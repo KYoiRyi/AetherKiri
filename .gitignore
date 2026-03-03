@@ -12,7 +12,7 @@ vcpkg_installed/
 .vs/
 .gradle/
 .act/
-.devtools/flutter/
+.devtools
 *.md
 *.lock
 
