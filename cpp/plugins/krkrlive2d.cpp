@@ -7,14 +7,6 @@
 #include <vector>
 
 #include <spdlog/spdlog.h>
-#if defined(__ANDROID__)
-#include <android/log.h>
-#define L2D_LOGI(...) __android_log_print(ANDROID_LOG_INFO, "krkrlive2d", __VA_ARGS__)
-#define L2D_LOGW(...) __android_log_print(ANDROID_LOG_WARN, "krkrlive2d", __VA_ARGS__)
-#else
-#define L2D_LOGI(...) ((void)0)
-#define L2D_LOGW(...) ((void)0)
-#endif
 #include "tjs.h"
 #include "ncbind.hpp"
 #include "StorageIntf.h"
@@ -26,7 +18,6 @@
 #include <GLES2/gl2ext.h>
 
 #include <minizip/unzip.h>
-#include <minizip/ioapi.h>
 
 // Cubism SDK
 #include "CubismFramework.hpp"
@@ -44,9 +35,8 @@
 
 using namespace Live2D::Cubism::Framework;
 
-// Texture loaders defined in krkrgles.cpp
+// KTX texture loader is defined in krkrgles.cpp
 extern "C" GLuint LoadKtxTexture(const uint8_t *data, size_t dataSize);
-extern "C" GLuint LoadPngTexture(const uint8_t *data, size_t dataSize);
 
 // Shared render target so krkrgles.cpp copyLayer can read from
 // the Live2D model's internal FBO.
@@ -109,65 +99,25 @@ void EnsureCubismInitialized() {
 
 // ---------------------------------------------------------------------------
 // ZIP helper — extract ALL entries from a ZIP archive in one pass.
-// Uses minizip custom IO to read directly from memory (no temp file).
+// Writes ZIP to a temp file once, reads all entries, then deletes.
 // ---------------------------------------------------------------------------
 using ZipArchive = std::unordered_map<std::string, std::vector<uint8_t>>;
-
-struct MemZipStream {
-    const uint8_t *data;
-    size_t         size;
-    size_t         pos;
-};
-
-static voidpf ZCALLBACK mem_open_func(voidpf opaque, const char *, int) {
-    return opaque;
-}
-static uLong ZCALLBACK mem_read_func(voidpf, voidpf stream, void *buf, uLong sz) {
-    auto *s = static_cast<MemZipStream *>(stream);
-    size_t avail = (s->pos < s->size) ? s->size - s->pos : 0;
-    size_t n = (sz < avail) ? sz : avail;
-    if (n > 0) { std::memcpy(buf, s->data + s->pos, n); s->pos += n; }
-    return static_cast<uLong>(n);
-}
-static uLong ZCALLBACK mem_write_func(voidpf, voidpf, const void *, uLong) {
-    return 0;
-}
-static long ZCALLBACK mem_tell_func(voidpf, voidpf stream) {
-    return static_cast<long>(static_cast<MemZipStream *>(stream)->pos);
-}
-static long ZCALLBACK mem_seek_func(voidpf, voidpf stream, uLong offset, int origin) {
-    auto *s = static_cast<MemZipStream *>(stream);
-    size_t newpos = 0;
-    switch (origin) {
-    case ZLIB_FILEFUNC_SEEK_SET: newpos = offset; break;
-    case ZLIB_FILEFUNC_SEEK_CUR: newpos = s->pos + offset; break;
-    case ZLIB_FILEFUNC_SEEK_END: newpos = s->size + offset; break;
-    default: return -1;
-    }
-    if (newpos > s->size) return -1;
-    s->pos = newpos;
-    return 0;
-}
-static int ZCALLBACK mem_close_func(voidpf, voidpf) { return 0; }
-static int ZCALLBACK mem_error_func(voidpf, voidpf) { return 0; }
 
 static bool ExtractZipToMemory(const uint8_t *zipData, size_t zipSize,
                                ZipArchive &out) {
     out.clear();
-    MemZipStream ms = { zipData, zipSize, 0 };
+    char tmpPath[256];
+    std::snprintf(tmpPath, sizeof(tmpPath), "/tmp/krkr_l2d_%p.zip",
+                  static_cast<const void *>(zipData));
+    {
+        FILE *f = std::fopen(tmpPath, "wb");
+        if (!f) return false;
+        std::fwrite(zipData, 1, zipSize, f);
+        std::fclose(f);
+    }
 
-    zlib_filefunc_def funcs = {};
-    funcs.zopen_file  = mem_open_func;
-    funcs.zread_file  = mem_read_func;
-    funcs.zwrite_file = mem_write_func;
-    funcs.ztell_file  = mem_tell_func;
-    funcs.zseek_file  = mem_seek_func;
-    funcs.zclose_file = mem_close_func;
-    funcs.zerror_file = mem_error_func;
-    funcs.opaque      = &ms;
-
-    unzFile zf = unzOpen2(nullptr, &funcs);
-    if (!zf) return false;
+    unzFile zf = unzOpen(tmpPath);
+    if (!zf) { std::remove(tmpPath); return false; }
 
     int ret = unzGoToFirstFile(zf);
     while (ret == UNZ_OK) {
@@ -185,6 +135,7 @@ static bool ExtractZipToMemory(const uint8_t *zipData, size_t zipSize,
         ret = unzGoToNextFile(zf);
     }
     unzClose(zf);
+    std::remove(tmpPath);
     return !out.empty();
 }
 
@@ -327,33 +278,20 @@ public:
             if (dotPos != std::string::npos)
                 ktxPath = ktxPath.substr(0, dotPos) + ".ktx";
 
-            L2D_LOGI("tex #%d: texPath='%s' ktxPath='%s'", i, texPath.c_str(), ktxPath.c_str());
-
             GLuint texId = 0;
 
             auto ktxIt = archive.find(ktxPath);
             if (ktxIt != archive.end()) {
-                L2D_LOGI("tex #%d: found KTX in archive (%zu bytes)", i, ktxIt->second.size());
                 texId = LoadKtxTexture(ktxIt->second.data(), ktxIt->second.size());
                 if (texId)
-                    L2D_LOGI("tex #%d: KTX loaded OK (texId=%u)", i, texId);
-                else
-                    L2D_LOGW("tex #%d: KTX load FAILED", i);
-            } else {
-                L2D_LOGI("tex #%d: KTX not found in archive", i);
+                    spdlog::debug("krkrlive2d: loaded KTX texture #{} ({})", i, ktxPath);
             }
 
             if (!texId) {
                 auto texIt = archive.find(texPath);
                 if (texIt != archive.end()) {
-                    L2D_LOGI("tex #%d: found PNG in archive (%zu bytes)", i, texIt->second.size());
-                    texId = LoadPngTexture(texIt->second.data(), texIt->second.size());
-                    if (texId)
-                        L2D_LOGI("tex #%d: PNG loaded OK (texId=%u)", i, texId);
-                    else
-                        L2D_LOGW("tex #%d: PNG decode FAILED", i);
-                } else {
-                    L2D_LOGW("tex #%d: PNG not found in archive either", i);
+                    spdlog::warn("krkrlive2d: PNG texture loading not yet implemented: {}",
+                                 texPath);
                 }
             }
 
@@ -366,7 +304,7 @@ public:
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                 glBindTexture(GL_TEXTURE_2D, 0);
-                L2D_LOGW("tex #%d: using 1x1 white placeholder", i);
+                spdlog::warn("krkrlive2d: using placeholder for texture #{}", i);
             }
 
             textureIds_.push_back(texId);
