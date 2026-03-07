@@ -7,6 +7,8 @@
 
 #include "PSBMedia.h"
 
+#include "PSBFile.h"
+#include "resources/ImageMetadata.h"
 #include "MsgIntf.h"
 #include "Platform.h"
 #include "SysInitIntf.h"
@@ -18,6 +20,38 @@ namespace PSB {
     namespace {
         size_t ClampSizeT(size_t value, size_t min_value, size_t max_value) {
             return std::max(min_value, std::min(value, max_value));
+        }
+
+        void RegisterPSBResourcesIntoMedia(
+            PSBMedia &media, PSBFile &psb, const std::string &archiveKey) {
+            const auto objs = psb.getObjects();
+            if(objs) {
+                for(const auto &[name, value] : *objs) {
+                    const auto resource =
+                        std::dynamic_pointer_cast<PSBResource>(value);
+                    if(!resource)
+                        continue;
+                    media.add(archiveKey + "/" + name, resource);
+                }
+            }
+
+            auto *handler = psb.getTypeHandler();
+            if(!handler)
+                return;
+            auto resources = handler->collectResources(psb, false);
+            for(auto &metadata : resources) {
+                auto *image =
+                    dynamic_cast<ImageMetadata *>(metadata.get());
+                if(!image)
+                    continue;
+                auto resource = image->getResource();
+                if(!resource)
+                    continue;
+                const std::string name = image->getName();
+                if(name.empty())
+                    continue;
+                media.add(archiveKey + "/" + name, resource);
+            }
         }
     } // namespace
 
@@ -198,6 +232,22 @@ namespace PSB {
 
     bool PSBMedia::CheckExistentStorage(const ttstr &name) {
         const auto key = canonicalizeKey(name.AsStdString());
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if(_resources.find(key) != _resources.end()) {
+                _hitCount++;
+                return true;
+            }
+            const bool found = findBySuffixLocked(key) != _resources.end();
+            if(found)
+                _hitCount++;
+            else
+                _missCount++;
+            if(found)
+                return true;
+        }
+        if(!tryLazyLoadArchive(key))
+            return false;
         std::lock_guard<std::mutex> lock(_mutex);
         if(_resources.find(key) != _resources.end()) {
             _hitCount++;
@@ -226,21 +276,81 @@ namespace PSB {
                                   it->first);
                 }
             }
-            if(it == _resources.end() || it->second.resource == nullptr) {
-                _missCount++;
-                LOGGER->warn("PSB media cache miss: {}", key);
-                TVPThrowExceptionMessage(TJS_W("%1:cannot open psb resource"),
-                                         name);
+            if(it != _resources.end() && it->second.resource != nullptr) {
+                _hitCount++;
+                touchLocked(it->second);
+                res = it->second.resource;
             }
-            _hitCount++;
-            touchLocked(it->second);
-            res = it->second.resource;
         }
 
+        if(!res && tryLazyLoadArchive(key)) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            auto it = _resources.find(key);
+            if(it == _resources.end()) {
+                it = findBySuffixLocked(key);
+                if(it != _resources.end()) {
+                    LOGGER->debug("PSB media cache suffix-hit(after-load): {} -> {}",
+                                  key, it->first);
+                }
+            }
+            if(it != _resources.end() && it->second.resource != nullptr) {
+                _hitCount++;
+                touchLocked(it->second);
+                res = it->second.resource;
+            }
+        }
+
+        if(!res) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _missCount++;
+            LOGGER->warn("PSB media cache miss: {}", key);
+            TVPThrowExceptionMessage(TJS_W("%1:cannot open psb resource"),
+                                     name);
+        }
         auto *memoryStream = new tTVPMemoryStream();
         memoryStream->WriteBuffer(res->data.data(), res->data.size());
         memoryStream->Seek(0, TJS_BS_SEEK_SET);
         return memoryStream;
+    }
+
+    bool PSBMedia::tryLazyLoadArchive(const std::string &key) {
+        const auto slashPos = key.find('/');
+        if(slashPos == std::string::npos || slashPos == 0)
+            return false;
+
+        const std::string archiveKey = key.substr(0, slashPos);
+        bool shouldAttemptLoad = false;
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            shouldAttemptLoad =
+                _loadedArchives.insert(archiveKey).second;
+        }
+        if(!shouldAttemptLoad)
+            return false;
+
+        PSBFile psb;
+        try {
+            ttstr archivePath(archiveKey.c_str());
+            if(!psb.loadPSBFile(archivePath)) {
+                std::lock_guard<std::mutex> lock(_mutex);
+                _loadedArchives.erase(archiveKey);
+                LOGGER->debug("PSB lazy-load failed: {}", archiveKey);
+                return false;
+            }
+            LOGGER->info("PSB lazy-load archive: {}", archiveKey);
+            RegisterPSBResourcesIntoMedia(*this, psb, archiveKey);
+            return true;
+        } catch(const std::exception &e) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _loadedArchives.erase(archiveKey);
+            LOGGER->warn("PSB lazy-load error: {} ({})", e.what(), archiveKey);
+            return false;
+        } catch(...) {
+            std::lock_guard<std::mutex> lock(_mutex);
+            _loadedArchives.erase(archiveKey);
+            LOGGER->warn("PSB lazy-load unknown error: {}", archiveKey);
+            return false;
+        }
     }
 
     void PSBMedia::GetListAt(const ttstr &name, iTVPStorageLister *lister) {

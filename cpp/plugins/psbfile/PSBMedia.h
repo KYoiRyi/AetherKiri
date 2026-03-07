@@ -5,6 +5,7 @@
 
 #include <list>
 #include <mutex>
+#include <unordered_set>
 #include <unordered_map>
 
 #include "PSBValue.h"
@@ -70,6 +71,7 @@ namespace PSB {
 
         std::string canonicalizeKey(const std::string &key) const;
         ResourceMap::iterator findBySuffixLocked(const std::string &key);
+        bool tryLazyLoadArchive(const std::string &key);
         void touchLocked(CacheEntry &entry);
         void adaptBudgetByMemoryPressureLocked();
         void evictIfNeededLocked();
@@ -85,5 +87,6 @@ namespace PSB {
         size_t _maxByteSize = 192ULL * 1024ULL * 1024ULL;
         uint64_t _hitCount = 0;
         uint64_t _missCount = 0;
+        std::unordered_set<std::string> _loadedArchives;
     };
 } // namespace PSB
