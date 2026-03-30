@@ -14,6 +14,8 @@
 #include <sys/utime.h>
 #include <boost/locale.hpp>
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #pragma comment(lib, "psapi.lib")
 
@@ -90,55 +92,113 @@ int TVPCheckArchive(const ttstr &localname);
 void TVPCheckAndSendDumps(const std::string &dumpdir,
                           const std::string &packageName,
                           const std::string &versionStr);
+// ---------------------------------------------------------------------------
+// TVPSetupFileLogger — call once at startup to mirror all spdlog output to a
+// rotating log file next to the executable.  Safe to call multiple times.
+// ---------------------------------------------------------------------------
+static void TVPSetupFileLogger() {
+    static bool s_done = false;
+    if(s_done)
+        return;
+    s_done = true;
+    try {
+        std::string logpath = TVPGetDefaultFileDir() + "/krkr2.log";
+        // Build a combined logger: stdout colour + file
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        auto file_sink    = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+                                logpath, /*truncate=*/true);
+        std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
+        auto combined = std::make_shared<spdlog::logger>("krkr2", sinks.begin(), sinks.end());
+        combined->set_level(spdlog::level::debug);
+        combined->flush_on(spdlog::level::debug);
+        spdlog::set_default_logger(combined);
+        spdlog::info("--- krkr2 log started, file: {} ---", logpath);
+    } catch(const std::exception &e) {
+        // Can't write log file — fall back silently
+        OutputDebugStringA(("krkr2: failed to create log file: " + std::string(e.what()) + "\n").c_str());
+    }
+}
+
 bool TVPCheckStartupArg() {
+    // Set up file logging immediately so everything that follows is captured.
+    TVPSetupFileLogger();
+
     int argc;
-    const std::u16string argv = boost::locale::conv::utf_to_utf<char16_t>(
-        *CommandLineToArgvW(GetCommandLineW(), &argc));
-    //	__wgetmainargs(&argc, &argv, &env, 0, &info);
+    // CommandLineToArgvW returns wchar_t** (an array of argument strings).
+    // Previously the code mistakenly dereferenced the pointer with *, which
+    // yielded argv[0] (the program path) as a single wstring.  All subsequent
+    // argv[1] / argv[i] accesses then indexed individual *characters* of that
+    // path string instead of actual command-line arguments.
+    wchar_t **argv_w = CommandLineToArgvW(GetCommandLineW(), &argc);
+    spdlog::info("TVPCheckStartupArg: argc={}", argc);
+    if(!argv_w)
+        return false;
+
     TVPCheckAndSendDumps(TVPGetDefaultFileDir() + "/dumps", "win32-test",
                          "test");
+
+    bool result = false;
     if(argc > 1) {
-        if(TVPCheckExistentLocalFile(argv[1])) {
-            if(TVPCheckArchive(argv[1]) == 1) {
-                TVPMainScene::GetInstance()->startupFrom(
-                    converter.to_bytes(argv[1]));
-                return true;
+        // argv_w[0] = program path, argv_w[1] = first user-supplied argument
+        std::wstring arg1_w(argv_w[1]);
+        // ttstr (tjs_char = char16_t) is binary-compatible with wchar_t on
+        // Windows (both 16-bit), so reinterpret_cast is safe here.
+        ttstr arg1_tjs(reinterpret_cast<const tjs_char *>(arg1_w.c_str()));
+        std::string arg1_utf8 = converter.to_bytes(arg1_w);
+        spdlog::info("TVPCheckStartupArg: arg1='{}'", arg1_utf8);
+
+        bool isFile = TVPCheckExistentLocalFile(arg1_tjs);
+        spdlog::info("TVPCheckStartupArg: isFile={}", isFile);
+        if(isFile) {
+            int archiveStatus = TVPCheckArchive(arg1_tjs);
+            spdlog::info("TVPCheckStartupArg: TVPCheckArchive={} "
+                         "(1=has startup.tjs, 2=archive/no startup.tjs, 0=not archive)",
+                         archiveStatus);
+            if(archiveStatus == 1) {
+                TVPMainScene::GetInstance()->startupFrom(arg1_utf8);
+                result = true;
             }
-            return false;
-        }
-        bool bootable = false;
-        TVPListDir(converter.to_bytes(argv[1]),
-                   [&](const std::string &_name, int mask) {
-                       if(mask & (S_IFREG)) {
-                           std::string name(_name);
-                           std::transform(name.begin(), name.end(),
-                                          name.begin(), [](int c) -> int {
-                                              if(c <= 'Z' && c >= 'A')
-                                                  return c - ('A' - 'a');
-                                              return c;
-                                          });
-                           if(name == "startup.tjs") {
-                               bootable = true;
+            // archive exists but contains no startup.tjs → result stays false
+        } else {
+            bool bootable = false;
+            TVPListDir(arg1_utf8,
+                       [&](const std::string &_name, int mask) {
+                           if(mask & (S_IFREG)) {
+                               std::string name(_name);
+                               std::transform(
+                                   name.begin(), name.end(), name.begin(),
+                                   [](int c) -> int {
+                                       if(c <= 'Z' && c >= 'A')
+                                           return c - ('A' - 'a');
+                                       return c;
+                                   });
+                               if(name == "startup.tjs") {
+                                   bootable = true;
+                               }
                            }
-                       }
-                   });
-        for(int i = 2; i < argc; ++i) {
-            std::u16string str{ argv[i] };
-            size_t pos = str.find(u'=');
-            if(pos == str.npos) {
-                TVPSetCommandLine(ttstr{ argv[i] }.c_str(), "yes"_tss);
-            } else {
-                ttstr val = str.c_str() + pos + 1;
-                TVPSetCommandLine(str.substr(0, pos).c_str(), val);
+                       });
+            spdlog::info("TVPCheckStartupArg: dir scan bootable={}", bootable);
+            // Process additional key=value arguments (argv[2] and beyond)
+            for(int i = 2; i < argc; ++i) {
+                std::u16string str = boost::locale::conv::utf_to_utf<char16_t>(
+                    std::wstring(argv_w[i]));
+                size_t pos = str.find(u'=');
+                if(pos == str.npos) {
+                    TVPSetCommandLine(ttstr{ str.c_str() }.c_str(), "yes"_tss);
+                } else {
+                    ttstr val = str.c_str() + pos + 1;
+                    TVPSetCommandLine(str.substr(0, pos).c_str(), val);
+                }
             }
-        }
-        if(bootable) {
-            TVPMainScene::GetInstance()->startupFrom(
-                converter.to_bytes(argv[1]));
-            return true;
+            if(bootable) {
+                TVPMainScene::GetInstance()->startupFrom(arg1_utf8);
+                result = true;
+            }
         }
     }
-    return false;
+
+    LocalFree(argv_w);
+    return result;
 }
 
 int TVPShowSimpleMessageBox(const ttstr &text, const ttstr &caption,
