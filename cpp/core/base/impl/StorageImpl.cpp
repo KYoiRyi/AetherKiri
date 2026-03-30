@@ -1487,16 +1487,19 @@ void TVPAutoMountSiblingXP3Archives() {
     if(TVPProjectDir.GetLastChar() != TJS_W('/'))
         return;
 
-    tjs_int len = TVPProjectDir.GetLen();
-    while(len > 0 && TVPProjectDir[len - 1] == TJS_W('/'))
-        len--;
-    if(len == 0)
-        return;
-    ttstr projDir = TVPProjectDir.SubString(0, len);
-    ttstr parentStoragePath = TVPExtractStoragePath(projDir);
+    // In modern Kirikiri2-Next architecture (e.g., Flutter frontend), games are often launched 
+    // by pointing directly to a directory. When TVPProjectDir ends with '/', it means we are 
+    // looking inside the project folder itself, so we should search for sibling XP3 archives 
+    // *inside* this directory, not its parent.
+    ttstr parentStoragePath = TVPProjectDir;
     if(parentStoragePath.IsEmpty())
         return;
 
+    // For log identification purposes
+    tjs_int len = TVPProjectDir.GetLen();
+    while(len > 0 && TVPProjectDir[len - 1] == TJS_W('/'))
+        len--;
+    ttstr projDir = TVPProjectDir.SubString(0, len);
     ttstr projBaseName = TVPExtractStorageName(projDir);
 
     spdlog::info("AutoMountXP3: TVPProjectDir={}", TVPProjectDir.AsStdString());
@@ -1517,9 +1520,6 @@ void TVPAutoMountSiblingXP3Archives() {
     std::string parentPath = nativeParent.AsStdString();
     spdlog::info("AutoMountXP3: nativeParent={}", parentPath);
 
-    std::string projBaseStr = projBaseName.AsNarrowStdString();
-    for(auto &c : projBaseStr) c = (char)tolower((unsigned char)c);
-
     std::vector<std::string> xp3Names;
 
     DIR *dirp = opendir(parentPath.c_str());
@@ -1535,10 +1535,6 @@ void TVPAutoMountSiblingXP3Archives() {
         std::string ext = name.substr(name.size() - 4);
         for(auto &c : ext) c = (char)tolower((unsigned char)c);
         if(ext != ".xp3") continue;
-
-        std::string baseLower = name.substr(0, name.size() - 4);
-        for(auto &c : baseLower) c = (char)tolower((unsigned char)c);
-        if(baseLower == projBaseStr) continue;
 
         xp3Names.push_back(name);
     }

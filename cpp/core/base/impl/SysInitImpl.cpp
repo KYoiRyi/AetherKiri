@@ -162,6 +162,12 @@ void TVPBeforeSystemInit() {
         TVPProjectDir += TVPArchiveDelimiter;
     } else {
         TVPProjectDir += TJS_W("/");
+        // On platforms with case-sensitive filesystems like Linux and Android, 
+        // entirely unpacked games (without any .xp3 files) might fail to load 
+        // if files like "STARTUP.TJS" are capitalized, because they aren't in 
+        // the AutoPathTable. By adding the project root to AutoPath, the engine 
+        // can find such files using its case-insensitive AutoPath cache fallback.
+        TVPAddAutoPath(TVPProjectDir);
     }
     TVPSetCurrentDirectory(TVPProjectDir);
     // randomize
