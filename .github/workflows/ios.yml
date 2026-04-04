@@ -1,0 +1,70 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build iOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Build Systems
+        run: |
+          brew install cmake ninja pkg-config
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Disable Analytics
+        run: |
+          flutter config --no-analytics
+
+      - name: Cache vcpkg downloads and archives
+        uses: actions/cache@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+            out/ios
+          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-ios-
+            ${{ runner.os }}-vcpkg-
+
+      - name: Build iOS Release
+        run: |
+          chmod +x ./build.sh
+          # The script internally runs build_ios.sh which defaults to release configuration
+          # It generates the libengine_api.a via CMake, merges it with Vcpkg deps, and then builds Flutter
+          ./build.sh ios release --jobs=4
+
+      - name: Compress App Bundle
+        run: |
+          # ZIP the Runner.app for easier downloading. 
+          # Note: This is an unsigned build. It will need to be re-signed locally or deployed via Xcode.
+          cd apps/flutter_app/build/ios/iphoneos || exit 0
+          if [ -d "Runner.app" ]; then
+            zip -r KrKr2-Next-iOS.zip Runner.app
+          else
+            echo "Runner.app not found in expected directory"
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KrKr2-Next-iOS-Unsigned
+          path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.zip
+          retention-days: 7
