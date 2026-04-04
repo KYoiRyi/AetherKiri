@@ -13,6 +13,10 @@ vcpkg_extract_source_archive(SOURCE_PATH
         libintl.patch
 )
 
+if(VCPKG_HOST_IS_WINDOWS)
+    vcpkg_replace_string("${SOURCE_PATH}/glib/meson.build" "host_system != 'windows'" "false")
+endif()
+
 set(LANGUAGES C CXX)
 if(VCPKG_TARGET_IS_OSX OR VCPKG_TARGET_IS_IOS)
     list(APPEND LANGUAGES OBJC OBJCXX)

@@ -44,7 +44,7 @@ namespace TJSPP {
         const tjs_char *Script;
         const tjs_char *Current{};
     };
-    int yylex(parser::value_type *yylex, tTJSPPExprParser *ptr);
+    int yylex(parser::semantic_type *yylex, tTJSPPExprParser *ptr);
 } // namespace TJSPP
 
 #endif

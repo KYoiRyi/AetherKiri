@@ -94,7 +94,7 @@ extern "C" int64_t TJS_GetOrphanedICCCount() {
 //---------------------------------------------------------------------------
 namespace TJS // following is in the namespace
 {
-    int yylex(parser::value_type *yylex, tTJSScriptBlock *ptr) {
+    int yylex(parser::semantic_type *yylex, tTJSScriptBlock *ptr) {
         tjs_int n;
         const tjs_int t = ptr->GetLexicalAnalyzer()->GetNext(n);
         yylex->num = n;

@@ -1,6 +1,6 @@
-%require "3.8.2"
+%require "3.7.4"
 %language "C++"
-%header "tjsdate.tab.hpp"
+%defines "tjsdate.tab.hpp"
 %output "tjsdate.tab.cpp"
 %define api.namespace {TJSDate}
 

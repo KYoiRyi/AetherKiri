@@ -31,6 +31,7 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
 
 #include "environ/Application.h"
@@ -540,6 +541,25 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #if defined(__ANDROID__)
   AndroidInfoLog("engine_open_game: input='%s' normalized='%s'",
                  game_root_path_utf8, normalized_game_root_path.c_str());
+  try {
+    std::string log_file_path = normalized_game_root_path;
+    if (!log_file_path.empty() && log_file_path.back() != '/') {
+      log_file_path += "/";
+    }
+    log_file_path += "krkr2.log";
+    auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(log_file_path, true);
+    auto attach_sink = [&](const char* name) {
+      if (auto logger = spdlog::get(name)) {
+        logger->sinks().push_back(file_sink);
+      }
+    };
+    attach_sink("core");
+    attach_sink("tjs2");
+    attach_sink("plugin");
+    spdlog::info("engine_open_game: Android file logger successfully attached to {}", log_file_path);
+  } catch (const std::exception& e) {
+    AndroidInfoLog("engine_open_game: Failed to create Android log file: %s", e.what());
+  }
 #endif
   spdlog::default_logger()->flush();
 

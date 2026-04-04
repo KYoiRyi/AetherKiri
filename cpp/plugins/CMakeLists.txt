@@ -28,7 +28,6 @@ target_sources(${PROJECT_NAME} PUBLIC
     layerExRaster.cpp
     layerExAreaAverage.cpp
     layerExLongExposure.cpp
-    krkrlive2d.cpp
     krkrgles.cpp
     drawDeviceD2DCompat.cpp
     wfBasicEffectCompat.cpp
@@ -72,55 +71,62 @@ file(GLOB_RECURSE CUBISM_FW_SOURCES
 # Exclude non-OpenGL renderers (already removed from tree, but safety net)
 list(FILTER CUBISM_FW_SOURCES EXCLUDE REGEX ".*/D3D9/.*|.*/D3D11/.*|.*/Vulkan/.*|.*/Metal/.*|.*/Cocos2d/.*")
 
-add_library(CubismFramework STATIC ${CUBISM_FW_SOURCES})
-target_include_directories(CubismFramework PUBLIC
-    ${CUBISM_FW_DIR}
-    ${CUBISM_CORE_DIR}/include
-)
-target_compile_definitions(CubismFramework PUBLIC CSM_TARGET_ANGLE_ES2)
-
-# ANGLE headers for CubismFramework's OpenGLES2 renderer
-find_package(unofficial-angle CONFIG QUIET)
-if(unofficial-angle_FOUND)
-    target_link_libraries(CubismFramework PRIVATE
-        unofficial::angle::libEGL
-        unofficial::angle::libGLESv2
+if(CUBISM_FW_SOURCES)
+    add_library(CubismFramework STATIC ${CUBISM_FW_SOURCES})
+    target_include_directories(CubismFramework PUBLIC
+        ${CUBISM_FW_DIR}
+        ${CUBISM_CORE_DIR}/include
     )
-    # EGL/GLES2 headers come from egl-registry/opengl-registry via vcpkg
-    # but aren't automatically propagated to standalone static library targets.
-    get_target_property(_EGL_INCS unofficial::angle::libEGL INTERFACE_INCLUDE_DIRECTORIES)
-    if(_EGL_INCS)
-        target_include_directories(CubismFramework PRIVATE ${_EGL_INCS})
+    target_compile_definitions(CubismFramework PUBLIC CSM_TARGET_ANGLE_ES2)
+
+    # ANGLE headers for CubismFramework's OpenGLES2 renderer
+    find_package(unofficial-angle CONFIG QUIET)
+    if(unofficial-angle_FOUND)
+        target_link_libraries(CubismFramework PRIVATE
+            unofficial::angle::libEGL
+            unofficial::angle::libGLESv2
+        )
+        # EGL/GLES2 headers come from egl-registry/opengl-registry via vcpkg
+        # but aren't automatically propagated to standalone static library targets.
+        get_target_property(_EGL_INCS unofficial::angle::libEGL INTERFACE_INCLUDE_DIRECTORIES)
+        if(_EGL_INCS)
+            target_include_directories(CubismFramework PRIVATE ${_EGL_INCS})
+        endif()
+        if(VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+            target_include_directories(CubismFramework PRIVATE
+                ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
+        endif()
+    elseif(ANDROID)
+        target_link_libraries(CubismFramework PRIVATE EGL GLESv2)
     endif()
-    if(VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
-        target_include_directories(CubismFramework PRIVATE
-            ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
+
+    if(ANDROID)
+        set(CUBISM_CORE_ARCH ${CMAKE_ANDROID_ARCH_ABI})
+        set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/android/${CUBISM_CORE_ARCH}/libLive2DCubismCore.a)
+    elseif(IOS)
+        set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/ios/Release-iphoneos/libLive2DCubismCore.a)
+    elseif(APPLE)
+        if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
+            set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/macos/x86_64/libLive2DCubismCore.a)
+        else()
+            set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/macos/arm64/libLive2DCubismCore.a)
+        endif()
     endif()
-elseif(ANDROID)
-    target_link_libraries(CubismFramework PRIVATE EGL GLESv2)
+
+    target_link_libraries(CubismFramework PUBLIC ${CUBISM_CORE_LIB})
+
+    target_include_directories(${PROJECT_NAME} PUBLIC
+        ${CUBISM_FW_DIR}
+        ${CUBISM_CORE_DIR}/include
+    )
+    target_compile_definitions(${PROJECT_NAME} PUBLIC CSM_TARGET_ANGLE_ES2)
+    target_link_libraries(${PROJECT_NAME} PUBLIC CubismFramework)
+    # Add the live2d source code to krkr2plugin since the framework is available
+    target_sources(${PROJECT_NAME} PUBLIC krkrlive2d.cpp)
+else()
+    message(WARNING "Live2D Cubism SDK Framework is missing or empty! krkrlive2d plugin will NOT be compiled. To fix, extract Live2D Cubism Native SDK into cpp/plugins/cubism/")
+    target_sources(${PROJECT_NAME} PUBLIC krkrlive2d_stub.cpp)
 endif()
-
-if(ANDROID)
-    set(CUBISM_CORE_ARCH ${CMAKE_ANDROID_ARCH_ABI})
-    set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/android/${CUBISM_CORE_ARCH}/libLive2DCubismCore.a)
-elseif(IOS)
-    set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/ios/Release-iphoneos/libLive2DCubismCore.a)
-elseif(APPLE)
-    if(CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
-        set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/macos/x86_64/libLive2DCubismCore.a)
-    else()
-        set(CUBISM_CORE_LIB ${CUBISM_CORE_DIR}/lib/macos/arm64/libLive2DCubismCore.a)
-    endif()
-endif()
-
-target_link_libraries(CubismFramework PUBLIC ${CUBISM_CORE_LIB})
-
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${CUBISM_FW_DIR}
-    ${CUBISM_CORE_DIR}/include
-)
-target_compile_definitions(${PROJECT_NAME} PUBLIC CSM_TARGET_ANGLE_ES2)
-target_link_libraries(${PROJECT_NAME} PUBLIC CubismFramework)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${KRKR2PLUGIN_PATH} ${KRKR2PLUGIN_PATH}/simplebinder})
 target_link_libraries(${PROJECT_NAME} PUBLIC krkr2core)

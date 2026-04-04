@@ -117,16 +117,21 @@ void TVPCheckMemory() {
 
 int TVPShowSimpleMessageBox(const ttstr &text, const ttstr &caption) {
     std::vector<ttstr> normal;
-    normal.emplace_back(
-        LocaleConfigManager::GetInstance()->GetText("msgbox_ok"));
+    ttstr okBtn = LocaleConfigManager::GetInstance()->GetText("msgbox_ok");
+    if(okBtn.IsEmpty()) okBtn = TJS_W("OK");
+    normal.emplace_back(okBtn);
     return TVPShowSimpleMessageBox(text, caption, normal);
 }
 
 int TVPShowSimpleMessageBoxYesNo(const ttstr &text, const ttstr &caption) {
     std::vector<ttstr> normal;
     LocaleConfigManager *mgr = LocaleConfigManager::GetInstance();
-    normal.emplace_back(mgr->GetText("msgbox_yes"));
-    normal.emplace_back(mgr->GetText("msgbox_no"));
+    ttstr yesBtn = mgr->GetText("msgbox_yes");
+    ttstr noBtn = mgr->GetText("msgbox_no");
+    if(yesBtn.IsEmpty()) yesBtn = TJS_W("Yes");
+    if(noBtn.IsEmpty()) noBtn = TJS_W("No");
+    normal.emplace_back(yesBtn);
+    normal.emplace_back(noBtn);
     return TVPShowSimpleMessageBox(text, caption, normal);
 }
 

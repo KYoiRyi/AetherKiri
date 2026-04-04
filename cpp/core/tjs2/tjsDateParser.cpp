@@ -20,7 +20,7 @@ namespace TJSDate {
     //---------------------------------------------------------------------------
     // interface to bison generated parser
     //---------------------------------------------------------------------------
-    int yylex(parser::value_type *yylex, tTJSDateParser *ptr) {
+    int yylex(parser::semantic_type *yylex, tTJSDateParser *ptr) {
         int tok = ptr->lex(yylex);
         return tok;
     }
@@ -134,7 +134,7 @@ namespace TJSDate {
     //---------------------------------------------------------------------------
     tjs_int64 tTJSDateParser::GetTime() { return Time; }
     //---------------------------------------------------------------------------
-    int tTJSDateParser::lex(parser::value_type *yylex) {
+    int tTJSDateParser::lex(parser::semantic_type *yylex) {
         if(*InputPointer == 0)
             return -1;
 

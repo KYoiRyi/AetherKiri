@@ -18,7 +18,7 @@
 namespace TJSPP {
     //---------------------------------------------------------------------------
 
-    int yylex(parser::value_type *yylex, tTJSPPExprParser *ptr) {
+    int yylex(parser::semantic_type *yylex, tTJSPPExprParser *ptr) {
         tjs_int32 val;
         const tjs_int n = ptr->GetNext(val);
         if(n == parser::token_kind_type::PT_NUM)

@@ -28,7 +28,7 @@
 namespace TJS {
     class tTJSScriptBlock;
 
-    int yylex(parser::value_type *yylex, tTJSScriptBlock *ptr);
+    int yylex(parser::semantic_type *yylex, tTJSScriptBlock *ptr);
     int _yyerror(const tjs_char *msg, tTJSScriptBlock *pm, tjs_int pos = -1);
 
 #define TJS_TO_VM_CODE_ADDR(x) ((x) * (tjs_int)sizeof(tjs_uint32))

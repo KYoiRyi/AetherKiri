@@ -1,0 +1,578 @@
+
+[13:51:54] ================================================================
+[13:51:54]   KrKr2-Next Android Build  |  2026-04-04 13:51:54
+[13:51:54] ================================================================
+[13:51:54]   BuildType : Release
+[13:51:54]   ABI       : arm64-v8a
+[13:51:54]   Jobs      : 24
+[13:51:54]   Clean     : False
+[13:51:54]   ProjectRoot: D:\Program Files\Visual\KrKr2-Next
+[13:51:54] ================================================================
+[13:51:54] 
+[13:51:54] ==============================================================
+[13:51:54]   步骤 1/4 — 前置工具检测
+[13:51:54] ==============================================================
+[13:51:54]   >> 检测 git ...
+[13:51:54]          路径: C:\Program Files\Git\cmd\git.exe
+[13:51:54]   [OK] Git     : git version 2.53.0.windows.2
+[13:51:54]   >> 检测 cmake ...
+[13:51:54]          路径: D:\Program Files\Visual\dep\cmake\bin\cmake.exe
+[13:51:54]   [OK] CMake   : cmake version 4.3.1
+[13:51:54]   >> 检测 ninja ...
+[13:51:54]          路径: C:\ninja\ninja.exe
+[13:51:54]   [OK] Ninja   : v1.13.2
+[13:51:54]   >> 检测 Visual Studio / MSVC Build Tools ...
+[13:51:54]          vcpkg 在 Windows 编译 host 工具时必须使用 MSVC cl.exe
+[13:51:54]          vswhere 路径: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
+[13:51:54]          VS 安装目录: C:\Program Files\Microsoft Visual Studio\18\Community
+[13:51:54]   [OK] MSVC    : C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
+[13:51:54]   >> 检测 Java (JDK 17+) ...
+[13:51:54]          java 路径: D:\Program Files\Visual\dep\jdk21\bin\java.exe
+[13:51:55]   [OK] Java    : openjdk version "21.0.10" 2026-01-20 LTS
+[13:51:55]          Java 版本 21 >= 17 ✔
+[13:51:55]   >> 检测 Flutter SDK ...
+[13:51:55]          从 PATH 检测到: D:\Program Files\Visual\dep\flutter\bin\flutter.bat
+[13:51:55]          复用已存在的安全挂载点 (Junction): C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[13:51:55]          SDK 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[13:51:55]          flutter 可执行: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[13:51:56]   [OK] Flutter : Flutter 3.41.6 • channel stable • https://github.com/flutter/flutter.git Framewo
+[13:51:56]   >> 检测 Android SDK ...
+[13:51:56]          检查默认路径: C:\Users\Administrator\AppData\Local\Android\Sdk
+[13:51:56]          找到!
+[13:51:56]   [OK] Android SDK : C:\Users\Administrator\AppData\Local\Android\Sdk
+[13:51:56]          adb: Android Debug Bridge version 1.0.41
+[13:51:56]   >> 检测 Android NDK ...
+[13:51:56]          扫描 NDK 目录: C:\Users\Administrator\AppData\Local\Android\Sdk\ndk
+[13:51:56]          选取最新版本: 30.0.14904198
+[13:51:56]   [OK] Android NDK : C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198 (Version: 30.0.14904198-beta1)
+[13:51:56]   [INFO] └─ 完成 (耗时 2s)
+[13:51:56] 
+[13:51:56] ==============================================================
+[13:51:56]   步骤 2/4 — 初始化 vcpkg 并安装 Android 依赖
+[13:51:56] ==============================================================
+[13:51:56]   >> 定位 vcpkg ...
+[13:51:56]   [WARN] 检测到终端环境变量或系统路径存在空格，为彻底防止 MSYS2 环境崩溃，
+[13:51:56]   [WARN] 已强制将 vcpkg 工作区转入纯净目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[13:51:56]          使用无空格安全目录 vcpkg: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[13:51:56]   [OK] vcpkg 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[13:51:56]          vcpkg.exe 已存在，跳过 bootstrap
+[13:51:56]   [OK] vcpkg   : vcpkg package management program version 2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c
+[13:51:56]          可执行路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe
+[13:51:56]          已设置 VCPKG_ROOT=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[13:51:56]          已设置 ANDROID_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk
+[13:51:56]          已设置 ANDROID_NDK_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
+[13:51:56]          已设置 VCPKG_BUILD_TYPE=release (仅编译 Release，节省一半耗时)
+[13:51:56]          已生成强制 Release 重写规则的临时 Triplet 目录: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[13:51:56]          overlay-ports: D:\Program Files\Visual\KrKr2-Next\vcpkg\ports (7 个自定义 port)
+[13:51:56]          overlay-triplets: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets (7 个自定义 triplet)
+[13:51:56]   >> 安装 vcpkg 依赖 — triplet: arm64-android (ABI: arm64-v8a)
+[13:51:56]   [WARN] 检测到旧的 ANGLE 构建缓存，将清理以确保 overlay port 生效...
+[13:51:56]          已删除: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\buildtrees\angle
+[13:51:56]          vcpkg 参数: install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed --x-manifest-root=D:\Program Files\Visual\KrKr2-Next --overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports --overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[13:51:56]          注意: 首次执行将从源码编译所有依赖，可能耗时 1-2 小时。
+[13:51:56]          CMD: "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat" && cd /d "D:\Program Files\Visual\KrKr2-Next" && "C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe" install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed "--x-manifest-root=D:\Program Files\Visual\KrKr2-Next" "--overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports" "--overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets" 2>&1
+**********************************************************************
+** Visual Studio 2026 Developer Command Prompt v18.4.2
+** Copyright (c) 2026 Microsoft Corporation
+**********************************************************************
+[vcvarsall.bat] Environment initialized for: 'x64'
+warning: The vcpkg C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe is using detected vcpkg root C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe and ignoring mismatched VCPKG_ROOT environment value C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg. To suppress this message, unset the environment variable or use the --vcpkg-root command line switch.
+Detecting compiler hash for triplet x64-windows...
+Compiler found: C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.50.35717/bin/Hostx64/x64/cl.exe
+Detecting compiler hash for triplet arm64-android...
+Compiler found: C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe
+The following packages are already installed:
+    7zip:arm64-android@24.09#1
+    angle[core,vulkan]:arm64-android@chromium_7258#3
+  * boost-algorithm:arm64-android@1.88.0
+  * boost-align:arm64-android@1.88.0
+  * boost-array:arm64-android@1.88.0
+  * boost-assert:arm64-android@1.88.0
+  * boost-atomic:arm64-android@1.88.0
+  * boost-bind:arm64-android@1.88.0
+  * boost-charconv:arm64-android@1.88.0#1
+  * boost-chrono:arm64-android@1.88.0
+  * boost-cmake:arm64-android@1.88.0
+  * boost-concept-check:arm64-android@1.88.0
+  * boost-config:arm64-android@1.88.0
+  * boost-container:arm64-android@1.88.0#1
+  * boost-container-hash:arm64-android@1.88.0
+  * boost-conversion:arm64-android@1.88.0
+  * boost-core:arm64-android@1.88.0
+  * boost-date-time:arm64-android@1.88.0
+  * boost-describe:arm64-android@1.88.0
+  * boost-detail:arm64-android@1.88.0
+  * boost-dynamic-bitset:arm64-android@1.88.0
+  * boost-endian:arm64-android@1.88.0
+  * boost-exception:arm64-android@1.88.0
+  * boost-function:arm64-android@1.88.0
+  * boost-function-types:arm64-android@1.88.0
+  * boost-functional:arm64-android@1.88.0
+  * boost-fusion:arm64-android@1.88.0
+  * boost-headers:arm64-android@1.88.0
+  * boost-integer:arm64-android@1.88.0
+  * boost-intrusive:arm64-android@1.88.0
+  * boost-io:arm64-android@1.88.0
+    boost-iostreams[core,zstd,zlib,lzma,bzip2]:arm64-android@1.88.0
+  * boost-iterator:arm64-android@1.88.0
+  * boost-lexical-cast:arm64-android@1.88.0
+    boost-locale:arm64-android@1.88.0#1
+  * boost-move:arm64-android@1.88.0
+  * boost-mp11:arm64-android@1.88.0
+  * boost-mpl:arm64-android@1.88.0
+  * boost-numeric-conversion:arm64-android@1.88.0
+  * boost-optional:arm64-android@1.88.0
+    boost-phoenix:arm64-android@1.88.0
+  * boost-pool:arm64-android@1.88.0
+  * boost-predef:arm64-android@1.88.0
+  * boost-preprocessor:arm64-android@1.88.0
+  * boost-proto:arm64-android@1.88.0
+  * boost-random:arm64-android@1.88.0
+  * boost-range:arm64-android@1.88.0
+  * boost-ratio:arm64-android@1.88.0
+  * boost-regex:arm64-android@1.88.0
+  * boost-smart-ptr:arm64-android@1.88.0
+    boost-spirit:arm64-android@1.88.0
+  * boost-static-assert:arm64-android@1.88.0
+  * boost-system:arm64-android@1.88.0
+  * boost-thread:arm64-android@1.88.0
+  * boost-throw-exception:arm64-android@1.88.0
+  * boost-tokenizer:arm64-android@1.88.0
+  * boost-tuple:arm64-android@1.88.0
+  * boost-type-index:arm64-android@1.88.0
+  * boost-type-traits:arm64-android@1.88.0
+  * boost-typeof:arm64-android@1.88.0
+  * boost-uninstall:arm64-android@1.88.0
+  * boost-unordered:arm64-android@1.88.0
+  * boost-utility:arm64-android@1.88.0
+  * boost-variant:arm64-android@1.88.0
+  * boost-variant2:arm64-android@1.88.0
+  * boost-winapi:arm64-android@1.88.0
+    breakpad:arm64-android@2024-02-16
+  * brotli:arm64-android@1.1.0#1
+    bullet3:arm64-android@3.25#3
+  * bzip2[core,tool]:arm64-android@1.0.8#6
+  * cairo[core,freetype,fontconfig]:arm64-android@1.18.4
+  * dirent:arm64-android@1.26
+  * egl-registry:arm64-android@2024-01-25
+  * expat:arm64-android@2.7.1
+    ffmpeg:arm64-android@3.3.9
+    fmt:arm64-android@11.2.0
+  * fontconfig:arm64-android@2.15.0#4
+  * freetype[core,zlib,png,bzip2,brotli]:arm64-android@2.13.3
+  * gettext[core,tools]:x64-windows@0.22.5#2
+  * gettext-libintl:arm64-android@0.22.5#3
+  * gettext-libintl:x64-windows@0.22.5#3
+  * glib:arm64-android@2.84.2#2
+  * gperf:x64-windows@3.3
+    highway:arm64-android@1.3.0
+    jxrlib:arm64-android@2019.10.9#7
+    libarchive:arm64-android@3.7.7
+  * libdisasm:arm64-android@0.23#11
+  * libexif:arm64-android@0.6.25
+  * libffi:arm64-android@3.5.2
+    libgdiplus:arm64-android@5.6.1#5
+  * libiconv:x64-windows@1.18#1
+  * libiconv:arm64-android@1.18#1
+    libjpeg-turbo:arm64-android@3.1.1
+  * liblzma:arm64-android@5.8.1
+    libogg:arm64-android@1.3.6#1
+    libpng:arm64-android@1.6.50
+  * libuuid:arm64-android@1.0.3#15
+    libvorbis:arm64-android@1.3.7#4
+    libwebp[core,simd,nearlossless,libwebpmux]:arm64-android@1.6.0#1
+    libxml2[core,zlib,iconv]:arm64-android@2.14.5#1
+    lz4:arm64-android@1.10.0
+    minizip:arm64-android@1.3.1#1
+    oboe:arm64-android@1.8.0
+    oniguruma:arm64-android@6.9.10
+    openal-soft:arm64-android@1.24.3#1
+    opencv4[core,openmp]:arm64-android@4.7.0#6
+  * opengl-registry:arm64-android@2024-02-10#1
+    opus:arm64-android@1.5.2
+    opusfile:arm64-android@0.12+20221121#1
+  * pcre2[core,platform-default-features,jit]:arm64-android@10.46
+  * pixman:arm64-android@0.44.2
+  * pkgconf:x64-windows@2.5.1#1
+  * pthread:arm64-android@3.0.0#2
+  * pthreads:arm64-android@3.0.0#14
+    sdl2:arm64-android@2.32.10
+    spdlog:arm64-android@1.15.3
+  * spirv-headers:arm64-android@1.4.309.0
+  * spirv-tools:arm64-android@1.4.309.0
+  * tiff[core,zip,lzma,jpeg]:arm64-android@4.7.0
+    tinyxml2:arm64-android@11.0.0
+    uchardet:arm64-android@0.0.8
+    unrar:arm64-android@6.0.7#1
+  * vcpkg-boost:x64-windows@2025-03-29
+    vcpkg-cmake:x64-windows@2024-04-23
+  * vcpkg-cmake-config:x64-windows@2024-05-23
+  * vcpkg-cmake-get-vars:x64-windows@2025-05-29
+  * vcpkg-get-python-packages:x64-windows@2025-04-05
+  * vcpkg-make:x64-windows@2025-08-21
+  * vcpkg-pkgconfig-get-modules:x64-windows@2024-04-03
+  * vcpkg-tool-meson:x64-windows@1.9.0
+  * vulkan-headers:arm64-android@1.4.309.0
+  * vulkan-memory-allocator:arm64-android@3.3.0
+  * zlib:arm64-android@1.3.1
+    zstd:arm64-android@1.5.7
+7zip provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(7zip CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE 7zip::7zip)
+
+The package angle provides unofficial CMake targets:
+
+    find_package(unofficial-angle REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE unofficial::angle::libGLESv2)
+
+    # Or use the EGL target
+    find_package(unofficial-angle REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE unofficial::angle::libEGL)
+
+zstd provides CMake targets:
+
+  find_package(zstd CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE zstd::libzstd)
+
+The package boost-iostreams is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS iostreams)
+    target_link_libraries(main PRIVATE Boost::iostreams)
+
+or the generated cmake configs via:
+
+    find_package( REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::iostreams)
+
+The package boost-locale is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS locale)
+    target_link_libraries(main PRIVATE Boost::locale)
+
+or the generated cmake configs via:
+
+    find_package( REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::locale)
+
+The package boost-phoenix is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS phoenix)
+    target_link_libraries(main PRIVATE Boost::phoenix)
+
+or the generated cmake configs via:
+
+    find_package( REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::phoenix)
+
+The package boost-spirit is compatible with built-in CMake targets of FindBoost.cmake:
+
+    find_package(Boost REQUIRED COMPONENTS spirit)
+    target_link_libraries(main PRIVATE Boost::spirit)
+
+or the generated cmake configs via:
+
+    find_package( REQUIRED CONFIG)
+    target_link_libraries(main PRIVATE Boost::spirit)
+
+breakpad provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(unofficial-breakpad CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE unofficial::breakpad::libbreakpad_client)
+
+bullet3 provides CMake targets:
+
+  find_package(Bullet CONFIG REQUIRED)
+  # specific set: BulletSoftBody, BulletDynamics, BulletInverseDynamics,
+  #               BulletCollision, Bullet3Common, LinearMath
+  target_link_libraries(main PRIVATE ${BULLET_LIBRARIES})
+  # individual imported targets, e.g. for Bullet 3 libs
+  target_link_libraries(main PRIVATE Bullet3Dynamics)
+
+bullet3 provides pkg-config modules:
+
+  # specific set: BulletSoftBody, BulletDynamics, BulletCollision, LinearMath
+  bullet
+
+To use ffmpeg add the following to your CMake project:
+
+    find_package(FFMPEG REQUIRED)
+    target_include_directories(main PRIVATE ${FFMPEG_INCLUDE_DIRS})
+    target_link_directories(main PRIVATE ${FFMPEG_LIBRARIES})
+
+The package fmt provides CMake targets:
+
+    find_package(fmt CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE fmt::fmt)
+
+    # Or use the header-only version
+    find_package(fmt CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE fmt::fmt-header-only)
+
+highway provides CMake targets:
+
+    find_package(hwy CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE hwy::hwy)
+
+The package jxrlib provides CMake integration:
+
+    find_package(JXR REQUIRED)
+    target_include_directories(main PRIVATE ${JXR_INCLUDE_DIRS})
+    target_link_libraries(main PRIVATE ${JXR_LIBRARIES})
+
+libarchive is compatible with the CMake Find Module:
+
+  find_package(LibArchive REQUIRED)
+  target_link_libraries(main PRIVATE LibArchive::LibArchive) # since CMake 3.17
+
+libarchive provides pkg-config modules:
+
+  # library that can create and read several streaming archive formats
+  libarchive
+
+libjpeg-turbo is compatible with built-in implementation-agnostic CMake targets:
+
+    find_package(JPEG REQUIRED)
+    target_link_libraries(main PRIVATE JPEG::JPEG)
+
+libjpeg-turbo provides CMake targets for the TurboJPEG C API:
+
+    find_package(libjpeg-turbo CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE $<IF:$<TARGET_EXISTS:libjpeg-turbo::turbojpeg>,libjpeg-turbo::turbojpeg,libjpeg-turbo::turbojpeg-static>)
+
+libpng provides CMake targets:
+
+  find_package(PNG REQUIRED)
+  target_link_libraries(main PRIVATE PNG::PNG)
+
+To use libgdiplus add the following to your CMake project:
+
+    find_package(libgdiplus CONFIG REQUIRED)
+    target_include_directories(main PRIVATE libgdiplus::libgdiplus)
+
+libogg provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(Ogg CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE Ogg::ogg)
+
+libogg provides pkg-config modules:
+
+  # ogg is a library for manipulating ogg bitstreams
+  ogg
+
+The package libvorbis provides CMake targets:
+
+    # Vorbis reference encoder and decoder, low-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbis)
+
+    # Audio stream decoding and basic manipulation, high-level API
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisfile)
+
+    # Convenience API for setting up an encoding environment
+    find_package(Vorbis CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE Vorbis::vorbisenc)
+
+libwebp provides CMake targets:
+
+    find_package(WebP CONFIG REQUIRED)
+    # basic usage
+    target_link_libraries(main PRIVATE WebP::webp WebP::webpdecoder WebP::webpdemux)
+    # for manipulating the WebP graphics format container (port feature libwebpmux)
+    target_link_libraries(main PRIVATE WebP::libwebpmux)
+    # for sharp RGB to YUV conversion
+    target_link_libraries(main PRIVATE WebP::sharpyuv)
+
+The package libxml2 is compatible with built-in CMake targets:
+
+    find_package(LibXml2 REQUIRED)
+    target_link_libraries(main PRIVATE LibXml2::LibXml2)
+
+lz4 provides CMake targets:
+
+  find_package(lz4 CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE lz4::lz4)
+
+lz4 provides pkg-config modules:
+
+  liblz4
+
+minizip provides CMake targets:
+
+    find_package(unofficial-minizip CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE unofficial::minizip::minizip)
+
+oniguruma provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(oniguruma CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE oniguruma::onig)
+
+oniguruma provides pkg-config modules:
+
+  # Regular expression library
+  oniguruma
+
+openal-soft provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(OpenAL CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE OpenAL::OpenAL)
+
+openal-soft provides pkg-config modules:
+
+  # OpenAL is a cross-platform 3D audio API
+  openal
+
+If you do not install the meta-port *opencv*, the package opencv4 is compatible with CMake
+if you set the OpenCV_DIR *before* the find_package call
+
+    set(OpenCV_DIR "${VCPKG_INSTALLED_DIR}/arm64-android/share/opencv4")
+    find_package(OpenCV REQUIRED)
+
+opus provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(Opus CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE Opus::opus)
+
+opus provides pkg-config modules:
+
+  # Opus IETF audio codec ( build)
+  opus
+
+The package opusfile provides CMake targets:
+
+    find_package(OpusFile CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE OpusFile::opusfile)
+
+    # To use the opusurl API
+    target_link_libraries(main PRIVATE OpusFile::opusurl)
+
+sdl2 provides CMake targets:
+
+    find_package(SDL2 CONFIG REQUIRED)
+    target_link_libraries(main
+        PRIVATE
+        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    )
+
+The package spdlog provides CMake targets:
+
+    find_package(spdlog CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE spdlog::spdlog)
+
+    # Or use the header-only version
+    find_package(spdlog CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE spdlog::spdlog_header_only)
+
+tinyxml2 provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(tinyxml2 CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE tinyxml2::tinyxml2)
+
+tinyxml2 provides pkg-config modules:
+
+  # simple, small, C++ XML parser
+  tinyxml2
+
+uchardet provides CMake targets:
+
+  # this is heuristically generated, and may not be correct
+  find_package(uchardet CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE uchardet::libuchardet)
+
+uchardet provides pkg-config modules:
+
+  # An encoding detector library ported from Mozilla
+  uchardet
+
+unrar is compatible with the CMake Find Module:
+
+  find_package(unrar CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE unrar::unrar)
+All requested installations completed successfully in: 1.23 ms
+[13:52:04]   [OK] vcpkg 依赖安装完成: arm64-android  (耗时 8s)
+[13:52:04]          已安装库文件数: 102 (.a / .so)
+[13:52:04]   [INFO] └─ 完成 (耗时 8s)
+[13:52:04] 
+[13:52:04] ==============================================================
+[13:52:04]   步骤 3/4 — 构建 Flutter Android APK (Release)
+[13:52:04] ==============================================================
+[13:52:04]   >> 写入 android/local.properties ...
+[13:52:04]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\local.properties
+[13:52:04]          sdk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk
+[13:52:04]          ndk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\ndk\\30.0.14904198
+[13:52:04]          flutter.sdk=C:\\Users\\Administrator\\AppData\\Local\\KrKr2-Next-flutter-safe
+[13:52:04]   [OK] local.properties 已写入
+[13:52:04]   >> flutter pub get — 同步 Dart 依赖 ...
+[13:52:04]          工作目录: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app
+Resolving dependencies...
+Downloading packages...
+  async 2.13.0 (2.13.1 available)
+  cupertino_icons 1.0.8 (1.0.9 available)
+  file_picker 9.2.3 (10.3.10 available)
+  flutter_plugin_android_lifecycle 2.0.33 (2.0.34 available)
+  flutter_svg 2.2.3 (2.2.4 available)
+  hooks 1.0.1 (1.0.2 available)
+  image_picker_android 0.8.13+14 (0.8.13+16 available)
+  meta 1.17.0 (1.18.2 available)
+  native_toolchain_c 0.17.4 (0.17.6 available)
+  path_provider_android 2.2.22 (2.2.23 available)
+  shared_preferences 2.5.4 (2.5.5 available)
+  shared_preferences_android 2.4.20 (2.4.23 available)
+  shared_preferences_platform_interface 2.4.1 (2.4.2 available)
+  test_api 0.7.10 (0.7.11 available)
+  url_launcher_android 6.3.28 (6.3.29 available)
+  vector_graphics 1.1.19 (1.1.21 available)
+  vector_math 2.2.0 (2.3.0 available)
+  win32 5.15.0 (6.0.0 available)
+Got dependencies!
+18 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+[13:52:05]   [OK] flutter pub get 完成 (耗时 2s)
+[13:52:05]   >> flutter build apk ...
+[13:52:05]          目标平台  : android-arm64
+[13:52:05]          编译类型  : release
+[13:52:06]          flutter 路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[13:52:06]          注意: 此步骤包含 Gradle 下载、CMake 交叉编译，首次可能耗时 30-60 分钟。
+[13:52:06]          CMD: "C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat" build apk --release --target-platform android-arm64 2>&1
+Running Gradle task 'assembleRelease'...                            8.7s
+√ Built build\app\outputs\flutter-apk\app-release.apk (67.4MB)
+[13:52:16]   [OK] flutter build apk 完成 (耗时 10s)
+[13:52:16]   [INFO] └─ 完成 (耗时 12s)
+[13:52:16] 
+[13:52:16] ==============================================================
+[13:52:16]   步骤 4/4 — 验证输出 APK
+[13:52:16] ==============================================================
+[13:52:16]   >> 查找 APK 文件 ...
+[13:52:16]          预期路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
+[13:52:16]          已找到预期路径
+[13:52:16]   [OK] APK 文件已生成
+[13:52:16]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
+[13:52:16]          大小: 67.4 MB
+[13:52:16]          时间: 2026-04-04 13:52:15
+[13:52:16]   >> 检查 APK 内容（原生库）...
+[13:52:16]   [OK] APK 中包含 9 个原生库 (.so)
+[13:52:16]            ✔ lib/arm64-v8a/libSDL2.so
+[13:52:16]            ✔ lib/arm64-v8a/libapp.so
+[13:52:16]            ✔ lib/arm64-v8a/libc++_shared.so
+[13:52:16]            ✔ lib/arm64-v8a/libdatastore_shared_counter.so
+[13:52:16]            ✔ lib/arm64-v8a/libengine_api.so
+[13:52:16]            ✔ lib/arm64-v8a/libflutter.so
+[13:52:16]            ✔ lib/arm64-v8a/libomp.so
+[13:52:16]            ✔ lib/armeabi-v7a/libdatastore_shared_counter.so
+[13:52:16]            ✔ lib/x86_64/libdatastore_shared_counter.so
+[13:52:16]   [INFO] └─ 完成 (耗时 0s)
+[13:52:16] 
+[13:52:16] ================================================================
+[13:52:16]   BUILD SUCCESS  |  APK: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk  |  Size: 67.4 MB
+[13:52:16]   结束时间: 2026-04-04 13:52:16
+[13:52:16]   总耗时: 22s
+[13:52:16] ================================================================

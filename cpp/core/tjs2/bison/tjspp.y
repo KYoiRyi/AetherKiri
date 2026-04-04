@@ -1,6 +1,6 @@
-%require "3.8.2"
+%require "3.7.4"
 %language "C++"
-%header "tjspp.tab.hpp"
+%defines "tjspp.tab.hpp"
 %output "tjspp.tab.cpp"
 
 %define api.namespace {TJSPP}

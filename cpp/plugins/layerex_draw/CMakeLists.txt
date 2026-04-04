@@ -20,7 +20,11 @@ else()
     find_package(libgdiplus CONFIG REQUIRED)
     target_link_libraries(${PROJECT_NAME} PRIVATE libgdiplus::libgdiplus)
 
-    set(VCPKG_INSTALL_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+    if(VCPKG_ROOT)
+        set(VCPKG_INSTALL_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}")
+    else()
+        set(VCPKG_INSTALL_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}")
+    endif()
 
     # glibconfig
     # https://invent.kde.org/frameworks/extra-cmake-modules/-/blob/master/find-modules/FindGLIB2.cmake

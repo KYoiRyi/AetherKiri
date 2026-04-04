@@ -78,9 +78,9 @@ namespace TJSDate {
 
         void SetTimeZoneOffset(int v);
 
-        int lex(parser::value_type *yylex);
+        int lex(parser::semantic_type *yylex);
     };
-    int yylex(parser::value_type *yylex, tTJSDateParser *ptr);
+    int yylex(parser::semantic_type *yylex, tTJSDateParser *ptr);
     //---------------------------------------------------------------------------
 } // namespace TJSDate
 #endif

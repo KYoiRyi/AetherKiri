@@ -1,7 +1,7 @@
-%require "3.8.2"
+%require "3.7.4"
 %language "C++"
 %expect 1
-%header "tjs.tab.hpp"
+%defines "tjs.tab.hpp"
 %output "tjs.tab.cpp"
 %define api.namespace {TJS}
 

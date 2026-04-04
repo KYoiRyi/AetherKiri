@@ -1,0 +1,481 @@
+[2026-04-04 13:26:10.443] [core] [info] engine_open_game: Android file logger successfully attached to /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/krkr2.log
+[2026-04-04 13:26:10.443] [core] [debug] engine_open_game: calling Application->StartApplication...
+[2026-04-04 13:26:10.443] [core] [debug] StartApplication: normalizing storage path...
+[2026-04-04 13:26:10.443] [core] [debug] StartApplication: TVPInitScriptEngine...
+[2026-04-04 13:26:10.443] [core] [info] [TVP Console]  (info) Data path : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/savedata/
+[2026-04-04 13:26:10.446] [core] [debug] StartApplication: TVPInitFontNames...
+[2026-04-04 13:26:10.463] [core] [info] loaded system font: /system/fonts/NotoSansCJK-Regular.ttc
+[2026-04-04 13:26:10.467] [core] [info] [TVP Console]  Program started on Linux (ARM64)
+[2026-04-04 13:26:10.467] [core] [debug] StartApplication: TVPInitializeBaseSystems...
+[2026-04-04 13:26:10.467] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.467] [core] [debug] [TVP Console]  (info) Total 0 file(s) found, 0 file(s) activated. (0ms)
+[2026-04-04 13:26:10.467] [core] [debug] StartApplication: tvpLoadPlugins...
+[2026-04-04 13:26:10.469] [plugin] [info] initPsbFile
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading AlphaMovie.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/AlphaMovie.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading KAGParserEx.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/KAGParserEx.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading PackinOne.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('packinone.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/PackinOne.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading extNagano.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('extnagano.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/extNagano.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading extrans.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/extrans.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading getSample.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/getSample.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading k2compat.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('k2compat.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/k2compat.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading kagexopt.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('kagexopt.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/kagexopt.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading krkrsteam.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('krkrsteam.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/krkrsteam.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading krmovie.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('krmovie.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/krmovie.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading kztouch.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('kztouch.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/kztouch.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading layerExDraw.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/layerExDraw.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading lzfs.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('lzfs.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/lzfs.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading menu.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('menu.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/menu.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading motionplayer.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/motionplayer.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading motionplayer_nod3d.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('motionplayer_nod3d.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/motionplayer_nod3d.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading multiimage.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('multiimage.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/multiimage.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading psbfile.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/psbfile.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading psd.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/psd.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading textrender.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/textrender.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading win32dialog.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/win32dialog.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading win32ole.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('win32ole.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/win32ole.dll Failed
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading windowEx.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/windowEx.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading wuopus.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/wuopus.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading wuvorbis.dll
+[2026-04-04 13:26:10.481] [core] [debug] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/wuvorbis.dll Success
+[2026-04-04 13:26:10.481] [core] [info] [TVP Console]  (info) Loading yuzuex.dll
+[2026-04-04 13:26:10.481] [core] [warning] ncbAutoRegister::LoadModule('yuzuex.dll'): module not found in internal plugin map
+[2026-04-04 13:26:10.481] [core] [error] Loading Plugin: /storage/emulated/0/Download/【KR】SLP007/Senrenbanka/Senrenbanka/plugin/yuzuex.dll Failed
+[2026-04-04 13:26:10.481] [core] [debug] StartApplication: TVPSystemInit...
+[2026-04-04 13:26:10.482] [core] [info] [TVP Console]  (info) Total physical memory : 11377172480
+[2026-04-04 13:26:10.486] [core] [info] [TVP Console]  (info) Specified option(s) (earlier item has more priority) : renderer=opengl memory_profile=aggressive memory_budget_mb=0 memory_log_interval_ms=12000 psb_cache_mb=128 psb_cache_entries=1024 archive_cache_count=20 autopath_cache_count=192
+[2026-04-04 13:26:10.486] [core] [info] AutoMountXP3: TVPProjectDir=file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka//
+[2026-04-04 13:26:10.486] [core] [info] AutoMountXP3: parentStoragePath=file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka//
+[2026-04-04 13:26:10.486] [core] [info] AutoMountXP3: projBaseName=senrenbanka
+[2026-04-04 13:26:10.486] [core] [info] AutoMountXP3: nativeParent=/storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka//
+[2026-04-04 13:26:10.489] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgimage1080.xp3
+[2026-04-04 13:26:10.490] [core] [debug] [TVP Console]  (info) Done. (contains 97 file(s), 97 segment(s))
+[2026-04-04 13:26:10.490] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgimage1080.xp3 (1 dirs, 97 files)
+[2026-04-04 13:26:10.491] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgm.xp3
+[2026-04-04 13:26:10.492] [core] [debug] [TVP Console]  (info) Done. (contains 103 file(s), 103 segment(s))
+[2026-04-04 13:26:10.492] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgm.xp3 (1 dirs, 103 files)
+[2026-04-04 13:26:10.493] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data.xp3
+[2026-04-04 13:26:10.496] [core] [debug] [TVP Console]  (info) Done. (contains 1118 file(s), 1118 segment(s))
+[2026-04-04 13:26:10.496] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data.xp3 (15 dirs, 1118 files)
+[2026-04-04 13:26:10.497] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data1080.xp3
+[2026-04-04 13:26:10.499] [core] [debug] [TVP Console]  (info) Done. (contains 519 file(s), 519 segment(s))
+[2026-04-04 13:26:10.499] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data1080.xp3 (1 dirs, 519 files)
+[2026-04-04 13:26:10.501] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/evimage1080.xp3
+[2026-04-04 13:26:10.502] [core] [debug] [TVP Console]  (info) Done. (contains 112 file(s), 112 segment(s))
+[2026-04-04 13:26:10.502] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/evimage1080.xp3 (1 dirs, 112 files)
+[2026-04-04 13:26:10.504] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/fgimage1080.xp3
+[2026-04-04 13:26:10.507] [core] [debug] [TVP Console]  (info) Done. (contains 1767 file(s), 1767 segment(s))
+[2026-04-04 13:26:10.508] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/fgimage1080.xp3 (1 dirs, 1767 files)
+[2026-04-04 13:26:10.509] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch.xp3
+[2026-04-04 13:26:10.510] [core] [debug] [TVP Console]  (info) Done. (contains 384 file(s), 384 segment(s))
+[2026-04-04 13:26:10.510] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch.xp3 (1 dirs, 384 files)
+[2026-04-04 13:26:10.511] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch_data1080.xp3
+[2026-04-04 13:26:10.511] [core] [debug] [TVP Console]  (info) Done. (contains 15 file(s), 15 segment(s))
+[2026-04-04 13:26:10.512] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch_data1080.xp3 (1 dirs, 15 files)
+[2026-04-04 13:26:10.512] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/voice.xp3
+[2026-04-04 13:26:10.578] [core] [debug] [TVP Console]  (info) Done. (contains 44112 file(s), 44112 segment(s))
+[2026-04-04 13:26:10.583] [core] [info] [TVP Console]  (info) Auto-mounted sibling archive: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/voice.xp3 (1 dirs, 44112 files)
+[2026-04-04 13:26:10.583] [core] [debug] StartApplication: TVPInitializeStartupScript...
+[2026-04-04 13:26:10.586] [core] [debug] Loading Plugin: motionplayer.dll Success
+[2026-04-04 13:26:10.586] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.587] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgimage1080.xp3
+[2026-04-04 13:26:10.587] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgimage1080.xp3
+[2026-04-04 13:26:10.587] [core] [debug] [TVP Console]  (info) Done. (contains 97 file(s), 97 segment(s))
+[2026-04-04 13:26:10.588] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgm.xp3
+[2026-04-04 13:26:10.588] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/bgm.xp3
+[2026-04-04 13:26:10.588] [core] [debug] [TVP Console]  (info) Done. (contains 103 file(s), 103 segment(s))
+[2026-04-04 13:26:10.588] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data.xp3
+[2026-04-04 13:26:10.588] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data.xp3
+[2026-04-04 13:26:10.590] [core] [debug] [TVP Console]  (info) Done. (contains 1118 file(s), 1118 segment(s))
+[2026-04-04 13:26:10.590] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data1080.xp3
+[2026-04-04 13:26:10.591] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data1080.xp3
+[2026-04-04 13:26:10.591] [core] [debug] [TVP Console]  (info) Done. (contains 519 file(s), 519 segment(s))
+[2026-04-04 13:26:10.592] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/evimage1080.xp3
+[2026-04-04 13:26:10.592] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/evimage1080.xp3
+[2026-04-04 13:26:10.592] [core] [debug] [TVP Console]  (info) Done. (contains 112 file(s), 112 segment(s))
+[2026-04-04 13:26:10.592] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/fgimage1080.xp3
+[2026-04-04 13:26:10.593] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/fgimage1080.xp3
+[2026-04-04 13:26:10.594] [core] [debug] [TVP Console]  (info) Done. (contains 1767 file(s), 1767 segment(s))
+[2026-04-04 13:26:10.595] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch.xp3
+[2026-04-04 13:26:10.597] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch.xp3
+[2026-04-04 13:26:10.597] [core] [debug] [TVP Console]  (info) Done. (contains 384 file(s), 384 segment(s))
+[2026-04-04 13:26:10.597] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch_data1080.xp3
+[2026-04-04 13:26:10.598] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/patch_data1080.xp3
+[2026-04-04 13:26:10.598] [core] [debug] [TVP Console]  (info) Done. (contains 15 file(s), 15 segment(s))
+[2026-04-04 13:26:10.598] [core] [debug] [TVP Console]  (info) ArchiveCache miss: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/voice.xp3
+[2026-04-04 13:26:10.599] [core] [debug] [TVP Console]  (info) Trying to read XP3 virtual file system information from : file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/voice.xp3
+[2026-04-04 13:26:10.649] [core] [debug] [TVP Console]  (info) Done. (contains 44112 file(s), 44112 segment(s))
+[2026-04-04 13:26:10.676] [core] [debug] [TVP Console]  (info) Total 48239 file(s) found, 47849 file(s) activated. (90ms)
+[2026-04-04 13:26:10.676] [core] [info] Loading startup script: file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/data.xp3>startup.tjs
+[2026-04-04 13:26:10.695] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.734] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (39ms)
+[2026-04-04 13:26:10.750] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.783] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (33ms)
+[2026-04-04 13:26:10.795] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.830] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:10.844] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.882] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (38ms)
+[2026-04-04 13:26:10.897] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.934] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (37ms)
+[2026-04-04 13:26:10.948] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:10.981] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:10.994] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.028] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.041] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.075] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.088] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.123] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.137] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.171] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.185] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.221] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (37ms)
+[2026-04-04 13:26:11.236] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.270] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.283] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.317] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.332] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.367] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:11.379] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.413] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:11.426] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.462] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:11.477] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.512] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:11.526] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.561] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.573] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.607] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (33ms)
+[2026-04-04 13:26:11.621] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.658] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (36ms)
+[2026-04-04 13:26:11.672] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.706] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (34ms)
+[2026-04-04 13:26:11.721] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.761] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (40ms)
+[2026-04-04 13:26:11.773] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.810] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (37ms)
+[2026-04-04 13:26:11.828] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.863] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (35ms)
+[2026-04-04 13:26:11.876] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.920] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (44ms)
+[2026-04-04 13:26:11.939] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:11.995] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (55ms)
+[2026-04-04 13:26:12.012] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:12.051] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (39ms)
+[2026-04-04 13:26:12.058] [core] [debug] [TVP Console]  append_init.tjs を読み込みました(62ms)
+[2026-04-04 13:26:12.075] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:12.112] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (37ms)
+[2026-04-04 13:26:12.112] [core] [info] [TVP Console]  ########################################
+[2026-04-04 13:26:12.112] [core] [info] [TVP Console]  OS : Linux (ARM64)
+[2026-04-04 13:26:12.114] [core] [info] [TVP Console]  Engine : Revision 1705, Last Changed 2016/08/10 13:59:54, Compiled 2016/08/10 14:00:05
+[2026-04-04 13:26:12.114] [core] [info] [TVP Console]  Kirikiri : 2.32.2.426
+[2026-04-04 13:26:12.114] [core] [info] [TVP Console]  ########################################
+
+[2026-04-04 13:26:12.115] [core] [warning] ncbAutoRegister::LoadModule('packinone.dll'): module not found in internal plugin map
+[2026-04-04 13:26:12.115] [core] [error] Loading Plugin: PackinOne.dll Failed
+[2026-04-04 13:26:12.115] [core] [debug] Loading Plugin: KAGParserEx.dll Success
+[2026-04-04 13:26:12.115] [core] [debug] [TVP Console]  AppConfig.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.134] [core] [debug] [TVP Console]  Config.tjs を読み込みました(19ms)
+[2026-04-04 13:26:12.134] [core] [debug] [TVP Console]  KAG System スクリプトを読み込んでいます...
+[2026-04-04 13:26:12.134] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:12.171] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (37ms)
+[2026-04-04 13:26:12.173] [core] [debug] Loading Plugin: layerExImage.dll Success
+[2026-04-04 13:26:12.173] [core] [debug] [TVP Console]  LayerEx.tjs を読み込みました(39ms)
+[2026-04-04 13:26:12.174] [core] [debug] Loading Plugin: scriptsEx.dll Success
+[2026-04-04 13:26:12.174] [core] [debug] [TVP Console]  Utils.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.175] [core] [debug] [TVP Console]  KAGLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.175] [core] [debug] [TVP Console]  AnimKAGLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.176] [core] [debug] [TVP Console]  ButtonLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.176] [core] [debug] [TVP Console]  TransLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.177] [core] [debug] [TVP Console]  SelectLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.178] [core] [debug] [TVP Console]  MapSelectLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.179] [core] [debug] [TVP Console]  DialogLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.179] [core] [debug] [TVP Console]  HistoryLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.180] [core] [debug] [TVP Console]  BGM.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.180] [core] [debug] [TVP Console]  SE.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.181] [core] [debug] [TVP Console]  Voice.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.181] [core] [debug] [TVP Console]  Movie.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.182] [core] [debug] [TVP Console]  Conductor.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.183] [core] [debug] [TVP Console]  UpdateRegion.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.183] [core] [debug] [TVP Console]  psdlayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.184] [core] [debug] [TVP Console]  StandLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.184] [core] [debug] Loading Plugin: textrender.dll Success
+[2026-04-04 13:26:12.184] [core] [debug] [TVP Console]  TextRender.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.186] [core] [debug] [TVP Console]  AffineLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.186] [core] [debug] [TVP Console]  MultiResolution.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.187] [core] [debug] [TVP Console]  AffineSourceBMPBase.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.187] [core] [debug] [TVP Console]  AffineSourceBitmap.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.187] [core] [debug] [TVP Console]  AffineSourcePSD.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.187] [core] [debug] [TVP Console]  AffineSourceImage.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.188] [core] [debug] [TVP Console]  AffineSourceFlip.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.188] [core] [debug] [TVP Console]  AffineSourceVector.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.190] [core] [debug] [TVP Console]  AffineSourceStand.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.190] [core] [debug] [TVP Console]  AffineSourceASD.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.190] [core] [debug] [TVP Console]  AffineSourceTile.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.191] [core] [debug] [TVP Console]  AffineSourceNoise.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.191] [core] [debug] [TVP Console]  AnimationLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.191] [core] [debug] [TVP Console]  GenericFlip.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.192] [core] [debug] [TVP Console]  BaseLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.192] [core] [debug] [TVP Console]  GFX_Movie.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.193] [core] [debug] [TVP Console]  GFX_Particle.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.193] [core] [debug] [TVP Console]  GFX_AMovie.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.194] [core] [debug] Loading Plugin: motionplayer.dll Success
+[2026-04-04 13:26:12.194] [core] [info] [TVP Console]  use:motionplayer.dll
+[2026-04-04 13:26:12.195] [core] [debug] [TVP Console]  motion.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.197] [core] [debug] [TVP Console]  MessageLayer.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.198] [core] [debug] [TVP Console]  Menus.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.198] [core] [debug] [TVP Console]  DefaultMover.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.199] [core] [debug] [TVP Console]  Action.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.200] [core] [debug] [TVP Console]  LoopVoice.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.200] [core] [debug] [TVP Console]  LineMode.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.201] [core] [debug] [TVP Console]  LineModeEx.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.207] [core] [debug] Loading Plugin: windowEx.dll Success
+[2026-04-04 13:26:12.207] [core] [debug] [TVP Console]  MainWindow.tjs を読み込みました(6ms)
+[2026-04-04 13:26:12.212] [core] [debug] [TVP Console]  YAML.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.212] [core] [debug] [TVP Console]  KAGEnvBase.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.213] [core] [debug] [TVP Console]  KAGEnvTrans.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.215] [core] [debug] [TVP Console]  KAGEnvironment.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.216] [core] [debug] [TVP Console]  KAGEnvImageMapperStage.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.217] [core] [debug] [TVP Console]  KAGEnvImageMapperStand.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.217] [core] [debug] [TVP Console]  KAGEnvImage.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.217] [core] [debug] [TVP Console]  KAGEnvMusic.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.217] [core] [debug] [TVP Console]  KAGEnvSound.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.217] [core] [debug] [TVP Console]  world.tjs を読み込みました(11ms)
+[2026-04-04 13:26:12.220] [core] [debug] Loading Plugin: csvParser.dll Success
+[2026-04-04 13:26:12.221] [core] [debug] [TVP Console]  MyHistoryLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.222] [core] [debug] [TVP Console]  YesNoDialog.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.222] [core] [debug] [TVP Console]  MyYesNoDialog.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.222] [core] [debug] [TVP Console]  MyMapSelectLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.228] [core] [debug] [TVP Console]  system.tjs を読み込みました(6ms)
+[2026-04-04 13:26:12.229] [core] [debug] [TVP Console]  pagebase.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.231] [core] [debug] [TVP Console]  cgmode.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.231] [core] [debug] [TVP Console]  scenemode.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.232] [core] [debug] [TVP Console]  soundmode.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.232] [core] [debug] [TVP Console]  option.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.234] [core] [debug] [TVP Console]  saveload.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.234] [core] [debug] [TVP Console]  name.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.235] [core] [debug] [TVP Console]  encyclopedia.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.240] [core] [debug] [TVP Console]  default.tjs を読み込みました(5ms)
+[2026-04-04 13:26:12.255] [core] [debug] [TVP Console]  exroll.tjs を読み込みました(3ms)
+[2026-04-04 13:26:12.255] [core] [debug] [TVP Console]  emotion.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.255] [core] [debug] [TVP Console]  autoface.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.257] [core] [debug] [TVP Console]  dtptable.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.257] [core] [debug] [TVP Console]  PreRenderFontEx.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.257] [core] [debug] [TVP Console]  currentWindowsVersion, 0
+[2026-04-04 13:26:12.273] [core] [warning] ncbAutoRegister::LoadModule('yuzuex.dll'): module not found in internal plugin map
+[2026-04-04 13:26:12.273] [core] [error] Loading Plugin: yuzuex.dll Failed
+[2026-04-04 13:26:12.273] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:12.312] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (38ms)
+[2026-04-04 13:26:12.314] [core] [debug] [TVP Console]  movieqsel.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.336] [core] [warning] ncbAutoRegister::LoadModule('kztouch.dll'): module not found in internal plugin map
+[2026-04-04 13:26:12.336] [core] [error] Loading Plugin: kztouch.dll Failed
+[2026-04-04 13:26:12.338] [core] [debug] [TVP Console]  SliderLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.338] [core] [debug] [TVP Console]  CheckBoxLayer.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.339] [core] [debug] [TVP Console]  EditLayer.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.339] [core] [debug] [TVP Console]  gesture.tjs を読み込みました(4ms)
+[2026-04-04 13:26:12.340] [core] [debug] [TVP Console]  speech.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.340] [core] [debug] [TVP Console]  mscurautohide.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.340] [core] [debug] [TVP Console]  stayontop.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.341] [core] [debug] [TVP Console]  stopdeactive.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.343] [core] [debug] [TVP Console]  keybinder.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.344] [core] [debug] [TVP Console]  helptextman.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.344] [core] [debug] [TVP Console]  yuzu_system.tjs を読み込みました(15ms)
+[2026-04-04 13:26:12.345] [core] [debug] [TVP Console]  nocfchkdialog.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.346] [core] [debug] [TVP Console]  msghack.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.346] [core] [debug] [TVP Console]  sqscr.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.348] [core] [debug] [TVP Console]  quickmenu.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.358] [core] [debug] [TVP Console]  hsvcpick.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.359] [core] [debug] [TVP Console]  yuzu_option.tjs を読み込みました(11ms)
+[2026-04-04 13:26:12.360] [tjs2] [debug] Member "kag" does not exist
+[2026-04-04 13:26:12.361] [core] [debug] [TVP Console]  backlog.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.368] [core] [debug] Loading Plugin: fstat.dll Success
+[2026-04-04 13:26:12.370] [core] [debug] [TVP Console]  qlpopup.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.370] [core] [debug] [TVP Console]  yuzu_file.tjs を読み込みました(9ms)
+[2026-04-04 13:26:12.370] [core] [debug] [TVP Console]  gamecont.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.383] [core] [debug] [TVP Console]  exchview.tjs を読み込みました(3ms)
+[2026-04-04 13:26:12.384] [core] [debug] [TVP Console]  cgview.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.384] [core] [debug] [TVP Console]  yuzu_extra.tjs を読み込みました(13ms)
+[2026-04-04 13:26:12.385] [core] [debug] [TVP Console]  showdate.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.385] [core] [debug] [TVP Console]  passivecomp.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.387] [core] [debug] [TVP Console]  sysvoice.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.389] [core] [debug] [TVP Console]  voiceprogress.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.390] [core] [debug] [TVP Console]  bgmtitleindicator.tjs を読み込みました(2ms)
+[2026-04-04 13:26:12.391] [core] [debug] [TVP Console]  dragutil.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.399] [core] [debug] [TVP Console]  yuzu_touchui.tjs を読み込みました(8ms)
+[2026-04-04 13:26:12.405] [core] [debug] [TVP Console]  scnchart.tjs を読み込みました(3ms)
+[2026-04-04 13:26:12.418] [core] [debug] [TVP Console]  scnchart_ui.tjs を読み込みました(13ms)
+[2026-04-04 13:26:12.418] [core] [debug] [TVP Console]  yuzu_flowchart.tjs を読み込みました(19ms)
+[2026-04-04 13:26:12.418] [core] [debug] [TVP Console]  custom.tjs を読み込みました(178ms)
+[2026-04-04 13:26:12.421] [core] [debug] [TVP Console]  license, SourceHan.txt, 2
+[2026-04-04 13:26:12.421] [core] [debug] [TVP Console]  embFontLoader.tjs を読み込みました(3ms)
+[2026-04-04 13:26:12.421] [core] [debug] [TVP Console]  Override.tjs を読み込みました(203ms)
+[2026-04-04 13:26:12.437] [core] [debug] Loading Plugin: wuvorbis.dll Success
+[2026-04-04 13:26:12.437] [core] [debug] Loading Plugin: wuopus.dll Success
+[2026-04-04 13:26:12.437] [core] [debug] [TVP Console]  スクリプトの読み込みに 322ms かかりました
+[2026-04-04 13:26:12.438] [core] [info] FlutterWindowLayer created: 1280x720
+[2026-04-04 13:26:12.438] [core] [info] TVPCreateAndAddWindow: created FlutterWindowLayer (1280x720)
+[2026-04-04 13:26:12.438] [core] [debug] [TVP Console]  standCacheTable:huge, [8,0]
+[2026-04-04 13:26:12.451] [core] [debug] [TVP Console]  セーブデータ保存場所:file://./storage/emulated/0/download/【kr】slp007/senrenbanka/senrenbanka/savedata/
+[2026-04-04 13:26:12.457] [core] [debug] [TVP Console]  win32dialog.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.457] [core] [debug] [TVP Console]  debugutil.tjs を読み込みました(4ms)
+[2026-04-04 13:26:12.702] [core] [debug] FlutterWindowLayer::SetPaintBoxSize: layer=1920x1440, surface=1280x720
+[2026-04-04 13:26:12.757] [core] [debug] [TVP Console]  LogWindow.tjs を読み込みました(1ms)
+[2026-04-04 13:26:12.769] [core] [debug] FlutterWindowLayer::SetPaintBoxSize: layer=1920x1080, surface=1280x720
+[2026-04-04 13:26:12.810] [plugin] [info] kag: 0xb4000073dce556b0, cacheSize: 20971520
+[2026-04-04 13:26:12.829] [core] [debug] [TVP Console]  Plugin.tjs を読み込みました(0ms)
+[2026-04-04 13:26:12.829] [core] [info] [TVP Console]  * loadEnvinfo:envinit.tjs
+[2026-04-04 13:26:13.078] [core] [debug] [TVP Console]  standview.tjs を読み込みました(2ms)
+[2026-04-04 13:26:13.078] [core] [debug] [TVP Console]  KAGMainWindow のコンストラクタで 641ms かかりました
+[2026-04-04 13:26:13.134] [core] [info] [TVP Console]  enableTouch: 0
+[2026-04-04 13:26:13.135] [core] [debug] [TVP Console]  HoldPsdFile, gesture_help.pimg
+[2026-04-04 13:26:13.135] [plugin] [debug] load psb file: gesture_help.pimg
+[2026-04-04 13:26:13.172] [core] [debug] [TVP Console]  (info) Use mmap for Bitmap
+[2026-04-04 13:26:13.203] [core] [debug] [TVP Console]  UILoader.tjs を読み込みました(1ms)
+[2026-04-04 13:26:13.204] [plugin] [debug] load psb file: quickmenu.PIMG
+[2026-04-04 13:26:13.226] [plugin] [debug] load psb file: quickmenu.pimg
+[2026-04-04 13:26:13.227] [plugin] [info] PSB lazy-load archive: quickmenu.pimg
+[2026-04-04 13:26:13.300] [core] [debug] [TVP Console]  日付表示呼び出し
+[2026-04-04 13:26:13.311] [plugin] [debug] load psb file: chapter.PIMG
+[2026-04-04 13:26:13.323] [plugin] [debug] load psb file: chapter.pimg
+[2026-04-04 13:26:13.324] [plugin] [info] PSB lazy-load archive: chapter.pimg
+[2026-04-04 13:26:13.345] [plugin] [debug] load psb file: voicebar.PIMG
+[2026-04-04 13:26:13.350] [plugin] [debug] load psb file: voicebar.pimg
+[2026-04-04 13:26:13.350] [plugin] [info] PSB lazy-load archive: voicebar.pimg
+[2026-04-04 13:26:13.487] [core] [debug] [TVP Console]  AfterInit.tjs を読み込みました(409ms)
+[2026-04-04 13:26:13.488] [core] [info] Startup script ended.
+[2026-04-04 13:26:13.489] [core] [info] TVPBoostAutoMountPaths: re-ordered 114 patch paths to end of auto path list
+[2026-04-04 13:26:13.489] [core] [info] StartApplication: completed successfully
+[2026-04-04 13:26:13.489] [core] [info] engine_open_game: StartApplication returned successfully
+[2026-04-04 13:26:13.498] [core] [info] engine_set_option: fps_limit=0 (interval=0us)
+[2026-04-04 13:26:13.523] [core] [debug] Loading Plugin: extrans.dll Success
+[2026-04-04 13:26:13.523] [core] [warning] ncbAutoRegister::LoadModule('extnagano.dll'): module not found in internal plugin map
+[2026-04-04 13:26:13.523] [core] [error] Loading Plugin: extNagano.dll Failed
+[2026-04-04 13:26:13.558] [core] [debug] [TVP Console]  (info) Rebuilding Auto Path Table ...
+[2026-04-04 13:26:13.625] [core] [debug] [TVP Console]  (info) Total 48246 file(s) found, 47856 file(s) activated. (67ms)
+[2026-04-04 13:26:13.658] [core] [debug] TJS_CollectOrphanedICCs: released 386 orphaned ICCs (forced)
+[2026-04-04 13:26:13.795] [core] [debug] TJS_CollectOrphanedICCs: released 12 orphaned ICCs (forced)
+[2026-04-04 13:26:13.835] [core] [debug] TJS_CollectOrphanedICCs: released 4 orphaned ICCs (forced)
+[2026-04-04 13:26:13.880] [core] [debug] [TVP Console]  (mem) used=6216212MB free=5291MB budget=1024MB pressure=3 gcache=17/24MB psbcache=0/96MB vmem=273MB xp3seg=0MB layers=147/127MB heap=0/0MB tjs=8MB vs=0MB obj=24754 sb=135 icc=10693 orphan=0 untracked=6215795MB
+[2026-04-04 13:26:13.880] [core] [debug] [TVP Console]  (mem_delta) d_used=6216212MB d_heap=0MB d_tjs=8MB d_vs=0MB d_obj=24754 d_sb=135 d_icc=10693 cache:exec_hit=0 exec_miss=6 exec_named=21 eval_hit=390 eval_miss=180
+[2026-04-04 13:26:13.880] [core] [debug] [TVP Console]  (obj_detail) h0=1559 h1=8810 h2=-5 h3=14461 h4=-69 h5+-2 dict=-1376(+464/-1840) arr=-1306(+7712/-9018)
+[2026-04-04 13:26:13.910] [core] [info] EGL surface resized to 2318x1080
+[2026-04-04 13:26:13.933] [core] [info] AttachNativeWindow: success 2318x1080
+[2026-04-04 13:26:13.934] [core] [info] engine_tick: auto-attached ANativeWindow 2318x1080
+[2026-04-04 13:26:13.968] [core] [info] FlutterWindowLayer: blit resources initialized (program=159)
+[2026-04-04 13:26:16.535] [core] [debug] TJS_CollectOrphanedICCs: released 22 orphaned ICCs (forced)
+[2026-04-04 13:26:16.609] [core] [debug] [TVP Console]  (mem) used=6448476MB free=5064MB budget=1024MB pressure=3 gcache=22/24MB psbcache=0/96MB vmem=208MB xp3seg=0MB layers=152/156MB heap=0/0MB tjs=8MB vs=0MB obj=24901 sb=133 icc=10701 orphan=0 untracked=6448090MB
+[2026-04-04 13:26:16.609] [core] [debug] [TVP Console]  (mem_delta) d_used=232264MB d_heap=0MB d_tjs=0MB d_vs=0MB d_obj=147 d_sb=-2 d_icc=8 cache:exec_hit=0 exec_miss=6 exec_named=21 eval_hit=413 eval_miss=184
+[2026-04-04 13:26:16.609] [core] [debug] [TVP Console]  (obj_detail) h0=1564 h1=8813 h2=-12 h3=14625 h4=-70 h5+-19 dict=-1477(+573/-2050) arr=-1518(+7980/-9498)
+[2026-04-04 13:26:16.889] [plugin] [info] kag: 0xb4000073dce556b0, cacheSize: 20971520
+[2026-04-04 13:26:16.889] [plugin] [debug] load psb file: yuzulogo.mtn
+[2026-04-04 13:26:16.906] [plugin] [info] Player::play motion=yuzulogo all=1
+[2026-04-04 13:26:16.922] [plugin] [info] kag: 0xb4000073dce556b0, cacheSize: 20971520
+[2026-04-04 13:26:16.922] [plugin] [debug] load psb file: yuzulogo.mtn
+[2026-04-04 13:26:16.928] [plugin] [info] Player::play motion=yuzulogo all=1
+[2026-04-04 13:26:16.930] [plugin] [info] Player_clear: callCount=1
+[2026-04-04 13:26:16.930] [plugin] [info] Player_draw: calling draw, target=0xb4000073ecead510 callCount=1
+[2026-04-04 13:26:16.930] [plugin] [info] cachePSBImages: 0 layer positions for yuzulogo.mtn (chara=LOGO, total=0)
+[2026-04-04 13:26:16.930] [plugin] [info] cachePSBImages: fallback rawEntries=0 retry=0
+[2026-04-04 13:26:16.930] [plugin] [info] drawFallback: storage=yuzulogo.mtn chara=LOGO motion=yuzulogo
+[2026-04-04 13:26:16.930] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/motion/LOGO/yuzulogo
+[2026-04-04 13:26:16.930] [plugin] [info] PSB lazy-load archive(from cache): yuzulogo.mtn
+[2026-04-04 13:26:16.932] [plugin] [info] PSB objectTree for yuzulogo.mtn: LOGO[yuzulogo]
+[2026-04-04 13:26:16.932] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/motion/LOGO/normal
+[2026-04-04 13:26:16.932] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/motion/LOGO/show
+[2026-04-04 13:26:16.932] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/source/title/motion/show
+[2026-04-04 13:26:16.932] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/source/title/motion/normal
+[2026-04-04 13:26:16.932] [plugin] [debug] drawFallback: trying psb://yuzulogo.mtn/source/title/icon/bg/pixel
+[2026-04-04 13:26:16.932] [plugin] [warning] drawFallback: no image loaded for yuzulogo.mtn
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  ==== An exception occurred at affinesourcemotion.tjs(1)[(function) _getOptions], VM ip = 162 ==== 
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  -- Disassembled VM code --
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  #(1) Bytecode.
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  4 cdeq %1, %0
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  7 jf 000000266
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  *1 = (string)"motion"
+[2026-04-04 13:26:16.950] [core] [debug] [TVP Console]  *2 = (string)""
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  20 ceq %3, %4
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  23 jf 000000266
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *3 = (int)0
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *4 = (string)"progress"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  38 cl %-4
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *5 = (string)"_storageType"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *6 = (string)"emote"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  47 ceq %1, %2
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  50 jnf 000000110
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *7 = (string)"getPlayingTimelineInfoList"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  61 cp %-5, %2
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *8 = (string)"count"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *3 = (int)0
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  71 cgt %1, %2
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  74 jnf 000000080
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *9 = (string)"timelines"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *10 = (string)"_color"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  84 cdeq %1, %0
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  87 jf 000000097
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *10 = (string)"_color"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *11 = (string)"color"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *12 = (string)"variableKeys"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  105 cp %-4, %2
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  108 jmp 000000206
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *13 = (string)"chara"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *13 = (string)"chara"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *1 = (string)"motion"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *1 = (string)"motion"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *14 = (string)"tickCount"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *15 = (string)"tickcount"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *16 = (string)"speed"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *16 = (string)"speed"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *0 = (string)"_player"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  *17 = (string)"outline"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  -- Register dump --
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %-8=(real)-60  %-7=(string)"zpos"  %-6=(int)1  %-5=(int)1  %-4=()
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %-3=(object)(object 0xb4000073dcefddb0:0xb4000073dcefddb0)
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %-2=(object)(object 0x7fce49de70:(nil))
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %-1=(object)(object 0xb4000073dcf94a20:0xb4000073dcf94a20)  %0=()
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %1=(object)(object 0xb4000073dd039e40:0xb4000073dd039e40)  %2=(real)1  %3=(string)"yuzulogo"
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  %4=(string)""
+[2026-04-04 13:26:16.951] [core] [debug] [TVP Console]  --------------------------------------------------------------------------------------------------
+[2026-04-04 13:26:16.956] [core] [debug] [TVP Console]  trace : affinesourcemotion.tjs(1)[(function) getOptions] <-- kagenvimage.tjs(1)[(function) onStore] <-- kagenvironment.tjs(1)[(function expression) (anonymous)] <-- kagenvironment.tjs(1)[(function) _onStore] <-- kagenviron

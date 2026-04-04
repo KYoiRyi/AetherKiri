@@ -1,0 +1,5 @@
+# Set default behaviour to automatically normalize line endings.
+* text=auto
+
+# Enforce LF for vcpkg patch files, as patch.exe on Windows fails with CRLF line endings
+*.patch text eol=lf
