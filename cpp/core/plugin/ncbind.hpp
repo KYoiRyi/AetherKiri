@@ -1883,6 +1883,10 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase {
 		}
 		if (item) {
 			TJSNativeClassRegisterNCM(_classobj, name, item->GetDispatch(), _className, item->GetType(), item->GetFlags());
+			if (!TJS_strcmp(name, TJS_W("missing"))) {
+				tTJSVariant missingVar(TJS_W("missing"));
+				_classobj->ClassInstanceInfo(TJS_CII_SET_MISSING, 0, &missingVar);
+			}
 			item->Release();
 		}
 	}

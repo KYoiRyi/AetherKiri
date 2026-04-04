@@ -7,6 +7,7 @@
 #include "tjsDictionary.h"
 #include "ncbind.hpp"
 #include "psbfile/PSBFile.h"
+#include "base/ScriptMgnIntf.h"
 
 #include "ResourceManager.h"
 #include "EmotePlayer.h"
@@ -24,6 +25,9 @@ static motion::SeparateLayerAdaptor *GetSeparateLayerAdaptorInstance(iTJSDispatc
 }
 
 static iTJSDispatch2 *GetSeparateAdaptorRenderTarget(motion::SeparateLayerAdaptor *adaptor);
+
+class GenericMockObject;
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
 iTJSDispatch2 *ResolveLayerTreeOwnerBase(iTJSDispatch2 *base) {
     if(!base) return nullptr;
@@ -486,6 +490,20 @@ static tjs_error Player_clear(tTJSVariant *, tjs_int count, tTJSVariant **p,
     return TJS_S_OK;
 }
 
+static tjs_error Player_getLoopTime(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
+    if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
+    return TJS_S_OK;
+}
+
+static tjs_error Player_setLoopTime(tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
+    return TJS_S_OK;
+}
+
+static tjs_error Player_dummyMethodInt(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
+    if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
+    return TJS_S_OK;
+}
+
 static tjs_error Player_draw(tTJSVariant *, tjs_int count, tTJSVariant **p,
                              iTJSDispatch2 *objthis) {
     static int sDrawWrapCount = 0;
@@ -528,11 +546,16 @@ NCB_REGISTER_SUBCLASS_DELAY(Player) {
     NCB_METHOD_RAW_CALLBACK(draw, Player_draw, 0);
     NCB_METHOD_RAW_CALLBACK(setVariable, Player_setVariable, 0);
     NCB_METHOD_RAW_CALLBACK(getVariable, Player_getVariable, 0);
+    NCB_PROPERTY_RAW_CALLBACK(loopTime, Player_getLoopTime, Player_setLoopTime, 0);
+    NCB_METHOD_RAW_CALLBACK(canSync, Player_dummyMethodInt, 0);
+    NCB_METHOD_RAW_CALLBACK(sync, Player_dummyMethodInt, 0);
+    NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
 NCB_REGISTER_SUBCLASS_DELAY(EmotePlayer) {
     NCB_CONSTRUCTOR((ResourceManager));
     NCB_PROPERTY(useD3D, getUseD3D, setUseD3D);
+    NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
 static tjs_error ResourceManager_unload(tTJSVariant *, tjs_int count, tTJSVariant **p,
@@ -562,6 +585,7 @@ NCB_REGISTER_SUBCLASS(ResourceManager) {
     NCB_METHOD_RAW_CALLBACK(setEmotePSBDecryptFunc,
                             &ResourceManager::setEmotePSBDecryptFunc,
                             TJS_STATICMEMBER);
+    NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
 class Motion {
@@ -621,6 +645,129 @@ private:
     inline static bool _enableD3D;
 };
 
+class GenericMockObject : public tTJSDispatch {
+    tjs_uint RefCount;
+public:
+    GenericMockObject() : RefCount(1) {}
+    ~GenericMockObject() override {}
+
+    tjs_uint AddRef() override { return ++RefCount; }
+    tjs_uint Release() override {
+        if (--RefCount == 0) {
+            delete this;
+            return 0;
+        }
+        return RefCount;
+    }
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, tTJSVariant *result,
+                      iTJSDispatch2 *objthis) override {
+        if (result) {
+            if (membername) {
+                if (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length"))) {
+                    *result = tTJSVariant((tjs_int)0);
+                    return TJS_S_OK;
+                }
+            }
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, const tTJSVariant *param,
+                      iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error CreateNew(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, iTJSDispatch2 **result,
+                        tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = this;
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error GetCount(tjs_int *result, const tjs_char *membername,
+                       tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        if (result) *result = 0;
+        return TJS_S_OK;
+    }
+
+    tjs_error EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
+                          iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error DeleteMember(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error Invalidate(tjs_uint32 flag, const tjs_char *membername,
+                         tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error IsValid(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error IsInstanceOf(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, const tjs_char *classname,
+                           iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error Operation(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, tTJSVariant *result,
+                        const tTJSVariant *param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) *result = tTJSVariant();
+        return TJS_S_OK;
+    }
+};
+
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+    if (numparams >= 3) {
+        bool is_set = (tjs_int)*param[0];
+        if (!is_set) {
+            iTJSDispatch2* prop = param[2]->AsObjectNoAddRef();
+            static iTJSDispatch2* dummy = new GenericMockObject();
+            tTJSVariant dummy_var(dummy, dummy);
+            prop->PropSet(0, nullptr, nullptr, &dummy_var, prop);
+        }
+    }
+    if (result) *result = tTJSVariant(static_cast<tjs_int>(1));
+    return TJS_S_OK;
+}
+
+static tjs_error Motion_getD3DAdaptor(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
+    static iTJSDispatch2* dummy = new GenericMockObject();
+    if (r) {
+        dummy->AddRef();
+        *r = tTJSVariant(dummy, dummy);
+    }
+    return TJS_S_OK;
+}
+
 NCB_REGISTER_CLASS(Motion) {
     NCB_PROPERTY_RAW_CALLBACK(enableD3D, Motion::getEnableD3D,
                               Motion::setEnableD3D, TJS_STATICMEMBER);
@@ -633,6 +780,7 @@ NCB_REGISTER_CLASS(Motion) {
     NCB_SUBCLASS(Player, Player);
     NCB_SUBCLASS(EmotePlayer, EmotePlayer);
     NCB_SUBCLASS(SeparateLayerAdaptor, SeparateLayerAdaptor);
+    NCB_PROPERTY_RAW_CALLBACK_RO(D3DAdaptor, Motion_getD3DAdaptor, TJS_STATICMEMBER);
 }
 
 static void PreRegistCallback() {}
