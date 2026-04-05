@@ -17,7 +17,11 @@ jobs:
 
       - name: Install Build Systems
         run: |
-          brew install cmake ninja pkg-config autoconf automake autoconf-archive
+          brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils
+          # gettext and libtool are often keg-only, ensure their tools are in PATH
+          echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix libtool)/libexec/gnubin" >> $GITHUB_PATH
+          echo "$(brew --prefix libtool)/bin" >> $GITHUB_PATH
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -28,15 +32,16 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: Cache vcpkg downloads and archives
-        uses: actions/cache@v4
+      - name: Restore vcpkg downloads and archives
+        uses: actions/cache/restore@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
             out/ios
-          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
           restore-keys: |
+            ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-
             ${{ runner.os }}-vcpkg-ios-
             ${{ runner.os }}-vcpkg-
 
@@ -61,8 +66,19 @@ jobs:
           fi
 
       - name: Upload Artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: KrKr2-Next-iOS-Unsigned
           path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.ipa
           retention-days: 7
+
+      - name: Save vcpkg cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+            out/ios
+          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
