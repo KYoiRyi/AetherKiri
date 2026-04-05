@@ -21,7 +21,7 @@ jobs:
 
       - name: Install Build Systems
         run: |
-          brew install cmake ninja pkg-config
+          brew install cmake ninja pkg-config autoconf automake autoconf-archive
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -53,11 +53,13 @@ jobs:
 
       - name: Compress App Bundle
         run: |
-          # ZIP the Runner.app for easier downloading. 
-          # Note: This is an unsigned build. It will need to be re-signed locally or deployed via Xcode.
+          # Package the Runner.app into an unsigned .ipa for easier deployment. 
+          # Note: This is an unsigned build. It will need to be re-signed locally (e.g. via AltStore/Sideloadly) or deployed via Xcode.
           cd apps/flutter_app/build/ios/iphoneos || exit 0
           if [ -d "Runner.app" ]; then
-            zip -r KrKr2-Next-iOS.zip Runner.app
+            mkdir -p Payload
+            mv Runner.app Payload/
+            zip -r KrKr2-Next-iOS.ipa Payload
           else
             echo "Runner.app not found in expected directory"
           fi
@@ -66,5 +68,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: KrKr2-Next-iOS-Unsigned
-          path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.zip
+          path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.ipa
           retention-days: 7
