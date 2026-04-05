@@ -18,10 +18,8 @@ jobs:
       - name: Install Build Systems
         run: |
           brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison
-          # gettext, libtool, and bison are often keg-only, ensure their tools are in PATH
+          # gettext and bison are often keg-only, ensure their tools are in PATH
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
-          echo "$(brew --prefix libtool)/libexec/gnubin" >> $GITHUB_PATH
-          echo "$(brew --prefix libtool)/bin" >> $GITHUB_PATH
           echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
 
       - name: Set up Flutter
@@ -48,8 +46,6 @@ jobs:
 
       - name: Build iOS Release
         run: |
-          # Purge stale CMakeCache and build.ninja to force build_ios.sh to re-evaluate find_program instead of skipping configure
-          rm -f out/ios/release/CMakeCache.txt out/ios/release/build.ninja || true
           chmod +x ./build.sh
           # The script internally runs build_ios.sh which defaults to release configuration
           # It generates the libengine_api.a via CMake, merges it with Vcpkg deps, and then builds Flutter
