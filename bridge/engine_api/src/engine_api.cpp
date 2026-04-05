@@ -681,6 +681,8 @@ void RunOpenGameAsync(engine_handle_t handle,
 
 }  // namespace
 
+extern std::string TVPEngineApi_GetGlobalException();
+
 extern "C" {
 
 engine_result_t engine_get_runtime_api_version(uint32_t* out_api_version) {
@@ -1178,7 +1180,6 @@ engine_result_t engine_tick(engine_handle_t handle, uint32_t delta_ms) {
 #endif
 
   if (TVPTerminated) {
-    extern std::string TVPEngineApi_GetGlobalException();
     std::string except_msg = TVPEngineApi_GetGlobalException();
     if (!except_msg.empty()) {
       return SetHandleErrorAndReturnLocked(
