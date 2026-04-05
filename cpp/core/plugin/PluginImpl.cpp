@@ -221,6 +221,8 @@ protected:
 
 class tTJSNC_gfxFireStub : public tTJSNativeClass {
 public:
+    static tjs_uint32 ClassID;
+
     tTJSNC_gfxFireStub() : tTJSNativeClass(TJS_W("gfxFire")) {
         TJS_BEGIN_NATIVE_MEMBERS(gfxFire)
         TJS_DECL_EMPTY_FINALIZE_METHOD
@@ -238,6 +240,7 @@ protected:
 };
 
 tjs_uint32 tTJSNC_GamepadStub::ClassID = static_cast<tjs_uint32>(-1);
+tjs_uint32 tTJSNC_gfxFireStub::ClassID = static_cast<tjs_uint32>(-1);
 
 class tTVPProxyStorageMedia : public iTVPStorageMedia {
     tjs_uint RefCount = 1;

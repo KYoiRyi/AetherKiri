@@ -48,6 +48,7 @@ jobs:
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
           key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}
+          save-always: 'true'
           restore-keys: |
             ${{ runner.os }}-vcpkg-android-
             ${{ runner.os }}-vcpkg-
