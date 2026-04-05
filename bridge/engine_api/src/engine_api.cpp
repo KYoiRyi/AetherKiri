@@ -997,7 +997,6 @@ engine_result_t engine_get_startup_state(engine_handle_t handle,
   }
 
   *out_state = GetStartupState(impl);
-  ClearHandleErrorLocked(impl);
   SetThreadError(nullptr);
   return ENGINE_RESULT_OK;
 }
@@ -1048,7 +1047,6 @@ engine_result_t engine_drain_startup_logs(engine_handle_t handle,
     out_buffer[buffer_size - 1] = '\0';
   }
   *out_bytes_written = written;
-  ClearHandleErrorLocked(impl);
   SetThreadError(nullptr);
   return ENGINE_RESULT_OK;
 }
