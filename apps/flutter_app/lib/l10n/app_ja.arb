@@ -96,8 +96,10 @@
 
   "settingsAbout": "バージョン情報",
   "version": "バージョン",
-  "aboutVersionDesc": "反復テスト中、長期使用はご遠慮ください",
+  "aboutVersionDesc": "0.2.0-beta.1",
   "aboutAuthor": "作者",
+  "aboutAuthorName": "reAAAq (KYoiRyi により適合)",
+  "aboutGithubFork": "AetherKiri (現在のフォーク)",
   "aboutEmail": "メール",
   "aboutEmailCopied": "メールアドレスをコピーしました",
 

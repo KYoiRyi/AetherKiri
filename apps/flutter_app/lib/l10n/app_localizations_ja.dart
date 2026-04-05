@@ -256,10 +256,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get version => 'バージョン';
 
   @override
-  String get aboutVersionDesc => '反復テスト中、長期使用はご遠慮ください';
+  String get aboutVersionDesc => '0.2.0-beta.1';
 
   @override
   String get aboutAuthor => '作者';
+
+  @override
+  String get aboutAuthorName => 'reAAAq (KYoiRyi により適合)';
+
+  @override
+  String get aboutGithubFork => 'AetherKiri (現在のフォーク)';
 
   @override
   String get aboutEmail => 'メール';

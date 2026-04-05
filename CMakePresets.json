@@ -13,6 +13,7 @@
       "cacheVariables": {
         "WINDOWS": true,
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
+        "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true
       },
       "condition": {
@@ -56,6 +57,7 @@
         "CMAKE_C_COMPILER": "i686-w64-mingw32-gcc",
         "CMAKE_CXX_COMPILER": "i686-w64-mingw32-g++",
         "CMAKE_RC_COMPILER": "i686-w64-mingw32-windres",
+        "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true
       },
       "condition": {
@@ -70,6 +72,7 @@
       "hidden": true,
       "cacheVariables": {
         "LINUX": true,
+        "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true
       },
       "condition": {
@@ -102,6 +105,7 @@
         "MACOS": true,
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
+        "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true
       },
       "condition": {
@@ -139,6 +143,7 @@
         "CMAKE_CXX_COMPILER": "clang++",
         "VCPKG_TARGET_TRIPLET": "arm64-ios",
         "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true,
         "BUILD_TOOLS": false,
         "ENABLE_TESTS": false

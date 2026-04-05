@@ -571,7 +571,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutVersionDesc.
   ///
   /// In en, this message translates to:
-  /// **'Iterative testing, not for long-term use'**
+  /// **'0.2.0-beta.1'**
   String get aboutVersionDesc;
 
   /// No description provided for @aboutAuthor.
@@ -579,6 +579,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Author'**
   String get aboutAuthor;
+
+  /// No description provided for @aboutAuthorName.
+  ///
+  /// In en, this message translates to:
+  /// **'reAAAq (Adapted by KYoiRyi)'**
+  String get aboutAuthorName;
+
+  /// No description provided for @aboutGithubFork.
+  ///
+  /// In en, this message translates to:
+  /// **'AetherKiri (Current Fork)'**
+  String get aboutGithubFork;
 
   /// No description provided for @aboutEmail.
   ///

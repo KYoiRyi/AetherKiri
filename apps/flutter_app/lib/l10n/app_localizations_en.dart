@@ -265,10 +265,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get version => 'Version';
 
   @override
-  String get aboutVersionDesc => 'Iterative testing, not for long-term use';
+  String get aboutVersionDesc => '0.2.0-beta.1';
 
   @override
   String get aboutAuthor => 'Author';
+
+  @override
+  String get aboutAuthorName => 'reAAAq (Adapted by KYoiRyi)';
+
+  @override
+  String get aboutGithubFork => 'AetherKiri (Current Fork)';
 
   @override
   String get aboutEmail => 'Email';

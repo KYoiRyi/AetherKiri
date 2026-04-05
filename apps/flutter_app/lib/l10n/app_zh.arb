@@ -96,8 +96,10 @@
 
   "settingsAbout": "关于",
   "version": "版本",
-  "aboutVersionDesc": "迭代测试，切勿长期使用",
+  "aboutVersionDesc": "0.2.0-beta.1",
   "aboutAuthor": "作者",
+  "aboutAuthorName": "reAAAq (由 KYoiRyi 适配)",
+  "aboutGithubFork": "AetherKiri (当前分支项目)",
   "aboutEmail": "邮箱",
   "aboutEmailCopied": "邮箱已复制到剪贴板",
 

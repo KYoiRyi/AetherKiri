@@ -254,10 +254,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get version => '版本';
 
   @override
-  String get aboutVersionDesc => '迭代测试，切勿长期使用';
+  String get aboutVersionDesc => '0.2.0-beta.1';
 
   @override
   String get aboutAuthor => '作者';
+
+  @override
+  String get aboutAuthorName => 'reAAAq (由 KYoiRyi 适配)';
+
+  @override
+  String get aboutGithubFork => 'AetherKiri (当前分支项目)';
 
   @override
   String get aboutEmail => '邮箱';

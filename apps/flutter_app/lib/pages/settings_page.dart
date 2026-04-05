@@ -539,7 +539,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const Icon(Icons.person_outline),
                     title: Text(l10n.aboutAuthor),
                     trailing: Text(
-                      'reAAAq',
+                      l10n.aboutAuthorName,
                       style: TextStyle(
                         color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -572,7 +572,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.code),
-                    title: const Text('GitHub'),
+                    title: const Text('GitHub (Original)'),
                     subtitle: const Text(
                       'github.com/reAAAq/KrKr2-Next',
                       style: TextStyle(fontSize: 12),
@@ -585,6 +585,26 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       launchUrl(
                         Uri.parse('https://github.com/reAAAq/KrKr2-Next'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.code),
+                    title: Text(l10n.aboutGithubFork),
+                    subtitle: const Text(
+                      'github.com/KYoiRyi/AetherKiri',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: Icon(
+                      Icons.open_in_new,
+                      size: 18,
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    onTap: () {
+                      launchUrl(
+                        Uri.parse('https://github.com/KYoiRyi/AetherKiri'),
                         mode: LaunchMode.externalApplication,
                       );
                     },
