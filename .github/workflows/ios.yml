@@ -37,18 +37,15 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: Restore vcpkg downloads and archives
-        uses: actions/cache/restore@v4
+      - name: vcpkg cache
+        uses: actions/cache@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-            out/ios
-          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-
             ${{ runner.os }}-vcpkg-ios-
-            ${{ runner.os }}-vcpkg-
 
       - name: Build iOS Release
         run: |
@@ -78,12 +75,4 @@ jobs:
           path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.ipa
           retention-days: 7
 
-      - name: Save vcpkg cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            .devtools/vcpkg
-            ~/.cache/vcpkg/archives
-            out/ios
-          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
+

@@ -41,18 +41,15 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: Restore vcpkg downloads and archives
-        uses: actions/cache/restore@v4
+      - name: vcpkg cache
+        uses: actions/cache@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-            apps/flutter_app/build/.cxx
-          key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
+          key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}-
             ${{ runner.os }}-vcpkg-android-
-            ${{ runner.os }}-vcpkg-
 
       - name: Build Android Release
         run: |
@@ -72,11 +69,4 @@ jobs:
           path: apps/flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
-      - name: Save vcpkg cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            .devtools/vcpkg
-            ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}-${{ github.run_id }}
+
