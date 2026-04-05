@@ -57,6 +57,14 @@ public:
     void Invalidate() override {}
 };
 
+class tTJSNI_gfxFireStub : public tTJSNativeInstance {
+public:
+    tjs_error Construct(tjs_int, tTJSVariant **, iTJSDispatch2 *) override {
+        return TJS_S_OK;
+    }
+    void Invalidate() override {}
+};
+
 class tTJSNC_GamepadStub : public tTJSNativeClass {
 public:
     static tjs_uint32 ClassID;
@@ -211,6 +219,24 @@ protected:
     }
 };
 
+class tTJSNC_gfxFireStub : public tTJSNativeClass {
+public:
+    tTJSNC_gfxFireStub() : tTJSNativeClass(TJS_W("gfxFire")) {
+        TJS_BEGIN_NATIVE_MEMBERS(gfxFire)
+        TJS_DECL_EMPTY_FINALIZE_METHOD
+        TJS_BEGIN_NATIVE_CONSTRUCTOR_DECL(_this, tTJSNI_gfxFireStub, gfxFire) {
+            return TJS_S_OK;
+        }
+        TJS_END_NATIVE_CONSTRUCTOR_DECL(gfxFire)
+        TJS_END_NATIVE_MEMBERS
+    }
+
+protected:
+    tTJSNativeInstance *CreateNativeInstance() override {
+        return new tTJSNI_gfxFireStub();
+    }
+};
+
 tjs_uint32 tTJSNC_GamepadStub::ClassID = static_cast<tjs_uint32>(-1);
 
 class tTVPProxyStorageMedia : public iTVPStorageMedia {
@@ -299,6 +325,25 @@ static void TVPRegisterGamepadStub() {
     spdlog::info("Registered GamepadPort/Gamepad stub for missing gamepad.dll");
 }
 
+static void TVPRegisterGfxFireStub() {
+    iTJSDispatch2 *stub = new tTJSNC_gfxFireStub();
+    if(!stub)
+        return;
+
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if(!global) {
+        stub->Release();
+        return;
+    }
+
+    tTJSVariant val(stub);
+    global->PropSet(TJS_MEMBERENSURE, TJS_W("gfxFire"), nullptr, &val, global);
+
+    global->Release();
+    stub->Release();
+    spdlog::info("Registered gfxFire stub for missing gfxEffect.dll");
+}
+
 void TVPLoadPlugin(const ttstr &name) {
     auto pluginName = name;
     if(name == TJS_W("emoteplayer.dll"))
@@ -312,6 +357,8 @@ void TVPLoadPlugin(const ttstr &name) {
             TVPRegisterProxyFsStub();
         } else if(name == TJS_W("gamepad.dll")) {
             TVPRegisterGamepadStub();
+        } else if(name == TJS_W("gfxEffect.dll") || name == TJS_W("gfxfire.dll") || name == TJS_W("gfxFire.dll")) {
+            TVPRegisterGfxFireStub();
         }
     }
 }
