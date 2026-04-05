@@ -48,8 +48,8 @@ jobs:
 
       - name: Build iOS Release
         run: |
-          # Purge stale CMakeCache to force find_program to re-evaluate after Homebrew installations
-          rm -f out/ios/release/CMakeCache.txt || true
+          # Purge stale CMakeCache and build.ninja to force build_ios.sh to re-evaluate find_program instead of skipping configure
+          rm -f out/ios/release/CMakeCache.txt out/ios/release/build.ninja || true
           chmod +x ./build.sh
           # The script internally runs build_ios.sh which defaults to release configuration
           # It generates the libengine_api.a via CMake, merges it with Vcpkg deps, and then builds Flutter
