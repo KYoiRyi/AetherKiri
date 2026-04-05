@@ -46,6 +46,7 @@ jobs:
           key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-ios-
+            ${{ runner.os }}-vcpkg-
 
       - name: Build iOS Release
         run: |

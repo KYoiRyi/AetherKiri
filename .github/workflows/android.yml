@@ -50,6 +50,7 @@ jobs:
           key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-android-
+            ${{ runner.os }}-vcpkg-
 
       - name: Build Android Release
         run: |
