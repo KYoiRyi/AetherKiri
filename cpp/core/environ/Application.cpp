@@ -19,6 +19,9 @@
 #include "SystemIntf.h"
 
 #include "Exception.h"
+#include "NativeFreeTypeFace.h"
+#include "ClipboardIntf.h"
+#include "SystemControl.h"
 // #include "Resource.h"
 #include "SystemControl.h"
 // #include "MouseCursor.h"
@@ -518,12 +521,16 @@ void tTVPApplication::ShowException(const ttstr &e) {
     ttstr msg = e;
     msg += TJS_W("\n\n--- Recent Engine Logs ---\n");
     msg += TVPGetLastLog(20);
-#ifdef TVP_COMPILING_KIRIKIRI_SDL2
-    TVPShowSimpleMessageBox(msg, TVPGetErrorDialogTitle());
-#else
     TVPEngineApi_SetGlobalException(msg.AsStdString());
     spdlog::error("FATAL SCRIPT EXCEPTION:\n{}", msg.AsStdString());
-#endif
+
+    std::vector<ttstr> buttons;
+    buttons.push_back(TJS_W("OK"));
+    buttons.push_back(TJS_W("Copy to Clipboard"));
+    int result = TVPShowSimpleMessageBox(msg, TVPGetErrorDialogTitle(), buttons);
+    if (result == 1) { // 1 is the 0-indexed position of Copy to Clipboard button
+        TVPClipboardSetText(msg);
+    }
     TVPSystemUninit();
     TVPExitApplication(0);
 }
