@@ -22,6 +22,8 @@ namespace TJS {
 
     TJS_EXP_FUNC_DEF(iTJSDispatch2 *, TJSGetCompatBoolObject, (bool add_ref));
 
+    extern iTJSDispatch2* TVPGetGlobalMockObject();
+
     //---------------------------------------------------------------------------
     class tTJSVariantString;
 
