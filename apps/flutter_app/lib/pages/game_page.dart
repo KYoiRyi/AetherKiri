@@ -501,7 +501,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
           _stopPlaySessionRun();
           final error = _bridge.engineGetLastError();
           _log('Tick ended: result=$result, error=$error');
-          if (error.contains('termination') || error.contains('terminated')) {
+          if (error == 'runtime has been terminated') {
             _exitGame();
             return;
           }
@@ -1148,7 +1148,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                 OutlinedButton.icon(
                   onPressed: _exitGame,
                   icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back'),
+                  label: const Text('Exit Game'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: const BorderSide(color: Colors.white30),
@@ -1165,7 +1165,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     );
                   },
                   icon: const Icon(Icons.copy, size: 18),
-                  label: const Text('Copy'),
+                  label: const Text('Copy Error'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: const BorderSide(color: Colors.white30),
