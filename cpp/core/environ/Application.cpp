@@ -511,7 +511,10 @@ void tTVPApplication::BringToFront() {
 }
 #endif
 void tTVPApplication::ShowException(const ttstr &e) {
-    TVPShowSimpleMessageBox(e, TVPGetErrorDialogTitle());
+    ttstr msg = e;
+    msg += TJS_W("\n\n--- Recent Engine Logs ---\n");
+    msg += TVPGetLastLog(20);
+    TVPShowSimpleMessageBox(msg, TVPGetErrorDialogTitle());
     TVPSystemUninit();
     TVPExitApplication(0);
 }

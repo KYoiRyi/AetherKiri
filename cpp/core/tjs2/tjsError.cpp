@@ -137,7 +137,7 @@ namespace TJS {
     static void TJSReportExceptionSource(const ttstr &msg,
                                          const tTJSScriptBlock *block,
                                          tjs_int srcpos) {
-        if(TJSEnableDebugMode) {
+        {
             tTJS *tjs = block->GetTJS();
             tjs->OutputExceptionToConsole(
                 (msg + TJS_W(" at ") + block->GetLineDescriptionString(srcpos))
@@ -149,7 +149,7 @@ namespace TJS {
     static void TJSReportExceptionSource(const ttstr &msg,
                                          const tTJSInterCodeContext *context,
                                          tjs_int codepos) {
-        if(TJSEnableDebugMode) {
+        {
             tTJS *tjs = context->GetBlock()->GetTJS();
             tjs->OutputExceptionToConsole(
                 (msg + TJS_W(" at ") +
