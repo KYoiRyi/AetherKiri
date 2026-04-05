@@ -470,6 +470,10 @@ namespace TJS {
                                             tTJSVariantType to2);
     //---------------------------------------------------------------------------
 
+    // Global mock fallback declarations
+    extern iTJSDispatch2* TVPGetGlobalMockObject();
+    extern tTJSVariantClosure_S& TVPGetGlobalMockClosure_S();
+
     //---------------------------------------------------------------------------
     // tTJSVariant
     //---------------------------------------------------------------------------
@@ -690,8 +694,7 @@ namespace TJS {
                 return TJSGetCompatBoolObject(true);
 
             if(vt == tvtVoid) {
-                extern iTJSDispatch2* TVPGetGlobalMockObject();
-                iTJSDispatch2* mock = TVPGetGlobalMockObject();
+                iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
                 if(mock) mock->AddRef();
                 return mock;
             }
@@ -708,8 +711,7 @@ namespace TJS {
                 return TJSGetCompatBoolObject(false);
 
             if(vt == tvtVoid) {
-                extern iTJSDispatch2* TVPGetGlobalMockObject();
-                return TVPGetGlobalMockObject();
+                return TJS::TVPGetGlobalMockObject();
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -726,8 +728,7 @@ namespace TJS {
                 return TJSGetCompatBoolObject(true);
 
             if(vt == tvtVoid) {
-                extern iTJSDispatch2* TVPGetGlobalMockObject();
-                iTJSDispatch2* mock = TVPGetGlobalMockObject();
+                iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
                 if(mock) mock->AddRef();
                 return mock;
             }
@@ -744,8 +745,7 @@ namespace TJS {
                 return TJSGetCompatBoolObject(false);
 
             if(vt == tvtVoid) {
-                extern iTJSDispatch2* TVPGetGlobalMockObject();
-                return TVPGetGlobalMockObject();
+                return TJS::TVPGetGlobalMockObject();
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -758,8 +758,7 @@ namespace TJS {
                 return *(tTJSVariantClosure *)&Object;
             }
             if(vt == tvtVoid) {
-                extern tTJSVariantClosure_S& TVPGetGlobalMockClosure_S();
-                return *(tTJSVariantClosure *)&TVPGetGlobalMockClosure_S(); // already has ref inside TVPGetGlobalMockObject but it doesn't matter
+                return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S(); // already has ref inside TVPGetGlobalMockObject but it doesn't matter
             }
             TJSThrowVariantConvertError(*this, tvtObject);
             return *(tTJSVariantClosure *)&TJSNullVariantClosure;
@@ -771,8 +770,7 @@ namespace TJS {
                 return *(tTJSVariantClosure *)&Object;
             }
             if(vt == tvtVoid) {
-                extern tTJSVariantClosure_S& TVPGetGlobalMockClosure_S();
-                return *(tTJSVariantClosure *)&TVPGetGlobalMockClosure_S();
+                return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S();
             }
             TJSThrowVariantConvertError(*this, tvtObject);
             return *(tTJSVariantClosure *)&TJSNullVariantClosure;
