@@ -45,7 +45,7 @@ android {
                 val vcpkgRoot = System.getenv("VCPKG_ROOT") ?: "${projectRoot}/.devtools/vcpkg"
                 // 优先使用环境变量 ANDROID_NDK_HOME 避免因系统未正确配置默认 NDK 导致装载异常
                 val ndkDir = System.getenv("ANDROID_NDK_HOME") ?: android.ndkDirectory.absolutePath
-                arguments += listOf(
+                arguments += mutableListOf(
                     "-DANDROID_STL=c++_shared",
                     "-DVCPKG_TARGET_ANDROID=ON",
                     "-DBUILD_ENGINE_API=ON",
@@ -55,12 +55,14 @@ android {
                     // Disable manifest mode entirely to avoid recompiling 134 dependencies and MSYS2 branch deadlocks!
                     // This forces CMake to cleanly link against the pre-compiled `installed/` directory built precisely in Step 2.
                     "-DVCPKG_MANIFEST_MODE=OFF",
-                    // Pass explicitly the Chocolatey installed win_bison executable so CMake can generate TJS2 grammar parsers even if the current terminal hasn't refreshed its PATH variable.
-                    "-DBISON_EXECUTABLE=C:/ProgramData/chocolatey/bin/win_bison.exe",
                     // Use vcpkg toolchain as primary, chainload Android NDK toolchain
                     "-DCMAKE_TOOLCHAIN_FILE=${vcpkgRoot}/scripts/buildsystems/vcpkg.cmake",
                     "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${ndkDir}/build/cmake/android.toolchain.cmake"
                 )
+                if (System.getProperty("os.name").lowercase().contains("windows")) {
+                    // Pass explicitly the Chocolatey installed win_bison executable so CMake can generate TJS2 grammar parsers even if the current terminal hasn't refreshed its PATH variable.
+                    arguments += "-DBISON_EXECUTABLE=C:/ProgramData/chocolatey/bin/win_bison.exe"
+                }
             }
         }
     }
