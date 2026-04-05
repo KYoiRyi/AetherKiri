@@ -15,6 +15,66 @@
 #include "tjsError.h"
 #include "tjsLex.h"
 #include "tjsUtils.h"
+#include "tjs.h"
+
+// --- Global Mock Fallback for Void -> Object Conversions ---
+class GenericMockObjectForVariant : public tTJSDispatch {
+    tjs_uint RefCount;
+public:
+    GenericMockObjectForVariant() : RefCount(1) {}
+    ~GenericMockObjectForVariant() override {}
+
+    tjs_uint AddRef() override { return ++RefCount; }
+    tjs_uint Release() override { return RefCount; } // Never destroy singleton
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) override {
+        if (result) {
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, iTJSDispatch2 *objthis) override {
+        if (result) {
+            if (membername && (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length")))) {
+                *result = tTJSVariant((tjs_int)0);
+                return TJS_S_OK;
+            }
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropSet(tjs_uint32, const tjs_char *, tjs_uint32 *, const tTJSVariant *, iTJSDispatch2 *) override { return TJS_S_OK; }
+
+    tjs_error CreateNew(tjs_uint32, const tjs_char *, tjs_uint32 *, iTJSDispatch2 **result, tjs_int, tTJSVariant **, iTJSDispatch2 *) override {
+        if (result) { this->AddRef(); *result = this; }
+        return TJS_S_OK;
+    }
+
+    tjs_error GetCount(tjs_int *result, const tjs_char *, tjs_uint32 *, iTJSDispatch2 *) override { if (result) *result = 0; return TJS_S_OK; }
+    tjs_error EnumMembers(tjs_uint32, tTJSVariantClosure *, iTJSDispatch2 *) override { return TJS_S_OK; }
+    tjs_error DeleteMember(tjs_uint32, const tjs_char *, tjs_uint32 *, iTJSDispatch2 *) override { return TJS_S_OK; }
+    tjs_error Invalidate(tjs_uint32, const tjs_char *, tjs_uint32 *, iTJSDispatch2 *) override { return TJS_S_OK; }
+    tjs_error IsValid(tjs_uint32, const tjs_char *, tjs_uint32 *, iTJSDispatch2 *) override { return TJS_S_TRUE; }
+    tjs_error IsInstanceOf(tjs_uint32, const tjs_char *, tjs_uint32 *, const tjs_char *, iTJSDispatch2 *) override { return TJS_S_TRUE; }
+    tjs_error Operation(tjs_uint32, const tjs_char *, tjs_uint32 *, tTJSVariant *result, const tTJSVariant *, iTJSDispatch2 *) override {
+        if (result) *result = tTJSVariant();
+        return TJS_S_OK;
+    }
+};
+
+iTJSDispatch2* TVPGetGlobalMockObject() {
+    static iTJSDispatch2* g_GlobalMockObject = new GenericMockObjectForVariant();
+    return g_GlobalMockObject;
+}
+
+tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
+    static tTJSVariantClosure_S clo = { TVPGetGlobalMockObject(), TVPGetGlobalMockObject() };
+    return clo;
+}
+
+#include <spdlog/spdlog.h>
 #include "tjsDebug.h"
 namespace TJS {
     //---------------------------------------------------------------------------
