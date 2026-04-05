@@ -510,11 +510,20 @@ void tTVPApplication::BringToFront() {
 	}
 }
 #endif
+std::string g_EngineApiGlobalException;
+std::string TVPEngineApi_GetGlobalException() { return g_EngineApiGlobalException; }
+void TVPEngineApi_SetGlobalException(const std::string& msg) { g_EngineApiGlobalException = msg; }
+
 void tTVPApplication::ShowException(const ttstr &e) {
     ttstr msg = e;
     msg += TJS_W("\n\n--- Recent Engine Logs ---\n");
     msg += TVPGetLastLog(20);
+#ifdef TVP_COMPILING_KIRIKIRI_SDL2
     TVPShowSimpleMessageBox(msg, TVPGetErrorDialogTitle());
+#else
+    TVPEngineApi_SetGlobalException(msg.AsStdString());
+    spdlog::error("FATAL SCRIPT EXCEPTION:\n{}", msg.AsStdString());
+#endif
     TVPSystemUninit();
     TVPExitApplication(0);
 }

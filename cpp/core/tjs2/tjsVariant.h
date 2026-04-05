@@ -222,9 +222,8 @@ namespace TJS {
                            tjs_uint32 *hint, tTJSVariant *result,
                            tjs_int numparams, tTJSVariant **param,
                            iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->FuncCall(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->FuncCall(
                 flag, membername, hint, result, numparams, param,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -233,9 +232,8 @@ namespace TJS {
                                 tTJSVariant *result, tjs_int numparams,
                                 tTJSVariant **param,
                                 iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->FuncCallByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->FuncCallByNum(
                 flag, num, result, numparams, param,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -243,9 +241,8 @@ namespace TJS {
         tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, tTJSVariant *result,
                           iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->PropGet(flag, membername, hint, result,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropGet(flag, membername, hint, result,
                                    ObjThis ? ObjThis
                                            : (objthis ? objthis : Object));
         }
@@ -253,9 +250,8 @@ namespace TJS {
         tjs_error PropGetByNum(tjs_uint32 flag, tjs_int num,
                                tTJSVariant *result,
                                iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->PropGetByNum(flag, num, result,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropGetByNum(flag, num, result,
                                         ObjThis ? ObjThis
                                                 : (objthis ? objthis : Object));
         }
@@ -263,9 +259,8 @@ namespace TJS {
         tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, const tTJSVariant *param,
                           iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->PropSet(flag, membername, hint, param,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSet(flag, membername, hint, param,
                                    ObjThis ? ObjThis
                                            : (objthis ? objthis : Object));
         }
@@ -273,97 +268,86 @@ namespace TJS {
         tjs_error PropSetByNum(tjs_uint32 flag, tjs_int num,
                                const tTJSVariant *param,
                                iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->PropSetByNum(flag, num, param,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSetByNum(flag, num, param,
                                         ObjThis ? ObjThis
                                                 : (objthis ? objthis : Object));
         }
 
         tjs_error GetCount(tjs_int *result, const tjs_char *membername,
                            tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->GetCount(result, membername, hint,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->GetCount(result, membername, hint,
                                     ObjThis ? ObjThis
                                             : (objthis ? objthis : Object));
         }
 
         tjs_error GetCountByNum(tjs_int *result, tjs_int num,
                                 iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->GetCountByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->GetCountByNum(
                 result, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
 
         tjs_error PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
                               const tTJSVariant *param,
                               iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->PropSetByVS(flag, membername, param,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSetByVS(flag, membername, param,
                                        ObjThis ? ObjThis
                                                : (objthis ? objthis : Object));
         }
 
         tjs_error EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
                               iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->EnumMembers(flag, callback,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->EnumMembers(flag, callback,
                                        ObjThis ? ObjThis
                                                : (objthis ? objthis : Object));
         }
 
         tjs_error DeleteMember(tjs_uint32 flag, const tjs_char *membername,
                                tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->DeleteMember(flag, membername, hint,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->DeleteMember(flag, membername, hint,
                                         ObjThis ? ObjThis
                                                 : (objthis ? objthis : Object));
         }
 
         tjs_error DeleteMemberByNum(tjs_uint32 flag, tjs_int num,
                                     iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->DeleteMemberByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->DeleteMemberByNum(
                 flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
 
         tjs_error Invalidate(tjs_uint32 flag, const tjs_char *membername,
                              tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->Invalidate(flag, membername, hint,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->Invalidate(flag, membername, hint,
                                       ObjThis ? ObjThis
                                               : (objthis ? objthis : Object));
         }
 
         tjs_error InvalidateByNum(tjs_uint32 flag, tjs_int num,
                                   iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->InvalidateByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->InvalidateByNum(
                 flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
 
         tjs_error IsValid(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->IsValid(flag, membername, hint,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsValid(flag, membername, hint,
                                    ObjThis ? ObjThis
                                            : (objthis ? objthis : Object));
         }
 
         tjs_error IsValidByNum(tjs_uint32 flag, tjs_int num,
                                iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->IsValidByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsValidByNum(
                 flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
 
@@ -371,9 +355,8 @@ namespace TJS {
                             tjs_uint32 *hint, iTJSDispatch2 **result,
                             tjs_int numparams, tTJSVariant **param,
                             iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->CreateNew(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->CreateNew(
                 flag, membername, hint, result, numparams, param,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -382,9 +365,8 @@ namespace TJS {
                                  iTJSDispatch2 **result, tjs_int numparams,
                                  tTJSVariant **param,
                                  iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->CreateNewByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->CreateNewByNum(
                 flag, num, result, numparams, param,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -397,9 +379,8 @@ namespace TJS {
         tjs_error IsInstanceOf(tjs_uint32 flag, const tjs_char *membername,
                                tjs_uint32 *hint, const tjs_char *classname,
                                iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->IsInstanceOf(flag, membername, hint, classname,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsInstanceOf(flag, membername, hint, classname,
                                         ObjThis ? ObjThis
                                                 : (objthis ? objthis : Object));
         }
@@ -407,9 +388,8 @@ namespace TJS {
         tjs_error IsInstanceOf(tjs_uint32 flag, tjs_int num,
                                tjs_char *classname,
                                iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->IsInstanceOfByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsInstanceOfByNum(
                 flag, num, classname,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -418,9 +398,8 @@ namespace TJS {
                             tjs_uint32 *hint, tTJSVariant *result,
                             const tTJSVariant *param,
                             iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->Operation(flag, membername, hint, result, param,
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->Operation(flag, membername, hint, result, param,
                                      ObjThis ? ObjThis
                                              : (objthis ? objthis : Object));
         }
@@ -428,9 +407,8 @@ namespace TJS {
         tjs_error OperationByNum(tjs_uint32 flag, tjs_int num,
                                  tTJSVariant *result, const tTJSVariant *param,
                                  iTJSDispatch2 *objthis) const {
-            if(!Object)
-                TJSThrowNullAccess();
-            return Object->OperationByNum(
+            
+            return (Object ? Object : TJS::TVPGetGlobalMockObject())->OperationByNum(
                 flag, num, result, param,
                 ObjThis ? ObjThis : (objthis ? objthis : Object));
         }
@@ -484,7 +462,7 @@ namespace TJS {
     private:
         void AddRefObject() {
             if(Object.Object)
-                Object.Object->AddRef();
+                Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
             if(Object.ObjThis)
                 Object.ObjThis->AddRef();
             // does not addref the string or octet
@@ -503,7 +481,7 @@ namespace TJS {
         void AddRefContent() {
             if(vt == tvtObject) {
                 if(Object.Object)
-                    Object.Object->AddRef();
+                    Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
                 if(Object.ObjThis)
                     Object.ObjThis->AddRef();
             } else {
@@ -687,7 +665,7 @@ namespace TJS {
         TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObject, ()) {
             if(vt == tvtObject) {
                 if(Object.Object)
-                    Object.Object->AddRef();
+                    Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
                 return Object.Object;
             }
             if(vt == tvtInteger && (Integer == 0 || Integer == 1))

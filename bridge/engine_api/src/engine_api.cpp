@@ -1178,10 +1178,15 @@ engine_result_t engine_tick(engine_handle_t handle, uint32_t delta_ms) {
 #endif
 
   if (TVPTerminated) {
-    return SetHandleErrorAndReturnLocked(
-        impl,
-        ENGINE_RESULT_INVALID_STATE,
-        "runtime has been terminated");
+    extern std::string TVPEngineApi_GetGlobalException();
+    std::string except_msg = TVPEngineApi_GetGlobalException();
+    if (!except_msg.empty()) {
+      return SetHandleErrorAndReturnLocked(
+          impl, ENGINE_RESULT_INTERNAL_ERROR, except_msg.c_str());
+    } else {
+      return SetHandleErrorAndReturnLocked(
+          impl, ENGINE_RESULT_INVALID_STATE, "runtime has been terminated");
+    }
   }
 
   // Frame rate limiting: when fps_limit > 0, skip rendering if not enough
