@@ -783,7 +783,43 @@ NCB_REGISTER_CLASS(Motion) {
     NCB_PROPERTY_RAW_CALLBACK_RO(D3DAdaptor, Motion_getD3DAdaptor, TJS_STATICMEMBER);
 }
 
-static void PreRegistCallback() {}
+class StaticGlobalMockFunc : public tTJSDispatch {
+    ttstr Name;
+public:
+    StaticGlobalMockFunc(const tjs_char* name) : Name(name) {}
+    ~StaticGlobalMockFunc() override {}
+
+    tjs_error TJS_INTF_METHOD FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            static iTJSDispatch2* dummy = new GenericMockObject();
+            dummy->AddRef();
+            *result = tTJSVariant(dummy, dummy);
+        }
+        return TJS_S_OK;
+    }
+};
+
+static void PreRegistCallback() {
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if (global) {
+        iTJSDispatch2 *func = new StaticGlobalMockFunc(TJS_W("SetSystemConfigDefaults"));
+        tTJSVariant val(func, func);
+        global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, global);
+        
+        tTJSVariant sysVar;
+        if(TJS_SUCCEEDED(global->PropGet(0, TJS_W("System"), nullptr, &sysVar, global)) && sysVar.Type() == tvtObject) {
+            iTJSDispatch2 *sysObj = sysVar.AsObjectNoAddRef();
+            if (sysObj) {
+                sysObj->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, sysObj);
+            }
+        }
+        func->Release();
+        global->Release();
+    }
+}
 
 static void PostUnregistCallback() {}
 
