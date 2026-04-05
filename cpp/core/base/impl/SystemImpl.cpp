@@ -647,11 +647,139 @@ extern void TVPDoSaveSystemVariables() {
     }
 }
 
+class GenericMockObjectLocal : public tTJSDispatch {
+    tjs_uint RefCount;
+public:
+    GenericMockObjectLocal() : RefCount(1) {}
+    ~GenericMockObjectLocal() override {}
+
+    tjs_uint AddRef() override { return ++RefCount; }
+    tjs_uint Release() override {
+        if (--RefCount == 0) {
+            delete this;
+            return 0;
+        }
+        return RefCount;
+    }
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, tTJSVariant *result,
+                      iTJSDispatch2 *objthis) override {
+        if (result) {
+            if (membername) {
+                if (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length"))) {
+                    *result = tTJSVariant((tjs_int)0);
+                    return TJS_S_OK;
+                }
+            }
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, const tTJSVariant *param,
+                      iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error CreateNew(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, iTJSDispatch2 **result,
+                        tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = this;
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error GetCount(tjs_int *result, const tjs_char *membername,
+                       tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        if (result) *result = 0;
+        return TJS_S_OK;
+    }
+
+    tjs_error EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
+                          iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error DeleteMember(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error Invalidate(tjs_uint32 flag, const tjs_char *membername,
+                         tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error IsValid(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error IsInstanceOf(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, const tjs_char *classname,
+                           iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error Operation(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, tTJSVariant *result,
+                        const tTJSVariant *param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) *result = tTJSVariant();
+        return TJS_S_OK;
+    }
+};
+
+class StaticGlobalMockFuncLocal : public tTJSDispatch {
+    ttstr Name;
+public:
+    StaticGlobalMockFuncLocal(const tjs_char* name) : Name(name) {}
+    ~StaticGlobalMockFuncLocal() override {}
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            static iTJSDispatch2* dummy = new GenericMockObjectLocal();
+            dummy->AddRef();
+            *result = tTJSVariant(dummy, dummy);
+        }
+        return TJS_S_OK;
+    }
+};
+
 //---------------------------------------------------------------------------
 // TVPCreateNativeClass_System
 //---------------------------------------------------------------------------
 tTJSNativeClass *TVPCreateNativeClass_System() {
     tTJSNC_System *cls = new tTJSNC_System();
+
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if (global) {
+        iTJSDispatch2 *func = new StaticGlobalMockFuncLocal(TJS_W("SetSystemConfigDefaults"));
+        tTJSVariant val(func, func);
+        global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, global);
+        cls->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, cls);
+        func->Release();
+    }
 
     // setup some platform-specific members
     //----------------------------------------------------------------------
