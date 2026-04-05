@@ -25,6 +25,9 @@ namespace TJS {
     TJS_EXP_FUNC_DEF(tjs_int32, TJSFindNativeClassID, (const tjs_char *name));
 
     TJS_EXP_FUNC_DEF(const tjs_char *, TJSFindNativeClassName, (tjs_int32 id));
+
+    // Global mock fallback
+    extern iTJSDispatch2* TVPGetGlobalMockObject();
     //---------------------------------------------------------------------------
 
     /*[*/
@@ -306,8 +309,7 @@ namespace TJS {
     if(!objthis)                                                               \
         return TJS_E_NATIVECLASSCRASH;                                         \
     {                                                                          \
-        extern iTJSDispatch2* TVPGetGlobalMockObject();                        \
-        if(objthis == TVPGetGlobalMockObject()) return TJS_S_OK;               \
+        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
     }                                                                          \
     typename *varname;                                                         \
     {                                                                          \
@@ -323,8 +325,7 @@ namespace TJS {
     if(!objthis)                                                               \
         return TJS_E_NATIVECLASSCRASH;                                         \
     {                                                                          \
-        extern iTJSDispatch2* TVPGetGlobalMockObject();                        \
-        if(objthis == TVPGetGlobalMockObject()) return TJS_S_OK;               \
+        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
     }                                                                          \
     typename *varname;                                                         \
     {                                                                          \
@@ -394,8 +395,7 @@ namespace TJS {
     typename *varname;                                                         \
     {                                                                          \
         tjs_error hr;                                                          \
-        extern iTJSDispatch2* TVPGetGlobalMockObject();                        \
-        if(objthis == TVPGetGlobalMockObject()) return TJS_S_OK;               \
+        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
         hr = objthis->NativeInstanceSupport(TJS_NIS_GETINSTANCE,               \
                                             TJS_NATIVE_CLASSID_NAME,           \
                                             (iTJSNativeInstance **)&varname);  \
