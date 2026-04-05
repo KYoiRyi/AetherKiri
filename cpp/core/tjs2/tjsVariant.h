@@ -464,7 +464,7 @@ namespace TJS {
     private:
         void AddRefObject() {
             if(Object.Object)
-                Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+                Object.Object->AddRef();
             if(Object.ObjThis)
                 Object.ObjThis->AddRef();
             // does not addref the string or octet
@@ -483,7 +483,7 @@ namespace TJS {
         void AddRefContent() {
             if(vt == tvtObject) {
                 if(Object.Object)
-                    Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+                    Object.Object->AddRef();
                 if(Object.ObjThis)
                     Object.ObjThis->AddRef();
             } else {
@@ -667,7 +667,7 @@ namespace TJS {
         TJS_CONST_METHOD_DEF(iTJSDispatch2 *, AsObject, ()) {
             if(vt == tvtObject) {
                 if(Object.Object)
-                    Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+                    Object.Object->AddRef();
                 return Object.Object;
             }
             if(vt == tvtInteger && (Integer == 0 || Integer == 1))

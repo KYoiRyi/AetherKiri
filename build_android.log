@@ -1,74 +1,76 @@
 
-[22:11:46] ================================================================
-[22:11:46]   KrKr2-Next Android Build  |  2026-04-04 22:11:46
-[22:11:46] ================================================================
-[22:11:46]   BuildType : Release
-[22:11:46]   ABI       : arm64-v8a
-[22:11:47]   Jobs      : 24
-[22:11:47]   Clean     : False
-[22:11:47]   ProjectRoot: D:\Program Files\Visual\KrKr2-Next
-[22:11:47] ================================================================
-[22:11:47] 
-[22:11:47] ==============================================================
-[22:11:47]   步骤 1/4 — 前置工具检测
-[22:11:47] ==============================================================
-[22:11:47]   >> 检测 git ...
-[22:11:47]          路径: C:\Program Files\Git\cmd\git.exe
-[22:11:47]   [OK] Git     : git version 2.53.0.windows.2
-[22:11:47]   >> 检测 cmake ...
-[22:11:47]          路径: D:\Program Files\Visual\dep\cmake\bin\cmake.exe
-[22:11:47]   [OK] CMake   : cmake version 4.3.1
-[22:11:47]   >> 检测 ninja ...
-[22:11:47]          路径: C:\ninja\ninja.exe
-[22:11:47]   [OK] Ninja   : v1.13.2
-[22:11:47]   >> 检测 Visual Studio / MSVC Build Tools ...
-[22:11:47]          vcpkg 在 Windows 编译 host 工具时必须使用 MSVC cl.exe
-[22:11:47]          vswhere 路径: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
-[22:11:47]          VS 安装目录: C:\Program Files\Microsoft Visual Studio\18\Community
-[22:11:47]   [OK] MSVC    : C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
-[22:11:47]   >> 检测 Java (JDK 17+) ...
-[22:11:47]          java 路径: D:\Program Files\Visual\dep\jdk21\bin\java.exe
-[22:11:47]   [OK] Java    : openjdk version "21.0.10" 2026-01-20 LTS
-[22:11:47]          Java 版本 21 >= 17 ✔
-[22:11:47]   >> 检测 Flutter SDK ...
-[22:11:47]          从 PATH 检测到: D:\Program Files\Visual\dep\flutter\bin\flutter.bat
-[22:11:47]          复用已存在的安全挂载点 (Junction): C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
-[22:11:47]          SDK 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
-[22:11:47]          flutter 可执行: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
-[22:11:48]   [OK] Flutter : Flutter 3.41.6 • channel stable • https://github.com/flutter/flutter.git Framewo
-[22:11:48]   >> 检测 Android SDK ...
-[22:11:48]          来源: 环境变量 ANDROID_HOME = C:\Users\Administrator\AppData\Local\Android\Sdk
-[22:11:48]   [OK] Android SDK : C:\Users\Administrator\AppData\Local\Android\Sdk
-[22:11:48]          adb: Android Debug Bridge version 1.0.41
-[22:11:48]   >> 检测 Android NDK ...
-[22:11:48]          来源: ANDROID_NDK_HOME = C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
-[22:11:48]   [OK] Android NDK : C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198 (Version: 30.0.14904198-beta1)
-[22:11:48]   [INFO] └─ 完成 (耗时 1s)
-[22:11:48] 
-[22:11:48] ==============================================================
-[22:11:48]   步骤 2/4 — 初始化 vcpkg 并安装 Android 依赖
-[22:11:48] ==============================================================
-[22:11:48]   >> 定位 vcpkg ...
-[22:11:48]   [WARN] 检测到终端环境变量或系统路径存在空格，为彻底防止 MSYS2 环境崩溃，
-[22:11:48]   [WARN] 已强制将 vcpkg 工作区转入纯净目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[22:11:48]          使用无空格安全目录 vcpkg: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[22:11:48]   [OK] vcpkg 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[22:11:48]          vcpkg.exe 已存在，跳过 bootstrap
-[22:11:48]   [OK] vcpkg   : vcpkg package management program version 2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c
-[22:11:48]          可执行路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe
-[22:11:48]          已设置 VCPKG_ROOT=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[22:11:48]          已设置 ANDROID_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk
-[22:11:48]          已设置 ANDROID_NDK_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
-[22:11:48]          已设置 VCPKG_BUILD_TYPE=release (仅编译 Release，节省一半耗时)
-[22:11:48]          已生成强制 Release 重写规则的临时 Triplet 目录: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
-[22:11:48]          overlay-ports: D:\Program Files\Visual\KrKr2-Next\vcpkg\ports (7 个自定义 port)
-[22:11:48]          overlay-triplets: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets (7 个自定义 triplet)
-[22:11:48]   >> 安装 vcpkg 依赖 — triplet: arm64-android (ABI: arm64-v8a)
-[22:11:48]   [WARN] 检测到旧的 ANGLE 构建缓存，将清理以确保 overlay port 生效...
-[22:11:48]          已删除: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\buildtrees\angle
-[22:11:48]          vcpkg 参数: install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed --x-manifest-root=D:\Program Files\Visual\KrKr2-Next --overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports --overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
-[22:11:48]          注意: 首次执行将从源码编译所有依赖，可能耗时 1-2 小时。
-[22:11:48]          CMD: "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat" && cd /d "D:\Program Files\Visual\KrKr2-Next" && "C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe" install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed "--x-manifest-root=D:\Program Files\Visual\KrKr2-Next" "--overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports" "--overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets" 2>&1
+[16:13:10] ================================================================
+[16:13:10]   KrKr2-Next Android Build  |  2026-04-05 16:13:10
+[16:13:10] ================================================================
+[16:13:10]   BuildType : Release
+[16:13:10]   ABI       : arm64-v8a
+[16:13:10]   Jobs      : 24
+[16:13:10]   Clean     : False
+[16:13:10]   ProjectRoot: D:\Program Files\Visual\KrKr2-Next
+[16:13:10] ================================================================
+[16:13:10] 
+[16:13:10] ==============================================================
+[16:13:10]   步骤 1/4 — 前置工具检测
+[16:13:10] ==============================================================
+[16:13:10]   >> 检测 git ...
+[16:13:10]          路径: C:\Program Files\Git\cmd\git.exe
+[16:13:10]   [OK] Git     : git version 2.53.0.windows.2
+[16:13:10]   >> 检测 cmake ...
+[16:13:10]          路径: D:\Program Files\Visual\dep\cmake\bin\cmake.exe
+[16:13:11]   [OK] CMake   : cmake version 4.3.1
+[16:13:11]   >> 检测 ninja ...
+[16:13:11]          路径: C:\ninja\ninja.exe
+[16:13:11]   [OK] Ninja   : v1.13.2
+[16:13:11]   >> 检测 Visual Studio / MSVC Build Tools ...
+[16:13:11]          vcpkg 在 Windows 编译 host 工具时必须使用 MSVC cl.exe
+[16:13:11]          vswhere 路径: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
+[16:13:11]          VS 安装目录: C:\Program Files\Microsoft Visual Studio\18\Community
+[16:13:11]   [OK] MSVC    : C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
+[16:13:11]   >> 检测 Java (JDK 17+) ...
+[16:13:11]          java 路径: D:\Program Files\Visual\dep\jdk21\bin\java.exe
+[16:13:11]   [OK] Java    : openjdk version "21.0.10" 2026-01-20 LTS
+[16:13:11]          Java 版本 21 >= 17 ✔
+[16:13:11]   >> 检测 Flutter SDK ...
+[16:13:11]          从 PATH 检测到: D:\Program Files\Visual\dep\flutter\bin\flutter.bat
+[16:13:11]          复用已存在的安全挂载点 (Junction): C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[16:13:11]          SDK 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[16:13:11]          flutter 可执行: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[16:13:12]   [OK] Flutter : Flutter 3.41.6 • channel stable • https://github.com/flutter/flutter.git Framewo
+[16:13:12]   >> 检测 Android SDK ...
+[16:13:12]          检查默认路径: C:\Users\Administrator\AppData\Local\Android\Sdk
+[16:13:12]          找到!
+[16:13:12]   [OK] Android SDK : C:\Users\Administrator\AppData\Local\Android\Sdk
+[16:13:12]          adb: Android Debug Bridge version 1.0.41
+[16:13:12]   >> 检测 Android NDK ...
+[16:13:12]          扫描 NDK 目录: C:\Users\Administrator\AppData\Local\Android\Sdk\ndk
+[16:13:12]          选取最新版本: 30.0.14904198
+[16:13:12]   [OK] Android NDK : C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198 (Version: 30.0.14904198-beta1)
+[16:13:12]   [INFO] └─ 完成 (耗时 2s)
+[16:13:12] 
+[16:13:12] ==============================================================
+[16:13:12]   步骤 2/4 — 初始化 vcpkg 并安装 Android 依赖
+[16:13:12] ==============================================================
+[16:13:12]   >> 定位 vcpkg ...
+[16:13:12]   [WARN] 检测到终端环境变量或系统路径存在空格，为彻底防止 MSYS2 环境崩溃，
+[16:13:12]   [WARN] 已强制将 vcpkg 工作区转入纯净目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[16:13:12]          使用无空格安全目录 vcpkg: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[16:13:12]   [OK] vcpkg 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[16:13:12]          vcpkg.exe 已存在，跳过 bootstrap
+[16:13:12]   [OK] vcpkg   : vcpkg package management program version 2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c
+[16:13:13]          可执行路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe
+[16:13:13]          已设置 VCPKG_ROOT=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[16:13:13]          已设置 ANDROID_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk
+[16:13:13]          已设置 ANDROID_NDK_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
+[16:13:13]          已设置 VCPKG_BUILD_TYPE=release (仅编译 Release，节省一半耗时)
+[16:13:13]          已生成强制 Release 重写规则的临时 Triplet 目录: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[16:13:13]          overlay-ports: D:\Program Files\Visual\KrKr2-Next\vcpkg\ports (7 个自定义 port)
+[16:13:13]          overlay-triplets: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets (7 个自定义 triplet)
+[16:13:13]   >> 安装 vcpkg 依赖 — triplet: arm64-android (ABI: arm64-v8a)
+[16:13:13]   [WARN] 检测到旧的 ANGLE 构建缓存，将清理以确保 overlay port 生效...
+[16:13:13]          已删除: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\buildtrees\angle
+[16:13:13]          vcpkg 参数: install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed --x-manifest-root=D:\Program Files\Visual\KrKr2-Next --overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports --overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[16:13:13]          注意: 首次执行将从源码编译所有依赖，可能耗时 1-2 小时。
+[16:13:13]          CMD: "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat" && cd /d "D:\Program Files\Visual\KrKr2-Next" && "C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe" install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed "--x-manifest-root=D:\Program Files\Visual\KrKr2-Next" "--overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports" "--overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets" 2>&1
 **********************************************************************
 ** Visual Studio 2026 Developer Command Prompt v18.4.2
 ** Copyright (c) 2026 Microsoft Corporation
@@ -495,22 +497,22 @@ unrar is compatible with the CMake Find Module:
 
   find_package(unrar CONFIG REQUIRED)
   target_link_libraries(main PRIVATE unrar::unrar)
-All requested installations completed successfully in: 1.28 ms
-[22:11:56]   [OK] vcpkg 依赖安装完成: arm64-android  (耗时 8s)
-[22:11:56]          已安装库文件数: 102 (.a / .so)
-[22:11:56]   [INFO] └─ 完成 (耗时 8s)
-[22:11:56] 
-[22:11:56] ==============================================================
-[22:11:56]   步骤 3/4 — 构建 Flutter Android APK (Release)
-[22:11:56] ==============================================================
-[22:11:56]   >> 写入 android/local.properties ...
-[22:11:56]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\local.properties
-[22:11:56]          sdk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk
-[22:11:56]          ndk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\ndk\\30.0.14904198
-[22:11:56]          flutter.sdk=C:\\Users\\Administrator\\AppData\\Local\\KrKr2-Next-flutter-safe
-[22:11:56]   [OK] local.properties 已写入
-[22:11:56]   >> flutter pub get — 同步 Dart 依赖 ...
-[22:11:56]          工作目录: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app
+All requested installations completed successfully in: 1.42 ms
+[16:13:26]   [OK] vcpkg 依赖安装完成: arm64-android  (耗时 13s)
+[16:13:26]          已安装库文件数: 102 (.a / .so)
+[16:13:26]   [INFO] └─ 完成 (耗时 13s)
+[16:13:26] 
+[16:13:26] ==============================================================
+[16:13:26]   步骤 3/4 — 构建 Flutter Android APK (Release)
+[16:13:26] ==============================================================
+[16:13:26]   >> 写入 android/local.properties ...
+[16:13:26]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\local.properties
+[16:13:26]          sdk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk
+[16:13:26]          ndk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\ndk\\30.0.14904198
+[16:13:26]          flutter.sdk=C:\\Users\\Administrator\\AppData\\Local\\KrKr2-Next-flutter-safe
+[16:13:26]   [OK] local.properties 已写入
+[16:13:26]   >> flutter pub get — 同步 Dart 依赖 ...
+[16:13:26]          工作目录: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app
 Resolving dependencies...
 Downloading packages...
   async 2.13.0 (2.13.1 available)
@@ -534,45 +536,1013 @@ Downloading packages...
 Got dependencies!
 18 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
-[22:11:58]   [OK] flutter pub get 完成 (耗时 2s)
-[22:11:58]   >> flutter build apk ...
-[22:11:58]          目标平台  : android-arm64
-[22:11:58]          编译类型  : release
-[22:11:58]          flutter 路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
-[22:11:58]          注意: 此步骤包含 Gradle 下载、CMake 交叉编译，首次可能耗时 30-60 分钟。
-[22:11:58]          CMD: "C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat" build apk --release --target-platform android-arm64 2>&1
+[16:13:30]   [OK] flutter pub get 完成 (耗时 4s)
+[16:13:30]   >> flutter build apk ...
+[16:13:30]          目标平台  : android-arm64
+[16:13:30]          编译类型  : release
+[16:13:30]          flutter 路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[16:13:30]          注意: 此步骤包含 Gradle 下载、CMake 交叉编译，首次可能耗时 30-60 分钟。
+[16:13:30]          CMD: "C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat" build apk --release --target-platform android-arm64 2>&1
 Running Gradle task 'assembleRelease'...                        
-Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 7352 bytes (99.6% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
-Running Gradle task 'assembleRelease'...                           41.8s
-√ Built build\app\outputs\flutter-apk\app-release.apk (67.4MB)
-[22:12:42]   [OK] flutter build apk 完成 (耗时 43s)
-[22:12:42]   [INFO] └─ 完成 (耗时 46s)
-[22:12:42] 
-[22:12:42] ==============================================================
-[22:12:42]   步骤 4/4 — 验证输出 APK
-[22:12:42] ==============================================================
-[22:12:42]   >> 查找 APK 文件 ...
-[22:12:42]          预期路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
-[22:12:42]          已找到预期路径
-[22:12:42]   [OK] APK 文件已生成
-[22:12:42]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
-[22:12:42]          大小: 67.4 MB
-[22:12:42]          时间: 2026-04-04 22:12:41
-[22:12:42]   >> 检查 APK 内容（原生库）...
-[22:12:42]   [OK] APK 中包含 9 个原生库 (.so)
-[22:12:42]            ✔ lib/arm64-v8a/libSDL2.so
-[22:12:42]            ✔ lib/arm64-v8a/libapp.so
-[22:12:42]            ✔ lib/arm64-v8a/libc++_shared.so
-[22:12:42]            ✔ lib/arm64-v8a/libdatastore_shared_counter.so
-[22:12:42]            ✔ lib/arm64-v8a/libengine_api.so
-[22:12:42]            ✔ lib/arm64-v8a/libflutter.so
-[22:12:42]            ✔ lib/arm64-v8a/libomp.so
-[22:12:42]            ✔ lib/armeabi-v7a/libdatastore_shared_counter.so
-[22:12:42]            ✔ lib/x86_64/libdatastore_shared_counter.so
-[22:12:42]   [INFO] └─ 完成 (耗时 0s)
-[22:12:42] 
-[22:12:42] ================================================================
-[22:12:42]   BUILD SUCCESS  |  APK: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk  |  Size: 67.4 MB
-[22:12:42]   结束时间: 2026-04-04 22:12:42
-[22:12:42]   总耗时: 55s
-[22:12:42] ================================================================
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 7476 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:buildCMakeRelease[arm64-v8a]'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\.cxx\release\404s3f1w\arm64-v8a'
+  [1/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMT19937ar-cok.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMT19937ar-cok.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMT19937ar-cok.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsMT19937ar-cok.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMT19937ar-cok.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMT19937ar-cok.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMT19937ar-cok.cpp:53:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMT19937ar-cok.cpp:53:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [2/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsNative.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsNative.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsNative.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsNative.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsNative.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsNative.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsNative.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsNative.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [3/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterface.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterface.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterface.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsInterface.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterface.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterface.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterface.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterface.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [4/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMath.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMath.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMath.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsMath.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMath.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMath.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMath.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMath.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [5/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMessage.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMessage.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMessage.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsMessage.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsMessage.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMessage.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMessage.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsMessage.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [6/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsObject.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsObject.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsObject.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsObject.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsObject.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsObject.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsObject.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsObject.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [7/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsException.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsException.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsException.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsException.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsException.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsException.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsException.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsException.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [8/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRegExp.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRegExp.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRegExp.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsRegExp.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRegExp.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRegExp.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRegExp.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRegExp.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [9/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDictionary.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDictionary.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDictionary.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsDictionary.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDictionary.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDictionary.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDictionary.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDictionary.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDictionary.cpp:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:220:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    220 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:281:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    281 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:341:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    341 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:368:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    368 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  5 warnings and 6 errors generated.
+  [10/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjspp.tab.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjspp.tab.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjspp.tab.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\gen\tjspp.tab.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjspp.tab.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen/tjspp.tab.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/bison/tjspp.y:14:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/bison/tjspp.y:14:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [11/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRandomGenerator.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRandomGenerator.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRandomGenerator.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsRandomGenerator.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsRandomGenerator.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRandomGenerator.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRandomGenerator.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsRandomGenerator.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [12/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDate.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDate.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDate.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsDate.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDate.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDate.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDate.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDate.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [13/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsBinarySerializer.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsBinarySerializer.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsBinarySerializer.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsBinarySerializer.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsBinarySerializer.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.cpp:9:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.cpp:9:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.cpp:12:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:220:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    220 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:281:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    281 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:341:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    341 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:368:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    368 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  5 warnings and 6 errors generated.
+  [14/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsUtils.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsUtils.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsUtils.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsUtils.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsUtils.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsUtils.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsUtils.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsUtils.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  1 warning and 6 errors generated.
+  [15/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsLex.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsLex.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsLex.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsLex.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsLex.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsLex.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsLex.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsLex.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsLex.cpp:13:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [16/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjs.tab.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjs.tab.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjs.tab.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\gen\tjs.tab.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/gen/tjs.tab.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen/tjs.tab.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/bison/tjs.y:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.h:16:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/bison/tjs.y:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.h:16:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/bison/tjs.y:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [17/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDebug.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDebug.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDebug.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsDebug.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDebug.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDebug.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDebug.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDebug.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDebug.cpp:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [18/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsVariantString.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsVariantString.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsVariantString.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsVariantString.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsVariantString.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:451:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    451 |         if(!this) return;
+        |            ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:462:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    462 |         if(!this)
+        |            ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:474:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    474 |         if(!this)
+        |            ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:486:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    486 |         if(!this) {
+        |            ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:500:18: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    500 |         return (!this) ? (nullptr) : (LongString ? LongString : ShortString);
+        |                 ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:505:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    505 |         if(!this)
+        |            ~^~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariantString.cpp:512:13: warning: 'this' pointer cannot be null in well-defined C++ code; pointer may be assumed to always convert to true [-Wundefined-bool-conversion]
+    512 |         if(!this)
+        |            ~^~~~
+  8 warnings and 6 errors generated.
+  [19/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsConstArrayData.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsConstArrayData.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsConstArrayData.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsConstArrayData.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsConstArrayData.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsConstArrayData.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsConstArrayData.cpp:9:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsConstArrayData.cpp:9:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsConstArrayData.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsConstArrayData.h:16:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.h:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [20/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsArray.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsArray.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsArray.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsArray.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsArray.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsArray.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsArray.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsArray.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsArray.cpp:20:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:220:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    220 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:281:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    281 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:341:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    341 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:368:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    368 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  5 warnings and 6 errors generated.
+  [21/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDisassemble.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDisassemble.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDisassemble.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsDisassemble.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsDisassemble.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDisassemble.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDisassemble.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDisassemble.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsDisassemble.cpp:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [22/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjs.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjs.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjs.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjs.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjs.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.cpp:18:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.h:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.cpp:34:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:220:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    220 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:281:27: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    281 |             } else if(len <= ULONG_MAX) {
+        |                       ~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:341:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    341 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsBinarySerializer.h:368:29: warning: result of comparison of constant 18446744073709551615 with expression of type 'tjs_uint' (aka 'unsigned int') is always true [-Wtautological-constant-out-of-range-compare]
+    368 |             } else if(count <= ULONG_MAX) {
+        |                       ~~~~~ ^  ~~~~~~~~~
+  6 warnings and 6 errors generated.
+  [23/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsScriptBlock.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsScriptBlock.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsScriptBlock.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsScriptBlock.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsScriptBlock.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.h:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [24/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeExec.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeExec.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeExec.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsInterCodeExec.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeExec.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeExec.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeExec.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeExec.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeExec.cpp:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [25/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsError.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsError.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsError.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsError.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsError.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsError.cpp:13:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.h:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  [26/671] Building CXX object cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeGen.cpp.o
+  FAILED: [code=1] cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeGen.cpp.o 
+  C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -DBOOST_LOCALE_NO_LIB -DBOOST_LOCALE_STATIC_LINK -DNDEBUG -DONIG_STATIC -DSPDLOG_COMPILED_LIB -DSPDLOG_FMT_EXTERNAL -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/common" -I"D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2" -I"D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/.cxx/release/404s3f1w/arm64-v8a/cpp/core/tjs2/gen" -isystem C:/Users/Administrator/AppData/Local/KrKr2-Next-vcpkg-safe/installed/arm64-android/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -fPIC -Wno-inconsistent-missing-override -fno-delete-null-pointer-checks -pthread -MD -MT cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeGen.cpp.o -MF cpp\core\tjs2\CMakeFiles\tjs2.dir\tjsInterCodeGen.cpp.o.d -o cpp/core/tjs2/CMakeFiles/tjs2.dir/tjsInterCodeGen.cpp.o -c "D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.cpp"
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.cpp:11:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:24: error: expected unqualified-id
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                        ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:467:25: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    467 |                 Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                         ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:28: error: expected unqualified-id
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:486:29: error: value of type 'tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    486 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:28: error: expected unqualified-id
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                            ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:670:29: error: value of type 'const tTJSVariantClosure_S' is not contextually convertible to 'bool'
+    670 |                     Object.(Object ? Object : TJS::TVPGetGlobalMockObject())->AddRef();
+        |                             ^~~~~~
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.cpp:19:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings and 6 errors generated.
+  ninja: build stopped: subcommand failed.
+
+  C++ build system [build] failed while executing:
+      @echo off
+      "C:\\ninja\\ninja.exe" ^
+        -C ^
+        "D:\\Program Files\\Visual\\KrKr2-Next\\apps\\flutter_app\\build\\.cxx\\release\\404s3f1w\\arm64-v8a" ^
+        engine_api
+    from D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\app
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 48s
+Running Gradle task 'assembleRelease'...                           48.4s
+Gradle task assembleRelease failed with exit code 1
+[16:14:28]   [ERROR] flutter build apk 失败 (耗时 58s)。
+       详情: D:\Program Files\Visual\KrKr2-Next\build_android.log
