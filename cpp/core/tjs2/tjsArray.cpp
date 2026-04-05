@@ -1072,6 +1072,11 @@ tjs_error tTJSArrayNI::Construct(tjs_int numparams, tTJSVariant **params,
 void tTJSArrayNI::Assign(iTJSDispatch2 *dsp) {
     // copy members from "dsp" to "Owner"
 
+    if(dsp == TJS::TVPGetGlobalMockObject()) {
+        Items.clear();
+        return;
+    }
+
     // determin dsp's object type
     tTJSArrayNI *arrayni = nullptr;
     if(TJS_SUCCEEDED(
@@ -1274,6 +1279,8 @@ void tTJSArrayNI::SaveStructuredBinaryForObject(
 void tTJSArrayNI::AssignStructure(iTJSDispatch2 *dsp,
                                   std::vector<iTJSDispatch2 *> &stack) {
     // assign structured data from dsp
+    if(dsp == TJS::TVPGetGlobalMockObject()) return;
+
     tTJSArrayNI *arrayni = nullptr;
     if(TJS_SUCCEEDED(
            dsp->NativeInstanceSupport(TJS_NIS_GETINSTANCE, ClassID_Array,

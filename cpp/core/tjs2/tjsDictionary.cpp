@@ -353,6 +353,11 @@ namespace TJS {
     void tTJSDictionaryNI::Assign(iTJSDispatch2 *dsp, bool clear) {
         // copy members from "dsp" to "Owner"
 
+        if(dsp == TJS::TVPGetGlobalMockObject()) {
+            if(clear) Owner->Clear();
+            return;
+        }
+
         // determin dsp's object type
         tTJSArrayNI *arrayni = nullptr;
         if(dsp &&
@@ -576,6 +581,8 @@ namespace TJS {
     tTJSDictionaryNI::AssignStructure(iTJSDispatch2 *dsp,
                                       std::vector<iTJSDispatch2 *> &stack) {
         // assign structured data from dsp
+        if(dsp == TJS::TVPGetGlobalMockObject()) return;
+
         tTJSArrayNI *dicni = nullptr;
         if(TJS_SUCCEEDED(dsp->NativeInstanceSupport(
                TJS_NIS_GETINSTANCE, ClassID_Dictionary,

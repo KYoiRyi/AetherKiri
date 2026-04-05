@@ -1154,7 +1154,24 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     side: const BorderSide(color: Colors.white30),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(
+                      ClipboardData(text: _errorMessage ?? 'Unknown error'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Error copied to clipboard')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: const Text('Copy'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white70,
+                    side: const BorderSide(color: Colors.white30),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 FilledButton.icon(
                   onPressed: () {
                     setState(() {
