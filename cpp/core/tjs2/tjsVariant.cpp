@@ -40,9 +40,16 @@ public:
 
     tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, iTJSDispatch2 *objthis) override {
         if (result) {
-            if (membername && (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length")))) {
-                *result = tTJSVariant((tjs_int)0);
-                return TJS_S_OK;
+            if (membername) {
+                if (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length")) ||
+                    !TJS_strcmp(membername, TJS_W("width")) || !TJS_strcmp(membername, TJS_W("height")) ||
+                    !TJS_strcmp(membername, TJS_W("imageWidth")) || !TJS_strcmp(membername, TJS_W("imageHeight")) ||
+                    !TJS_strcmp(membername, TJS_W("left")) || !TJS_strcmp(membername, TJS_W("top")) ||
+                    !TJS_strcmp(membername, TJS_W("x")) || !TJS_strcmp(membername, TJS_W("y")) ||
+                    !TJS_strcmp(membername, TJS_W("opacity")) || !TJS_strcmp(membername, TJS_W("visible"))) {
+                    *result = tTJSVariant((tjs_int)0);
+                    return TJS_S_OK;
+                }
             }
             *result = tTJSVariant(this, this);
         }
