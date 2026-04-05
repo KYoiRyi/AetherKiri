@@ -17,6 +17,10 @@
 #include "tjsUtils.h"
 #include "tjs.h"
 
+#include <spdlog/spdlog.h>
+#include "tjsDebug.h"
+namespace TJS {
+
 // --- Global Mock Fallback for Void -> Object Conversions ---
 class GenericMockObjectForVariant : public tTJSDispatch {
     tjs_uint RefCount;
@@ -74,9 +78,6 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
     return clo;
 }
 
-#include <spdlog/spdlog.h>
-#include "tjsDebug.h"
-namespace TJS {
     //---------------------------------------------------------------------------
     // tTJSVariantOctet related
     //---------------------------------------------------------------------------
