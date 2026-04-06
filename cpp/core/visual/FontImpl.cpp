@@ -277,24 +277,24 @@ void TVPInitFontNames() {
             };
 
 #if defined(__ANDROID__)
-            if(tryLoadFontDirect("/system/fonts/NotoSansCJK-Regular.ttc",
-                                 "/system/fonts/NotoSansCJK-Regular.ttc"))
-                break;
             if(tryLoadFontDirect("/system/fonts/NotoSansSC-Regular.otf",
                                  "/system/fonts/NotoSansSC-Regular.otf"))
                 break;
             if(tryLoadFontDirect("/system/fonts/DroidSansFallback.ttf",
                                  "/system/fonts/DroidSansFallback.ttf"))
                 break;
+            if(tryLoadFontDirect("/system/fonts/NotoSansCJK-Regular.ttc",
+                                 "/system/fonts/NotoSansCJK-Regular.ttc"))
+                break;
 #endif
 
 #if defined(__APPLE__) && TARGET_OS_IOS
             // iOS: use CoreText API to get system font data (sandbox-safe).
             {
-                // Preferred font names in order: Hiragino Sans (JP), PingFang SC (CN)
+                // Preferred font names in order: PingFang SC (CN), Hiragino Sans (JP)
                 static const char *preferredFonts[] = {
-                    "HiraginoSans-W3",
                     "PingFangSC-Regular",
+                    "HiraginoSans-W3",
                     "HiraMinProN-W3",
                     nullptr
                 };
