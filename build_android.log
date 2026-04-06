@@ -1,76 +1,74 @@
 
-[09:06:09] ================================================================
-[09:06:09]   KrKr2-Next Android Build  |  2026-04-06 09:06:09
-[09:06:09] ================================================================
-[09:06:09]   BuildType : Release
-[09:06:09]   ABI       : arm64-v8a
-[09:06:09]   Jobs      : 24
-[09:06:09]   Clean     : False
-[09:06:09]   ProjectRoot: D:\Program Files\Visual\KrKr2-Next
-[09:06:09] ================================================================
-[09:06:09] 
-[09:06:09] ==============================================================
-[09:06:09]   步骤 1/4 — 前置工具检测
-[09:06:09] ==============================================================
-[09:06:09]   >> 检测 git ...
-[09:06:09]          路径: C:\Program Files\Git\cmd\git.exe
-[09:06:09]   [OK] Git     : git version 2.53.0.windows.2
-[09:06:09]   >> 检测 cmake ...
-[09:06:09]          路径: D:\Program Files\Visual\dep\cmake\bin\cmake.exe
-[09:06:09]   [OK] CMake   : cmake version 4.3.1
-[09:06:09]   >> 检测 ninja ...
-[09:06:09]          路径: C:\ninja\ninja.exe
-[09:06:09]   [OK] Ninja   : v1.13.2
-[09:06:09]   >> 检测 Visual Studio / MSVC Build Tools ...
-[09:06:09]          vcpkg 在 Windows 编译 host 工具时必须使用 MSVC cl.exe
-[09:06:09]          vswhere 路径: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
-[09:06:09]          VS 安装目录: C:\Program Files\Microsoft Visual Studio\18\Community
-[09:06:09]   [OK] MSVC    : C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
-[09:06:09]   >> 检测 Java (JDK 17+) ...
-[09:06:09]          java 路径: D:\Program Files\Visual\dep\jdk21\bin\java.exe
-[09:06:09]   [OK] Java    : openjdk version "21.0.10" 2026-01-20 LTS
-[09:06:09]          Java 版本 21 >= 17 ✔
-[09:06:09]   >> 检测 Flutter SDK ...
-[09:06:09]          从 PATH 检测到: D:\Program Files\Visual\dep\flutter\bin\flutter.bat
-[09:06:09]          复用已存在的安全挂载点 (Junction): C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
-[09:06:09]          SDK 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
-[09:06:09]          flutter 可执行: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
-[09:06:11]   [OK] Flutter : Flutter 3.41.6 • channel stable • https://github.com/flutter/flutter.git Framewo
-[09:06:11]   >> 检测 Android SDK ...
-[09:06:11]          检查默认路径: C:\Users\Administrator\AppData\Local\Android\Sdk
-[09:06:11]          找到!
-[09:06:11]   [OK] Android SDK : C:\Users\Administrator\AppData\Local\Android\Sdk
-[09:06:11]          adb: Android Debug Bridge version 1.0.41
-[09:06:11]   >> 检测 Android NDK ...
-[09:06:11]          扫描 NDK 目录: C:\Users\Administrator\AppData\Local\Android\Sdk\ndk
-[09:06:11]          选取最新版本: 30.0.14904198
-[09:06:11]   [OK] Android NDK : C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198 (Version: 30.0.14904198-beta1)
-[09:06:11]   [INFO] └─ 完成 (耗时 2s)
-[09:06:11] 
-[09:06:11] ==============================================================
-[09:06:11]   步骤 2/4 — 初始化 vcpkg 并安装 Android 依赖
-[09:06:11] ==============================================================
-[09:06:11]   >> 定位 vcpkg ...
-[09:06:11]   [WARN] 检测到终端环境变量或系统路径存在空格，为彻底防止 MSYS2 环境崩溃，
-[09:06:11]   [WARN] 已强制将 vcpkg 工作区转入纯净目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[09:06:11]          使用无空格安全目录 vcpkg: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[09:06:11]   [OK] vcpkg 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[09:06:11]          vcpkg.exe 已存在，跳过 bootstrap
-[09:06:11]   [OK] vcpkg   : vcpkg package management program version 2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c
-[09:06:11]          可执行路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe
-[09:06:11]          已设置 VCPKG_ROOT=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
-[09:06:11]          已设置 ANDROID_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk
-[09:06:11]          已设置 ANDROID_NDK_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
-[09:06:11]          已设置 VCPKG_BUILD_TYPE=release (仅编译 Release，节省一半耗时)
-[09:06:11]          已生成强制 Release 重写规则的临时 Triplet 目录: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
-[09:06:11]          overlay-ports: D:\Program Files\Visual\KrKr2-Next\vcpkg\ports (7 个自定义 port)
-[09:06:11]          overlay-triplets: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets (7 个自定义 triplet)
-[09:06:11]   >> 安装 vcpkg 依赖 — triplet: arm64-android (ABI: arm64-v8a)
-[09:06:11]   [WARN] 检测到旧的 ANGLE 构建缓存，将清理以确保 overlay port 生效...
-[09:06:11]          已删除: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\buildtrees\angle
-[09:06:11]          vcpkg 参数: install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed --x-manifest-root=D:\Program Files\Visual\KrKr2-Next --overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports --overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
-[09:06:11]          注意: 首次执行将从源码编译所有依赖，可能耗时 1-2 小时。
-[09:06:11]          CMD: "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat" && cd /d "D:\Program Files\Visual\KrKr2-Next" && "C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe" install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed "--x-manifest-root=D:\Program Files\Visual\KrKr2-Next" "--overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports" "--overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets" 2>&1
+[09:20:56] ================================================================
+[09:20:56]   KrKr2-Next Android Build  |  2026-04-06 09:20:56
+[09:20:56] ================================================================
+[09:20:56]   BuildType : Release
+[09:20:56]   ABI       : arm64-v8a
+[09:20:56]   Jobs      : 24
+[09:20:56]   Clean     : False
+[09:20:56]   ProjectRoot: D:\Program Files\Visual\KrKr2-Next
+[09:20:56] ================================================================
+[09:20:56] 
+[09:20:56] ==============================================================
+[09:20:56]   步骤 1/4 — 前置工具检测
+[09:20:56] ==============================================================
+[09:20:56]   >> 检测 git ...
+[09:20:56]          路径: C:\Program Files\Git\cmd\git.exe
+[09:20:56]   [OK] Git     : git version 2.53.0.windows.2
+[09:20:56]   >> 检测 cmake ...
+[09:20:56]          路径: D:\Program Files\Visual\dep\cmake\bin\cmake.exe
+[09:20:56]   [OK] CMake   : cmake version 4.3.1
+[09:20:56]   >> 检测 ninja ...
+[09:20:56]          路径: C:\ninja\ninja.exe
+[09:20:56]   [OK] Ninja   : v1.13.2
+[09:20:56]   >> 检测 Visual Studio / MSVC Build Tools ...
+[09:20:56]          vcpkg 在 Windows 编译 host 工具时必须使用 MSVC cl.exe
+[09:20:56]          vswhere 路径: C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe
+[09:20:56]          VS 安装目录: C:\Program Files\Microsoft Visual Studio\18\Community
+[09:20:56]   [OK] MSVC    : C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat
+[09:20:56]   >> 检测 Java (JDK 17+) ...
+[09:20:56]          java 路径: D:\Program Files\Visual\dep\jdk21\bin\java.exe
+[09:20:56]   [OK] Java    : openjdk version "21.0.10" 2026-01-20 LTS
+[09:20:56]          Java 版本 21 >= 17 ✔
+[09:20:56]   >> 检测 Flutter SDK ...
+[09:20:56]          从 PATH 检测到: D:\Program Files\Visual\dep\flutter\bin\flutter.bat
+[09:20:56]          复用已存在的安全挂载点 (Junction): C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[09:20:56]          SDK 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe
+[09:20:56]          flutter 可执行: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[09:20:57]   [OK] Flutter : Flutter 3.41.6 • channel stable • https://github.com/flutter/flutter.git Framewo
+[09:20:57]   >> 检测 Android SDK ...
+[09:20:57]          来源: 环境变量 ANDROID_HOME = C:\Users\Administrator\AppData\Local\Android\Sdk
+[09:20:57]   [OK] Android SDK : C:\Users\Administrator\AppData\Local\Android\Sdk
+[09:20:57]          adb: Android Debug Bridge version 1.0.41
+[09:20:57]   >> 检测 Android NDK ...
+[09:20:57]          来源: ANDROID_NDK_HOME = C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
+[09:20:57]   [OK] Android NDK : C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198 (Version: 30.0.14904198-beta1)
+[09:20:57]   [INFO] └─ 完成 (耗时 1s)
+[09:20:57] 
+[09:20:57] ==============================================================
+[09:20:57]   步骤 2/4 — 初始化 vcpkg 并安装 Android 依赖
+[09:20:57] ==============================================================
+[09:20:57]   >> 定位 vcpkg ...
+[09:20:57]   [WARN] 检测到终端环境变量或系统路径存在空格，为彻底防止 MSYS2 环境崩溃，
+[09:20:57]   [WARN] 已强制将 vcpkg 工作区转入纯净目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[09:20:57]          使用无空格安全目录 vcpkg: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[09:20:57]   [OK] vcpkg 根目录: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[09:20:57]          vcpkg.exe 已存在，跳过 bootstrap
+[09:20:57]   [OK] vcpkg   : vcpkg package management program version 2026-03-04-4b3e4c276b5b87a649e66341e11553e8c577459c
+[09:20:57]          可执行路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe
+[09:20:57]          已设置 VCPKG_ROOT=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe
+[09:20:57]          已设置 ANDROID_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk
+[09:20:57]          已设置 ANDROID_NDK_HOME=C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198
+[09:20:57]          已设置 VCPKG_BUILD_TYPE=release (仅编译 Release，节省一半耗时)
+[09:20:57]          已生成强制 Release 重写规则的临时 Triplet 目录: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[09:20:57]          overlay-ports: D:\Program Files\Visual\KrKr2-Next\vcpkg\ports (7 个自定义 port)
+[09:20:57]          overlay-triplets: D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets (7 个自定义 triplet)
+[09:20:57]   >> 安装 vcpkg 依赖 — triplet: arm64-android (ABI: arm64-v8a)
+[09:20:57]   [WARN] 检测到旧的 ANGLE 构建缓存，将清理以确保 overlay port 生效...
+[09:20:57]          已删除: C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\buildtrees\angle
+[09:20:57]          vcpkg 参数: install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed --x-manifest-root=D:\Program Files\Visual\KrKr2-Next --overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports --overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets
+[09:20:57]          注意: 首次执行将从源码编译所有依赖，可能耗时 1-2 小时。
+[09:20:57]          CMD: "C:\Program Files\Microsoft Visual Studio\18\Community\VC\Auxiliary\Build\vcvars64.bat" && cd /d "D:\Program Files\Visual\KrKr2-Next" && "C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\vcpkg.exe" install --triplet arm64-android --x-install-root=C:\Users\Administrator\AppData\Local\KrKr2-Next-vcpkg-safe\installed "--x-manifest-root=D:\Program Files\Visual\KrKr2-Next" "--overlay-ports=D:\Program Files\Visual\KrKr2-Next\vcpkg\ports" "--overlay-triplets=D:\Program Files\Visual\KrKr2-Next\.devtools\temp_triplets" 2>&1
 **********************************************************************
 ** Visual Studio 2026 Developer Command Prompt v18.4.2
 ** Copyright (c) 2026 Microsoft Corporation
@@ -497,22 +495,22 @@ unrar is compatible with the CMake Find Module:
 
   find_package(unrar CONFIG REQUIRED)
   target_link_libraries(main PRIVATE unrar::unrar)
-All requested installations completed successfully in: 1.41 ms
-[09:06:24]   [OK] vcpkg 依赖安装完成: arm64-android  (耗时 13s)
-[09:06:24]          已安装库文件数: 102 (.a / .so)
-[09:06:24]   [INFO] └─ 完成 (耗时 13s)
-[09:06:24] 
-[09:06:24] ==============================================================
-[09:06:24]   步骤 3/4 — 构建 Flutter Android APK (Release)
-[09:06:24] ==============================================================
-[09:06:24]   >> 写入 android/local.properties ...
-[09:06:24]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\local.properties
-[09:06:24]          sdk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk
-[09:06:24]          ndk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\ndk\\30.0.14904198
-[09:06:24]          flutter.sdk=C:\\Users\\Administrator\\AppData\\Local\\KrKr2-Next-flutter-safe
-[09:06:24]   [OK] local.properties 已写入
-[09:06:24]   >> flutter pub get — 同步 Dart 依赖 ...
-[09:06:24]          工作目录: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app
+All requested installations completed successfully in: 1.31 ms
+[09:21:05]   [OK] vcpkg 依赖安装完成: arm64-android  (耗时 8s)
+[09:21:05]          已安装库文件数: 102 (.a / .so)
+[09:21:05]   [INFO] └─ 完成 (耗时 8s)
+[09:21:05] 
+[09:21:05] ==============================================================
+[09:21:05]   步骤 3/4 — 构建 Flutter Android APK (Release)
+[09:21:05] ==============================================================
+[09:21:05]   >> 写入 android/local.properties ...
+[09:21:05]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\local.properties
+[09:21:05]          sdk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk
+[09:21:05]          ndk.dir=C:\\Users\\Administrator\\AppData\\Local\\Android\\Sdk\\ndk\\30.0.14904198
+[09:21:05]          flutter.sdk=C:\\Users\\Administrator\\AppData\\Local\\KrKr2-Next-flutter-safe
+[09:21:05]   [OK] local.properties 已写入
+[09:21:05]   >> flutter pub get — 同步 Dart 依赖 ...
+[09:21:05]          工作目录: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app
 Resolving dependencies...
 Downloading packages...
   async 2.13.0 (2.13.1 available)
@@ -536,43 +534,209 @@ Downloading packages...
 Got dependencies!
 18 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
-[09:06:28]   [OK] flutter pub get 完成 (耗时 4s)
-[09:06:28]   >> flutter build apk ...
-[09:06:28]          目标平台  : android-arm64
-[09:06:28]          编译类型  : release
-[09:06:28]          flutter 路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
-[09:06:28]          注意: 此步骤包含 Gradle 下载、CMake 交叉编译，首次可能耗时 30-60 分钟。
-[09:06:28]          CMD: "C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat" build apk --release --target-platform android-arm64 2>&1
-Running Gradle task 'assembleRelease'...                           95.4s
-√ Built build\app\outputs\flutter-apk\app-release.apk (67.4MB)
-[09:08:05]   [OK] flutter build apk 完成 (耗时 2m 37s)
-[09:08:05]   [INFO] └─ 完成 (耗时 2m 41s)
-[09:08:05] 
-[09:08:05] ==============================================================
-[09:08:05]   步骤 4/4 — 验证输出 APK
-[09:08:05] ==============================================================
-[09:08:05]   >> 查找 APK 文件 ...
-[09:08:05]          预期路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
-[09:08:05]          已找到预期路径
-[09:08:05]   [OK] APK 文件已生成
-[09:08:05]          路径: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk
-[09:08:05]          大小: 67.45 MB
-[09:08:05]          时间: 2026-04-06 09:08:04
-[09:08:05]   >> 检查 APK 内容（原生库）...
-[09:08:05]   [OK] APK 中包含 9 个原生库 (.so)
-[09:08:05]            ✔ lib/arm64-v8a/libSDL2.so
-[09:08:05]            ✔ lib/arm64-v8a/libapp.so
-[09:08:05]            ✔ lib/arm64-v8a/libc++_shared.so
-[09:08:05]            ✔ lib/arm64-v8a/libdatastore_shared_counter.so
-[09:08:05]            ✔ lib/arm64-v8a/libengine_api.so
-[09:08:05]            ✔ lib/arm64-v8a/libflutter.so
-[09:08:05]            ✔ lib/arm64-v8a/libomp.so
-[09:08:05]            ✔ lib/armeabi-v7a/libdatastore_shared_counter.so
-[09:08:05]            ✔ lib/x86_64/libdatastore_shared_counter.so
-[09:08:05]   [INFO] └─ 完成 (耗时 0s)
-[09:08:05] 
-[09:08:05] ================================================================
-[09:08:05]   BUILD SUCCESS  |  APK: D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\outputs\flutter-apk\app-release.apk  |  Size: 67.45 MB
-[09:08:05]   结束时间: 2026-04-06 09:08:05
-[09:08:05]   总耗时: 2m 56s
-[09:08:05] ================================================================
+[09:21:07]   [OK] flutter pub get 完成 (耗时 2s)
+[09:21:07]   >> flutter build apk ...
+[09:21:07]          目标平台  : android-arm64
+[09:21:07]          编译类型  : release
+[09:21:07]          flutter 路径: C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat
+[09:21:07]          注意: 此步骤包含 Gradle 下载、CMake 交叉编译，首次可能耗时 30-60 分钟。
+[09:21:07]          CMD: "C:\Users\Administrator\AppData\Local\KrKr2-Next-flutter-safe\bin\flutter.bat" build apk --release --target-platform android-arm64 2>&1
+Running Gradle task 'assembleRelease'...                        
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:buildCMakeRelease[arm64-v8a]'.
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\.cxx\release\545p156s\arm64-v8a'
+  [1/20] Building CXX object cpp/core/base/CMakeFiles/core_base_module.dir/ScriptMgnIntf.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/base/ScriptMgnIntf.cpp:12:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsCommHead.h:51:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/base/ScriptMgnIntf.cpp:48:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsScriptBlock.h:15:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsInterCodeGen.h:213:24: warning: binding dereferenced null pointer to reference has undefined behavior [-Wnull-dereference]
+    213 |                 return *(tTJSVariant *)nullptr;
+        |                        ^~~~~~~~~~~~~~~~~~~~~~~
+  2 warnings generated.
+  [2/20] Linking CXX static library cpp\core\base\libcore_base_module.a
+  [3/20] Building CXX object cpp/plugins/fstat/CMakeFiles/fstat.dir/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [4/20] Building CXX object cpp/plugins/kagparserex/CMakeFiles/kagparserex.dir/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [5/20] Building CXX object cpp/plugins/psbfile/CMakeFiles/psbfile.dir/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [6/20] Building CXX object cpp/plugins/psdfile/CMakeFiles/psdfile.dir/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [7/20] Building CXX object bridge/engine_api/CMakeFiles/engine_api.dir/__/__/cpp/plugins/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [8/20] Building CXX object cpp/plugins/motionplayer/CMakeFiles/motionplayer.dir/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [9/20] Building CXX object cpp/plugins/layerex_draw/CMakeFiles/layerExDraw.dir/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [10/20] Building CXX object cpp/plugins/CMakeFiles/krkr2plugin.dir/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [11/20] Building CXX object cpp/plugins/psdfile/psdparse/CMakeFiles/psdparse.dir/__/__/motionplayer/main.cpp.o
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:6:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjs.h:17:
+  In file included from D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsVariant.h:16:
+  D:/Program Files/Visual/KrKr2-Next/cpp/core/tjs2/tjsString.h:467:35: warning: identifier '_tss' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+    467 | static TJS::tTJSString operator"" _tss(const char *str, size_t len) {
+        |                        ~~~~~~~~~~~^~~~
+        |                        operator""_tss
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:30:18: warning: function 'Universal_missing_method' has internal linkage but is not defined [-Wundefined-internal]
+     30 | static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+        |                  ^
+  D:/Program Files/Visual/KrKr2-Next/cpp/plugins/motionplayer/main.cpp:552:38: note: used here
+    552 |     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
+        |                                      ^
+  2 warnings generated.
+  [12/20] Linking CXX static library cpp\plugins\fstat\libfstat.a
+  [13/20] Linking CXX static library cpp\plugins\kagparserex\libkagparserex.a
+  [14/20] Linking CXX static library cpp\plugins\motionplayer\libmotionplayer.a
+  [15/20] Linking CXX static library cpp\plugins\layerex_draw\liblayerExDraw.a
+  [16/20] Linking CXX static library cpp\plugins\psbfile\libpsbfile.a
+  [17/20] Linking CXX static library cpp\plugins\psdfile\psdparse\libpsdparse.a
+  [18/20] Linking CXX static library cpp\plugins\psdfile\libpsdfile.a
+  [19/20] Linking CXX static library cpp\plugins\libkrkr2plugin.a
+  [20/20] Linking CXX shared library "D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\intermediates\cxx\release\545p156s\obj\arm64-v8a\libengine_api.so"
+  FAILED: [code=1] D:/Program Files/Visual/KrKr2-Next/apps/flutter_app/build/app/intermediates/cxx/release/545p156s/obj/arm64-v8a/libengine_api.so 
+  C:\Windows\system32\cmd.exe /C "cd . && C:\Users\Administrator\AppData\Local\Android\Sdk\ndk\30.0.14904198\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Users/Administrator/AppData/Local/Android/Sdk/ndk/30.0.14904198/toolchains/llvm/prebuilt/windows-x86_64/sysroot -fPIC -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -O3 -DNDEBUG  -shared -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments  -Wl,--gc-sections  -Xlinker --dependency-file=bridge\engine_api\CMakeFiles\engine_api.dir\link.d -Wl,-soname,libengine_api.so -o "D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\build\app\intermediates\cxx\release\545p156s\obj\arm64-v8a\libengine_api.so" @CMakeFiles\engine_api.rsp && cd ."
+  ld.lld: error: undefined symbol: Universal_missing_method(TJS::tTJSVariant*, int, TJS::tTJSVariant**, TJS::iTJSDispatch2*)
+  >>> referenced by ncbind.hpp:1563 (D:/Program Files/Visual/KrKr2-Next/cpp/core/plugin/ncbind.hpp:1563)
+  >>>               bridge/engine_api/CMakeFiles/engine_api.dir/__/__/cpp/plugins/motionplayer/main.cpp.o:(ncbRegistClass<ncbRegistSubClass<motion::Player>>::Regist())
+  >>> referenced by ncbind.hpp:1563 (D:/Program Files/Visual/KrKr2-Next/cpp/core/plugin/ncbind.hpp:1563)
+  >>>               bridge/engine_api/CMakeFiles/engine_api.dir/__/__/cpp/plugins/motionplayer/main.cpp.o:(ncbRegistClass<ncbRegistSubClass<motion::Player>>::Regist())
+  >>> referenced by ncbind.hpp:1563 (D:/Program Files/Visual/KrKr2-Next/cpp/core/plugin/ncbind.hpp:1563)
+  >>>               bridge/engine_api/CMakeFiles/engine_api.dir/__/__/cpp/plugins/motionplayer/main.cpp.o:(ncbRegistClass<ncbRegistSubClass<motion::EmotePlayer>>::Regist())
+  >>> referenced 3 more times
+  clang++: error: linker command failed with exit code 1 (use -v to see invocation)
+  ninja: build stopped: subcommand failed.
+
+  C++ build system [build] failed while executing:
+      @echo off
+      "C:\\ninja\\ninja.exe" ^
+        -C ^
+        "D:\\Program Files\\Visual\\KrKr2-Next\\apps\\flutter_app\\build\\.cxx\\release\\545p156s\\arm64-v8a" ^
+        engine_api
+    from D:\Program Files\Visual\KrKr2-Next\apps\flutter_app\android\app
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 6s
+Running Gradle task 'assembleRelease'...                            6.4s
+Gradle task assembleRelease failed with exit code 1
+[09:21:16]   [ERROR] flutter build apk 失败 (耗时 9s)。
+       详情: D:\Program Files\Visual\KrKr2-Next\build_android.log

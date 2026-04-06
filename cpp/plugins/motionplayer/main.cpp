@@ -27,7 +27,26 @@ static motion::SeparateLayerAdaptor *GetSeparateLayerAdaptorInstance(iTJSDispatc
 static iTJSDispatch2 *GetSeparateAdaptorRenderTarget(motion::SeparateLayerAdaptor *adaptor);
 
 class GenericMockObject;
-static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+    if (numparams >= 3) {
+        bool is_set = (tjs_int)*param[0];
+        ttstr membername;
+        if (param[1]) {
+            tTJSVariantString* str = param[1]->AsStringNoAddRef();
+            if (str) membername = str;
+        }
+        
+        ttstr logMsg = TJS_W("[MockTrace] CallMissing Triggered! Name: ");
+        logMsg += (membername.IsEmpty() ? TJS_W("<Unknown>") : membername);
+        logMsg += (is_set ? TJS_W(" (Set)") : TJS_W(" (Get/Call)"));
+        if (auto l = LOGGER) l->info("{}", logMsg.AsStdString());
+
+        if (!is_set && result) {
+            *result = tTJSVariant(TJS::TVPGetGlobalMockObject(), TJS::TVPGetGlobalMockObject());
+        }
+    }
+    return TJS_S_OK;
+}
 
 iTJSDispatch2 *ResolveLayerTreeOwnerBase(iTJSDispatch2 *base) {
     if(!base) return nullptr;
