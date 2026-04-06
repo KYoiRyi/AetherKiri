@@ -33,7 +33,11 @@ public:
 
     tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) override {
         if (result) {
-            *result = tTJSVariant(this, this);
+            if (!membername && numparams >= 1 && param[0]->Type() == tvtString) {
+                *result = *param[0];
+            } else {
+                *result = tTJSVariant(this, this);
+            }
         }
         return TJS_S_OK;
     }
@@ -48,6 +52,12 @@ public:
                     !TJS_strcmp(membername, TJS_W("x")) || !TJS_strcmp(membername, TJS_W("y")) ||
                     !TJS_strcmp(membername, TJS_W("opacity")) || !TJS_strcmp(membername, TJS_W("visible"))) {
                     *result = tTJSVariant((tjs_int)0);
+                    return TJS_S_OK;
+                }
+                if (!TJS_strcmp(membername, TJS_W("fps")) || !TJS_strcmp(membername, TJS_W("frame")) ||
+                    !TJS_strcmp(membername, TJS_W("totalFrame")) || !TJS_strcmp(membername, TJS_W("totalTime")) ||
+                    !TJS_strcmp(membername, TJS_W("rate"))) {
+                    *result = tTJSVariant((tjs_int)30);
                     return TJS_S_OK;
                 }
             }

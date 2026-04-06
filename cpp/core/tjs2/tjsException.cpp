@@ -35,6 +35,10 @@ namespace TJS {
             objthis->PropSet(TJS_MEMBERENSURE, message_name.c_str(),
                              message_name.GetHint(), &val, objthis);
 
+            static tTJSString msg_name(TJS_W("msg"));
+            objthis->PropSet(TJS_MEMBERENSURE, msg_name.c_str(),
+                             msg_name.GetHint(), &val, objthis);
+
             if(TJS_PARAM_EXIST(1))
                 val.CopyRef(*param[1]);
             else

@@ -524,8 +524,8 @@ namespace PSB {
             return false;
         }
 
-        if(_header.version > 3) {
-            LOGGER->critical("not support psb file format version > 3");
+        if(_header.version > 4) {
+            LOGGER->critical("not support psb file format version > 4");
             return false;
         }
 

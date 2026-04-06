@@ -687,6 +687,12 @@ public:
                     *result = tTJSVariant((tjs_int)0);
                     return TJS_S_OK;
                 }
+                if (!TJS_strcmp(membername, TJS_W("fps")) || !TJS_strcmp(membername, TJS_W("frame")) ||
+                    !TJS_strcmp(membername, TJS_W("totalFrame")) || !TJS_strcmp(membername, TJS_W("totalTime")) ||
+                    !TJS_strcmp(membername, TJS_W("rate"))) {
+                    *result = tTJSVariant((tjs_int)30);
+                    return TJS_S_OK;
+                }
             }
             this->AddRef();
             *result = tTJSVariant(this, this);
