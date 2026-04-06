@@ -233,18 +233,11 @@ bool tGenericFreeTypeFace::OpenFaceByIndex(tjs_uint index, FT_Face &face) {
     if(face)
         FT_Done_Face(face), face = nullptr;
 
-    FT_Parameter parameters[1];
-    parameters[0].tag =
-        FT_PARAM_TAG_UNPATENTED_HINTING; // Appleの特許回避を行う
-    parameters[0].data = nullptr;
-
     FT_Open_Args args;
     memset(&args, 0, sizeof(args));
     args.flags = FT_OPEN_STREAM;
     args.stream = &Stream;
     args.driver = 0;
-    args.num_params = 1;
-    args.params = parameters;
 
     FT_Error err = FT_Open_Face(FreeTypeLibrary, &args, index, &face);
 
