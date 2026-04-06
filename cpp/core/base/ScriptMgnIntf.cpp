@@ -421,7 +421,7 @@ public:
         logMsg += TJS_W(" | Params: ");
         for(tjs_int i = 0; i < numparams; i++) {
             if (param && param[i]) {
-                logMsg += param[i]->AsStringNoAddRef();
+                logMsg += TJSVariantToReadableString(*param[i]);
             } else {
                 logMsg += TJS_W("null");
             }
@@ -463,7 +463,7 @@ public:
         logMsg += (membername ? membername : TJS_W("<Unknown>"));
         if (param) {
             logMsg += TJS_W(" = ");
-            logMsg += param->AsStringNoAddRef();
+            logMsg += TJSVariantToReadableString(*param);
         }
         TVPAddLog(logMsg);
 
@@ -533,8 +533,12 @@ public:
             bool is_set = (tjs_int)*param[0];
             ttstr missname;
             if (param[1]) {
-                tTJSVariantString* str = param[1]->AsStringNoAddRef();
-                if (str) missname = str;
+                if (param[1]->Type() == tvtString) {
+                    tTJSVariantString* str = param[1]->AsStringNoAddRef();
+                    if (str) missname = str;
+                } else {
+                    missname = TJSVariantToReadableString(*param[1]);
+                }
             }
             ttstr logMsg = TJS_W("[MockTrace] Global CallMissing Triggered! Missing Plugin/Class/Prop: ");
             logMsg += (missname.IsEmpty() ? TJS_W("<Unknown>") : missname);
