@@ -664,6 +664,19 @@ public:
                        tjs_uint32 *hint, tTJSVariant *result,
                        tjs_int numparams, tTJSVariant **param,
                        iTJSDispatch2 *objthis) override {
+        ttstr logMsg = TJS_W("[MockTrace] FuncCall: ");
+        logMsg += (membername ? membername : TJS_W("<Missing/Callback>"));
+        logMsg += TJS_W(" | Params: ");
+        for(tjs_int i = 0; i < numparams; i++) {
+            if (param && param[i]) {
+                logMsg += param[i]->AsStringNoAddRef();
+            } else {
+                logMsg += TJS_W("null");
+            }
+            if(i < numparams - 1) logMsg += TJS_W(", ");
+        }
+        TVPAddLog(logMsg);
+
         if (result) {
             this->AddRef();
             *result = tTJSVariant(this, this);
@@ -674,6 +687,10 @@ public:
     tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
                       tjs_uint32 *hint, tTJSVariant *result,
                       iTJSDispatch2 *objthis) override {
+        ttstr logMsg = TJS_W("[MockTrace] PropGet: ");
+        logMsg += (membername ? membername : TJS_W("<Unknown>"));
+        TVPAddLog(logMsg);
+
         if (result) {
             if (membername) {
                 if (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length"))) {
@@ -690,6 +707,14 @@ public:
     tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
                       tjs_uint32 *hint, const tTJSVariant *param,
                       iTJSDispatch2 *objthis) override {
+        ttstr logMsg = TJS_W("[MockTrace] PropSet: ");
+        logMsg += (membername ? membername : TJS_W("<Unknown>"));
+        if (param) {
+            logMsg += TJS_W(" = ");
+            logMsg += param->AsStringNoAddRef();
+        }
+        TVPAddLog(logMsg);
+
         return TJS_S_OK;
     }
 
@@ -748,6 +773,18 @@ public:
 static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
     if (numparams >= 3) {
         bool is_set = (tjs_int)*param[0];
+        
+        ttstr membername;
+        if (param[1]) {
+            tTJSVariantString* str = param[1]->AsStringNoAddRef();
+            if (str) membername = str;
+        }
+        
+        ttstr logMsg = TJS_W("[MockTrace] CallMissing Triggered! Name: ");
+        logMsg += (membername.IsEmpty() ? TJS_W("<Unknown>") : membername);
+        logMsg += (is_set ? TJS_W(" (Set)") : TJS_W(" (Get/Call)"));
+        TVPAddLog(logMsg);
+
         if (!is_set) {
             iTJSDispatch2* prop = param[2]->AsObjectNoAddRef();
             static iTJSDispatch2* dummy = new GenericMockObject();
