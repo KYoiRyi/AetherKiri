@@ -12,13 +12,11 @@
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
-#if TARGET_OS_OSX
 #include <IOSurface/IOSurface.h>
 #include <EGL/eglext.h>
 #include <EGL/eglext_angle.h>
 #include <GLES2/gl2ext.h>
 #include <GLES2/gl2ext_angle.h>
-#endif // TARGET_OS_OSX
 #endif // __APPLE__
 
 #if defined(__ANDROID__)
@@ -316,7 +314,7 @@ void EGLContextManager::DestroySurface() {
 
 bool EGLContextManager::AttachIOSurface(uint32_t iosurface_id,
                                          uint32_t width, uint32_t height) {
-#if defined(__APPLE__) && TARGET_OS_OSX
+#if defined(__APPLE__)
     if (context_ == EGL_NO_CONTEXT) {
         spdlog::error("AttachIOSurface: EGL context not initialized");
         return false;
@@ -446,7 +444,7 @@ bool EGLContextManager::AttachIOSurface(uint32_t iosurface_id,
     (void)height;
     spdlog::error("AttachIOSurface: not supported on this platform");
     return false;
-#endif // __APPLE__ && TARGET_OS_OSX
+#endif // __APPLE__
 }
 
 void EGLContextManager::DetachIOSurface() {
