@@ -1024,8 +1024,11 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
             Integer++;
         else if(vt == tvtVoid)
             vt = tvtInteger, Integer = 1;
-        else
-            TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        else {
+            // TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+            ReleaseContent();
+            vt = tvtInteger, Integer = 1;
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -1041,8 +1044,11 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
             Integer--;
         else if(vt == tvtVoid)
             vt = tvtInteger, Integer = -1;
-        else
-            TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        else {
+            // TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+            ReleaseContent();
+            vt = tvtInteger, Integer = -1;
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -1165,7 +1171,10 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
             return;
         }
 
-        TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        // TJSThrowVariantConvertError(*this, tvtInteger, tvtReal);
+        ReleaseContent();
+        vt = tvtInteger;
+        Integer = 0;
     }
 
     //---------------------------------------------------------------------------
