@@ -27,26 +27,7 @@ static motion::SeparateLayerAdaptor *GetSeparateLayerAdaptorInstance(iTJSDispatc
 static iTJSDispatch2 *GetSeparateAdaptorRenderTarget(motion::SeparateLayerAdaptor *adaptor);
 
 class GenericMockObject;
-static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-    if (numparams >= 3) {
-        bool is_set = (tjs_int)*param[0];
-        ttstr membername;
-        if (param[1]) {
-            tTJSVariantString* str = param[1]->AsStringNoAddRef();
-            if (str) membername = str;
-        }
-        
-        ttstr logMsg = TJS_W("[MockTrace] CallMissing Triggered! Name: ");
-        logMsg += (membername.IsEmpty() ? TJS_W("<Unknown>") : membername);
-        logMsg += (is_set ? TJS_W(" (Set)") : TJS_W(" (Get/Call)"));
-        if (auto l = LOGGER) l->info("{}", logMsg.AsStdString());
-
-        if (!is_set && result) {
-            *result = tTJSVariant(TJS::TVPGetGlobalMockObject(), TJS::TVPGetGlobalMockObject());
-        }
-    }
-    return TJS_S_OK;
-}
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
 
 iTJSDispatch2 *ResolveLayerTreeOwnerBase(iTJSDispatch2 *base) {
     if(!base) return nullptr;
@@ -664,7 +645,128 @@ private:
     inline static bool _enableD3D;
 };
 
+class GenericMockObject : public tTJSDispatch {
+    tjs_uint RefCount;
+public:
+    GenericMockObject() : RefCount(1) {}
+    ~GenericMockObject() override {}
 
+    tjs_uint AddRef() override { return ++RefCount; }
+    tjs_uint Release() override {
+        if (--RefCount == 0) {
+            delete this;
+            return 0;
+        }
+        return RefCount;
+    }
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, tTJSVariant *result,
+                      iTJSDispatch2 *objthis) override {
+        if (result) {
+            if (membername) {
+                if (!TJS_strcmp(membername, TJS_W("count")) || !TJS_strcmp(membername, TJS_W("length"))) {
+                    *result = tTJSVariant((tjs_int)0);
+                    return TJS_S_OK;
+                }
+            }
+            this->AddRef();
+            *result = tTJSVariant(this, this);
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, const tTJSVariant *param,
+                      iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error CreateNew(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, iTJSDispatch2 **result,
+                        tjs_int numparams, tTJSVariant **param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) {
+            this->AddRef();
+            *result = this;
+        }
+        return TJS_S_OK;
+    }
+
+    tjs_error GetCount(tjs_int *result, const tjs_char *membername,
+                       tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        if (result) *result = 0;
+        return TJS_S_OK;
+    }
+
+    tjs_error EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
+                          iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error DeleteMember(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error Invalidate(tjs_uint32 flag, const tjs_char *membername,
+                         tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_OK;
+    }
+
+    tjs_error IsValid(tjs_uint32 flag, const tjs_char *membername,
+                      tjs_uint32 *hint, iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error IsInstanceOf(tjs_uint32 flag, const tjs_char *membername,
+                           tjs_uint32 *hint, const tjs_char *classname,
+                           iTJSDispatch2 *objthis) override {
+        return TJS_S_TRUE;
+    }
+
+    tjs_error Operation(tjs_uint32 flag, const tjs_char *membername,
+                        tjs_uint32 *hint, tTJSVariant *result,
+                        const tTJSVariant *param,
+                        iTJSDispatch2 *objthis) override {
+        if (result) *result = tTJSVariant();
+        return TJS_S_OK;
+    }
+};
+
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+    if (numparams >= 3) {
+        bool is_set = (tjs_int)*param[0];
+        if (!is_set) {
+            iTJSDispatch2* prop = param[2]->AsObjectNoAddRef();
+            static iTJSDispatch2* dummy = new GenericMockObject();
+            tTJSVariant dummy_var(dummy, dummy);
+            prop->PropSet(0, nullptr, nullptr, &dummy_var, prop);
+        }
+    }
+    if (result) *result = tTJSVariant(static_cast<tjs_int>(1));
+    return TJS_S_OK;
+}
+
+static tjs_error Motion_getD3DAdaptor(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
+    static iTJSDispatch2* dummy = new GenericMockObject();
+    if (r) {
+        dummy->AddRef();
+        *r = tTJSVariant(dummy, dummy);
+    }
+    return TJS_S_OK;
+}
 
 NCB_REGISTER_CLASS(Motion) {
     NCB_PROPERTY_RAW_CALLBACK(enableD3D, Motion::getEnableD3D,
@@ -678,8 +780,48 @@ NCB_REGISTER_CLASS(Motion) {
     NCB_SUBCLASS(Player, Player);
     NCB_SUBCLASS(EmotePlayer, EmotePlayer);
     NCB_SUBCLASS(SeparateLayerAdaptor, SeparateLayerAdaptor);
+    NCB_PROPERTY_RAW_CALLBACK_RO(D3DAdaptor, Motion_getD3DAdaptor, TJS_STATICMEMBER);
+}
+
+class StaticGlobalMockFunc : public tTJSDispatch {
+    ttstr Name;
+public:
+    StaticGlobalMockFunc(const tjs_char* name) : Name(name) {}
+    ~StaticGlobalMockFunc() override {}
+
+    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
+                       tjs_uint32 *hint, tTJSVariant *result,
+                       tjs_int numparams, tTJSVariant **param,
+                       iTJSDispatch2 *objthis) override {
+        if (result) {
+            static iTJSDispatch2* dummy = new GenericMockObject();
+            dummy->AddRef();
+            *result = tTJSVariant(dummy, dummy);
+        }
+        return TJS_S_OK;
+    }
+};
+
+static void PreRegistCallback() {
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if (global) {
+        iTJSDispatch2 *func = new StaticGlobalMockFunc(TJS_W("SetSystemConfigDefaults"));
+        tTJSVariant val(func, func);
+        global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, global);
+        
+        tTJSVariant sysVar;
+        if(TJS_SUCCEEDED(global->PropGet(0, TJS_W("System"), nullptr, &sysVar, global)) && sysVar.Type() == tvtObject) {
+            iTJSDispatch2 *sysObj = sysVar.AsObjectNoAddRef();
+            if (sysObj) {
+                sysObj->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, sysObj);
+            }
+        }
+        func->Release();
+        global->Release();
+    }
 }
 
 static void PostUnregistCallback() {}
 
+NCB_PRE_REGIST_CALLBACK(PreRegistCallback);
 NCB_POST_UNREGIST_CALLBACK(PostUnregistCallback);
