@@ -774,10 +774,6 @@ struct tTVPDrawTextData {
 static iTVPTexture2D *_CharacterTexture = nullptr,
                      *_CharacterTextureRGBA = nullptr;
 
-#if defined(__APPLE__)
-extern "C" void glFlush(void);
-#endif
-
 bool tTVPNativeBaseBitmap::InternalBlendText(tTVPCharacterData *data,
                                              tTVPDrawTextData *dtdata,
                                              tjs_uint32 color,
@@ -908,11 +904,6 @@ bool tTVPNativeBaseBitmap::InternalBlendText(tTVPCharacterData *data,
     TVPGetRenderManager()->OperateRect(
         method, GetTextureForRender(method->IsBlendTarget(), &drect), nullptr,
         drect, tRenderTexRectArray(src_tex));
-
-#if defined(__APPLE__)
-    glFlush();
-#endif
-
     return true;
 }
 
