@@ -440,14 +440,38 @@ ttstr tTVPStorageMediaManager::NormalizeStorageName(const ttstr &name,
     return tmp;
 }
 
+static ttstr FixMissingPathDelimiter(const ttstr& name) {
+    ttstr correctedName = name;
+    tjs_char lastchar = correctedName.GetLastChar();
+    
+    // Trim unexpectedly appended trailing spaces or double quotes from scripts
+    while (correctedName.GetLen() > 0 && (lastchar == TJS_W(' ') || lastchar == TJS_W('\t') || lastchar == TJS_W('\r') || lastchar == TJS_W('\n') || lastchar == TJS_W('\"'))) {
+        correctedName = ttstr(correctedName.c_str(), correctedName.GetLen() - 1);
+        lastchar = correctedName.GetLastChar();
+    }
+
+    if(correctedName.GetLen() > 0 && lastchar != TVPArchiveDelimiter && lastchar != TJS_W('/') && lastchar != TJS_W('\\')) {
+        if (correctedName.GetLen() > 4) {
+            ttstr ext = ttstr(correctedName.c_str() + correctedName.GetLen() - 4).AsLowerCase();
+            if(ext == TJS_W(".xp3") || ext == TJS_W(".tpm") || ext == TJS_W(".apk") || ext == TJS_W(".zip")) {
+                correctedName += TVPArchiveDelimiter;
+            } else {
+                correctedName += TJS_W('/');
+            }
+        } else {
+            correctedName += TJS_W('/');
+        }
+        TVPAddLog(TJS_W("(info) Automatically patched missing path delimiter: ") + correctedName);
+    }
+    return correctedName;
+}
+
 //---------------------------------------------------------------------------
 void tTVPStorageMediaManager::SetCurrentDirectory(const ttstr &name) {
-    tjs_char ch = name.GetLastChar();
-    if(ch != TJS_W('/') && ch != TJS_W('\\') && ch != TVPArchiveDelimiter)
-        TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
+    ttstr fixedName = FixMissingPathDelimiter(name);
 
     ttstr media, domain, path;
-    NormalizeStorageName(name, &media, &domain, &path);
+    NormalizeStorageName(fixedName, &media, &domain, &path);
 
     tMediaRecord *rec = GetMediaRecord(media);
     rec->CurrentDomain = domain;
@@ -951,12 +975,8 @@ static bool TVPClearAutoPathCacheCallbackInit = false;
 void TVPAddAutoPath(const ttstr &name) {
     tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
 
-    tjs_char lastchar = name.GetLastChar();
-    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_W('/') &&
-       lastchar != TJS_W('\\'))
-        TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
-
-    ttstr normalized = TVPNormalizeStorageName(name);
+    ttstr fixedName = FixMissingPathDelimiter(name);
+    ttstr normalized = TVPNormalizeStorageName(fixedName);
 
     auto i =
         std::find(TVPAutoPathList.begin(), TVPAutoPathList.end(), normalized);
@@ -970,12 +990,8 @@ void TVPAddAutoPath(const ttstr &name) {
 void TVPRemoveAutoPath(const ttstr &name) {
     tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
 
-    tjs_char lastchar = name.GetLastChar();
-    if(lastchar != TVPArchiveDelimiter && lastchar != TJS_W('/') &&
-       lastchar != TJS_W('\\'))
-        TVPThrowExceptionMessage(TVPMissingPathDelimiterAtLast);
-
-    ttstr normalized = TVPNormalizeStorageName(name);
+    ttstr fixedName = FixMissingPathDelimiter(name);
+    ttstr normalized = TVPNormalizeStorageName(fixedName);
 
     auto i =
         std::find(TVPAutoPathList.begin(), TVPAutoPathList.end(), normalized);
