@@ -219,8 +219,8 @@ namespace motion {
                     PSBImageEntry img;
                     img.key = pngKey;
                     img.path = path;
-                    img.left = _coordX + static_cast<int>(lp.left) - w / 2;
-                    img.top = _coordY + static_cast<int>(lp.top) - h / 2;
+                    img.left = _coordX + static_cast<int>(lp.left);
+                    img.top = _coordY + static_cast<int>(lp.top);
                     img.width = w;
                     img.height = h;
                     img.opacity = lp.opacity;
@@ -654,8 +654,8 @@ namespace motion {
 
                     // When same image appears at multiple positions, pick the
                     // one closest to the button's PSB position
-                    float imgPsbX = static_cast<float>(img.left + img.width / 2) - _coordX;
-                    float imgPsbY = static_cast<float>(img.top + img.height / 2) - _coordY;
+                    float imgPsbX = static_cast<float>(img.left);
+                    float imgPsbY = static_cast<float>(img.top);
                     float dist = std::abs(imgPsbX - btn.left) + std::abs(imgPsbY - btn.top);
                     if(!bestImg || dist < bestDist) {
                         bestImg = &img;
