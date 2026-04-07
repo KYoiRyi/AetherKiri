@@ -1,6 +1,6 @@
 <p align="center">
-  <h1 align="center">KrKr2 Next</h1>
-  <p align="center">基于 Flutter 重构的下一代 KiriKiri2 跨平台模拟器</p>
+  <h1 align="center">AetherKiri</h1>
+  <p align="center">Next-Generation KiriKiri2 Cross-Platform Runtime — Pushing the Engine to Its Limits</p>
 </p>
 
 <p align="center">
@@ -13,63 +13,152 @@
 
 ---
 
-**语言 / Language**: 中文 | [English](README_EN.md)
+> AetherKiri is a fork of [KrKr2-Next](https://github.com/reAAAq/KrKr2-Next) with the goal of **maximizing the capability** of the KiriKiri2 visual novel engine on modern hardware and platforms.
 
-> 🙏 本项目基于 [krkr2](https://github.com/2468785842/krkr2) 重构，感谢原作者的贡献。
+## What is AetherKiri?
 
-## 简介
+AetherKiri is a modern, cross-platform runtime for the [KiriKiri2](https://en.wikipedia.org/wiki/KiriKiri) visual novel engine. It runs original KiriKiri2 game scripts unmodified while delivering significantly better performance, broader platform support, and a contemporary user experience.
 
-**KrKr2 Next** 是 [KiriKiri2 (吉里吉里2)](https://zh.wikipedia.org/wiki/%E5%90%89%E9%87%8C%E5%90%89%E9%87%8C2) 视觉小说引擎的现代化跨平台运行环境。它完全兼容原版游戏脚本，使用现代图形接口进行硬件加速渲染，并在渲染性能和脚本执行效率上做了大量优化。基于 Flutter 构建统一的跨平台界面，支持 macOS · iOS · Windows · Linux · Android 五大平台。
-
-下图为当前在 macOS 上通过 Metal 后端运行的实际效果：
+The project reimagines the entire rendering and UI stack — replacing the legacy Cocos2d-x + GLFW pipeline with an **ANGLE-based offscreen rendering pipeline** and a **Flutter-based UI** — to bring KiriKiri2 games to five major platforms: **macOS, iOS, Windows, Linux, and Android**.
 
 <p align="center">
-  <img src="doc/1.png" alt="macOS Metal 后端运行截图" width="800">
+  <img src="doc/1.png" alt="Running on macOS with Metal backend" width="800">
 </p>
 
-## 架构
+## Key Highlights
+
+### Zero-Copy Hardware-Accelerated Rendering
+The engine renders offscreen via ANGLE's EGL Pbuffer Surface (OpenGL ES 2.0), then delivers frames to the Flutter Texture Widget through **platform-native zero-copy texture sharing** — no pixel buffers are copied across the engine/UI boundary:
+
+| Platform | Graphics API | Zero-Copy Mechanism |
+|----------|-------------|-------------------|
+| macOS / iOS | Metal | IOSurface |
+| Windows | Direct3D 11 | D3D11 Texture |
+| Linux | Vulkan / Desktop GL | DMA-BUF |
+| Android | OpenGL ES / Vulkan | HardwareBuffer |
+
+### Full Game Script Compatibility
+AetherKiri runs original KiriKiri2 game scripts (TJS2) without modification. It faithfully implements the complete KiriKiri2 virtual machine, plugin system, and resource archive (XP3) handling.
+
+### SIMD-Accelerated Pixel Operations
+Pixel blending and compositing are accelerated using the [Highway](https://github.com/google/highway) library for cross-platform SIMD (SSE/AVX/NEON), yielding significant speedups in software rendering paths.
+
+### Modern Flutter UI
+A unified Flutter-based interface replaces platform-specific native UI code, providing a consistent experience across desktop and mobile with built-in debugging tools (FPS monitor, engine lifecycle management, rendering state inspection).
+
+### Modular Plugin Architecture
+Games relying on custom native plugins are supported through a stub/mock system that gracefully degrades missing plugins, improving compatibility across a wider range of titles.
+
+## Architecture
 
 <p align="center">
-  <img src="doc/architecture.png" alt="技术架构图" width="700">
+  <img src="doc/architecture.png" alt="Architecture" width="700">
 </p>
 
-**渲染管线**：引擎通过 ANGLE 的 EGL Pbuffer Surface 进行离屏渲染（OpenGL ES 2.0），渲染结果通过平台原生纹理共享机制（macOS → IOSurface、Windows → D3D11 Texture、Linux → DMA-BUF）零拷贝传递给 Flutter Texture Widget 显示。
+```
+┌─────────────────────────────────────────────────┐
+│                 Flutter UI Layer                 │
+│          (Texture Widget, Input, Debug)          │
+├─────────────────────────────────────────────────┤
+│              engine_api C Bridge                 │
+│    engine_create / engine_tick / engine_destroy  │
+├─────────────────────────────────────────────────┤
+│              C++ Engine Core                     │
+│  ┌─────────┬──────────┬──────────┬───────────┐  │
+│  │  TJS2   │ Visual   │  Sound   │  Plugins  │  │
+│  │   VM    │ Renderer │  System  │  & Ext.   │  │
+│  └─────────┴──────────┴──────────┴───────────┘  │
+├─────────────────────────────────────────────────┤
+│              ANGLE (EGL / GLES 2.0)             │
+│         Offscreen Pbuffer Rendering             │
+├─────────────────────────────────────────────────┤
+│        Platform Graphics (Metal / D3D11 /        │
+│           Vulkan / GL / HW Buffer)              │
+└─────────────────────────────────────────────────┘
+```
 
+## Platform Support
 
-## 开发进度
+| Platform | Status | Notes |
+|----------|--------|-------|
+| macOS | Mostly Done | Metal backend via IOSurface; most mature platform |
+| iOS | In Progress | Pipeline working; OpenGL rendering being optimized |
+| Android | In Progress | Pipeline working; actively being optimized |
+| Windows | Planned | Direct3D 11 backend via D3D11 Texture |
+| Linux | Planned | Vulkan / Desktop GL backend via DMA-BUF |
 
-> ⚠️ 本项目处于活跃开发阶段，尚未发布稳定版本。macOS 平台进度领先。
+> This project is under active development. No stable release is available yet.
 
-| 模块 | 状态 | 说明 |
-|------|------|------|
-| C++ 引擎核心编译 | ✅ 完成 | KiriKiri2 核心引擎全平台可编译 |
-| ANGLE 渲染层迁移 | ✅ 基本完成 | 替代原 Cocos2d-x + GLFW 渲染管线，使用 EGL/GLES 离屏渲染 |
-| engine_api 桥接层 | ✅ 完成 | 导出 `engine_create` / `engine_tick` / `engine_destroy` 等 C API |
-| Flutter Plugin | ✅ 基本完成 | Platform Channel 通信、Texture 纹理桥接 |
-| Texture 零拷贝渲染 | ✅ 基本完成 | 通过平台原生纹理共享机制零拷贝传递引擎渲染帧到 Flutter |
-| Flutter 调试 UI | ✅ 基本完成 | FPS 控制、引擎生命周期管理、渲染状态监控 |
-| 输入事件转发 | ✅ 基本完成 | 鼠标 / 触控事件坐标映射转发到引擎 |
-| 引擎性能优化 | 🔨 进行中 | SIMD 像素混合、GPU 合成管线、VM 解释器优化等 |
-| 游戏兼容性优化 | 🔨 进行中 | 补全解析引擎、添加插件，阶段目标与 Z 大闭源版兼容性持平 |
-| 原有 krkr2 模拟器功能移植 | 📋 规划中 | 将原有 krkr2 模拟器功能逐步移植到新架构 |
+## Development Progress
 
-## 平台支持状态
+| Module | Status | Notes |
+|--------|--------|-------|
+| C++ Engine Core | Done | KiriKiri2 core engine compiles on all platforms |
+| ANGLE Rendering Migration | Mostly Done | Replaced legacy Cocos2d-x + GLFW with EGL/GLES offscreen rendering |
+| engine_api Bridge Layer | Done | Exports `engine_create` / `engine_tick` / `engine_destroy` C APIs |
+| Flutter Plugin | Mostly Done | Platform Channel communication, Texture bridge |
+| Zero-Copy Texture Rendering | Mostly Done | Platform-native texture sharing to Flutter |
+| Flutter Debug UI | Mostly Done | FPS control, engine lifecycle, rendering status |
+| Input Event Forwarding | Mostly Done | Mouse / touch coordinate mapping to engine |
+| Plugin System Completion | In Progress | Expanding game-specific plugin coverage and stub accuracy |
+| Game Compatibility | In Progress | Parser completion, plugin stubs, font handling improvements |
+| Original krkr2 Feature Porting | Planned | Gradual migration of original emulator features |
 
-| 平台 | 状态 | 图形后端 | 纹理共享机制 |
-|------|------|----------|-------------|
-| macOS | ✅ 基本完成 | Metal | IOSurface |
-| iOS | 🔨 流程打通，正在优化和修复 OpenGL 渲染 | Metal | IOSurface |
-| Windows | 📋 计划中 | Direct3D 11 | D3D11 Texture |
-| Linux | 📋 计划中 | Vulkan / Desktop GL | DMA-BUF |
-| Android | 🔨 流程跑通，优化中 | OpenGL ES / Vulkan | HardwareBuffer |
+## Roadmap
 
-## 引擎性能优化
+| Priority | Task | Status |
+|----------|------|--------|
+| P0 | Complete the plugin system (game-specific plugin reimplementation & stub coverage) | In Progress |
+| P0 | SIMD pixel blending ([Highway](https://github.com/google/highway)) | Done |
+| P1 | TJS2 VM interpreter optimization (computed goto) | Planned |
+| P1 | OpenMP parallelization for CPU-intensive paths | In Progress |
 
-| 优先级 | 任务 | 状态 |
-|--------|------|------|
-| P0 | 像素混合 SIMD 化 ([Highway](https://github.com/google/highway)) | ✅ 完成 |
-| P0 | 全 GPU 合成渲染管线 | 🔨 进行中 |
-| P0 | TJS2 VM 解释器优化 (computed goto) | 📋 计划中 |
-## 许可证
+## Contributing
 
-本项目基于 GNU General Public License v3.0 (GPL-3.0) 开源，详见 [LICENSE](./LICENSE)。
+**We are actively looking for reverse engineers.**
+
+Many KiriKiri2 games ship with custom native plugins (`.dll` / `.so`) that are critical for gameplay. Reverse engineering these plugins and re-implementing them as native TJS2 extensions or compatible stubs is the biggest bottleneck for game compatibility right now. If you have experience with binary reverse engineering, Win32 API, or Japanese visual novel internals, your help would make a direct impact.
+
+See the `cpp/plugins/` directory for existing plugin implementations and stubs to get started.
+
+General contributions (bug fixes, new platform ports, plugin stubs, test coverage) are also welcome — feel free to open issues or pull requests.
+
+## Building
+
+### Prerequisites
+
+- CMake 3.28+
+- Flutter SDK
+- vcpkg (configured via `vcpkg-configuration.json`)
+- Platform-specific toolchains:
+  - **macOS/iOS**: Xcode, Metal SDK
+  - **Android**: Android NDK
+  - **Windows**: Visual Studio 2019+, Windows SDK
+  - **Linux**: Vulkan headers, Mesa
+
+### Build
+
+```bash
+# Clone with submodules
+git clone --recursive https://github.com/<your-repo>/AetherKiri.git
+cd AetherKiri
+
+# Build using the unified script
+./build.sh
+```
+
+Platform-specific build scripts are also available:
+- `build_android_windows.ps1` — Build Android from Windows
+- `build_release.bat` — Windows release build
+
+## Acknowledgements
+
+- **[KrKr2-Next](https://github.com/reAAAq/KrKr2-Next)** — The original project this was forked from
+- **[KiriKiri2](https://en.wikipedia.org/wiki/KiriKiri)** — The visual novel engine by w.dee
+- **[ANGLE](https://chromium.googlesource.com/angle/angle)** — OpenGL ES implementation on top of platform graphics APIs
+- **[Highway](https://github.com/google/highway)** — Cross-platform SIMD library
+- **[Flutter](https://flutter.dev)** — Cross-platform UI framework
+
+## License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. See [LICENSE](./LICENSE) for details.
