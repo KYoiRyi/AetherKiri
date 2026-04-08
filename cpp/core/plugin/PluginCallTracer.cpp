@@ -525,11 +525,10 @@ tjs_error PluginPropertyProxy::Reserved3() { return m_original->Reserved3(); }
 
 static const char *TypeToStr(tTJSNativeInstanceType type) {
     switch (type) {
-    case nitMethod:     return "method";
-    case nitProperty:   return "property";
-    case nitClass:      return "class";
-    case nitConstructor:return "constructor";
-    default:            return "unknown";
+    case nitMethod:   return "method";
+    case nitProperty: return "property";
+    case nitClass:    return "class";
+    default:          return "unknown";
     }
 }
 
