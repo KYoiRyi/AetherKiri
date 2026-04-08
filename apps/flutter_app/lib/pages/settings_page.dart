@@ -26,6 +26,7 @@ class SettingsPage extends StatefulWidget {
     required this.renderer,
     required this.angleBackend,
     required this.forceLandscape,
+    required this.pluginTrace,
   });
 
   final EngineMode engineMode;
@@ -38,6 +39,7 @@ class SettingsPage extends StatefulWidget {
   final String renderer;
   final String angleBackend;
   final bool forceLandscape;
+  final bool pluginTrace;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -54,6 +56,7 @@ class SettingsResult {
     required this.renderer,
     required this.angleBackend,
     required this.forceLandscape,
+    required this.pluginTrace,
   });
 
   final EngineMode engineMode;
@@ -64,6 +67,7 @@ class SettingsResult {
   final String renderer;
   final String angleBackend;
   final bool forceLandscape;
+  final bool pluginTrace;
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -75,6 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late String _renderer;
   String _angleBackend = PrefsKeys.angleBackendGles;
   late bool _forceLandscape;
+  late bool _pluginTrace;
   String _localeCode = 'system';
   String _themeModeCode = 'dark';
   bool _dirty = false;
@@ -90,6 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _renderer = widget.renderer;
     _angleBackend = widget.angleBackend;
     _forceLandscape = widget.forceLandscape;
+    _pluginTrace = widget.pluginTrace;
     _loadLocale();
     _loadThemeMode();
   }
@@ -129,6 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString(PrefsKeys.renderer, _renderer);
     await prefs.setString(PrefsKeys.angleBackend, _angleBackend);
     await prefs.setBool(PrefsKeys.forceLandscape, _forceLandscape);
+    await prefs.setBool(PrefsKeys.pluginTrace, _pluginTrace);
 
     if (mounted) {
       Navigator.pop(
@@ -142,6 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
           renderer: _renderer,
           angleBackend: _angleBackend,
           forceLandscape: _forceLandscape,
+          pluginTrace: _pluginTrace,
         ),
       );
     }
@@ -445,6 +453,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       },
                     ),
                   ],
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.pluginTrace),
+                    subtitle: Text(l10n.pluginTraceDesc),
+                    value: _pluginTrace,
+                    onChanged: (value) {
+                      setState(() => _pluginTrace = value);
+                      _markDirty();
+                    },
+                  ),
                 ],
               ),
             ),

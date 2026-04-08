@@ -43,6 +43,9 @@
 /** Auto path cache max entry count. */
 #define ENGINE_OPTION_AUTOPATH_CACHE_COUNT "autopath_cache_count"
 
+/** Enable plugin call tracing to plugin_trace.log ("0"/"1"). */
+#define ENGINE_OPTION_PLUGIN_TRACE "plugin_trace"
+
 /* ── ANGLE Backend Values ───────────────────────────────────────── */
 
 /** Use ANGLE's OpenGL ES backend (default). */

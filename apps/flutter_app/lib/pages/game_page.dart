@@ -23,6 +23,7 @@ class GamePage extends StatefulWidget {
     this.ffiLibraryPath,
     this.engineBridgeBuilder = createEngineBridge,
     this.forceLandscape = true,
+    this.pluginTrace = false,
     this.gameManager,
   });
 
@@ -30,6 +31,7 @@ class GamePage extends StatefulWidget {
   final String? ffiLibraryPath;
   final EngineBridgeBuilder engineBridgeBuilder;
   final bool forceLandscape;
+  final bool pluginTrace;
 
   /// If set, play duration is recorded when leaving this page.
   final GameManager? gameManager;
@@ -401,6 +403,14 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
 
     await _applyMemoryGovernorOptions();
+
+    if (widget.pluginTrace) {
+      _log('Enabling plugin_trace');
+      await _bridge.engineSetOption(
+        key: PrefsKeys.optionPluginTrace,
+        value: '1',
+      );
+    }
 
     if (!mounted) return;
     setState(() => _phase = _EnginePhase.opening);

@@ -354,15 +354,21 @@ void TVPLoadPlugin(const ttstr &name) {
 
     if(TVPLoadInternalPlugin(pluginName)) {
         spdlog::debug("Loading Plugin: {} Success", name.AsStdString());
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), true, nullptr);
     } else {
         spdlog::error("Loading Plugin: {} Failed", name.AsStdString());
+        const char *stub = nullptr;
         if(name == TJS_W("proxyfs.dll")) {
             TVPRegisterProxyFsStub();
+            stub = "ProxyStorageMap stub";
         } else if(name == TJS_W("gamepad.dll")) {
             TVPRegisterGamepadStub();
+            stub = "GamepadStub";
         } else if(name == TJS_W("gfxEffect.dll") || name == TJS_W("gfxfire.dll") || name == TJS_W("gfxFire.dll")) {
             TVPRegisterGfxFireStub();
+            stub = "gfxFireStub";
         }
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), false, stub);
     }
 }
 
@@ -403,8 +409,10 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin> &list,
 }
 
 void TVPLoadInternalPlugins() {
+    PluginCallTracer::Instance().LogRegistrationStart();
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadAllModules();
+    PluginCallTracer::Instance().LogRegistrationEnd();
 }
 
 bool TVPLoadInternalPlugin(const ttstr &_name) {

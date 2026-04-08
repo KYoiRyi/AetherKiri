@@ -12,6 +12,7 @@
 #include "CharacterSet.h"
 
 #include "ncb_invoke.hpp"
+#include "PluginCallTracer.hpp"
 #include <map>
 #include <list>
 
@@ -1882,7 +1883,13 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase {
 			_hasCtor = true;
 		}
 		if (item) {
-			TJSNativeClassRegisterNCM(_classobj, name, item->GetDispatch(), _className, item->GetType(), item->GetFlags());
+			// Log registration info
+			PluginCallTracer::Instance().LogRegistration(
+				ttstr(_className), ttstr(name), item->GetType(), item->GetFlags());
+
+			iTJSDispatch2 *dsp = item->GetDispatch();
+			dsp = PluginCallTracer::Instance().WrapDispatch(ttstr(_className), ttstr(name), dsp, item->GetType());
+			TJSNativeClassRegisterNCM(_classobj, name, dsp, _className, item->GetType(), item->GetFlags());
 			if (!TJS_strcmp(name, TJS_W("missing"))) {
 				tTJSVariant missingVar(TJS_W("missing"));
 				_classobj->ClassInstanceInfo(TJS_CII_SET_MISSING, 0, &missingVar);

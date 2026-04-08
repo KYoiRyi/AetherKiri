@@ -44,6 +44,7 @@ class _HomePageState extends State<HomePage> {
   String _renderer = PrefsKeys.rendererOpengl;
   String _angleBackend = PrefsKeys.angleBackendGles;
   bool _forceLandscape = true;
+  bool _pluginTrace = false;
 
   String? _resolveBuiltInDylibPath() {
     if (Platform.isIOS) {
@@ -100,6 +101,7 @@ class _HomePageState extends State<HomePage> {
     _renderer = prefs.getString(PrefsKeys.renderer) ?? PrefsKeys.rendererOpengl;
     _angleBackend = prefs.getString(PrefsKeys.angleBackend) ?? PrefsKeys.angleBackendGles;
     _forceLandscape = prefs.getBool(PrefsKeys.forceLandscape) ?? true;
+    _pluginTrace = prefs.getBool(PrefsKeys.pluginTrace) ?? false;
     await _gameManager.load();
     await _gameManager.applyPendingPlaySession();
 
@@ -553,6 +555,7 @@ class _HomePageState extends State<HomePage> {
           gamePath: game.path,
           ffiLibraryPath: dylibPath,
           forceLandscape: _forceLandscape,
+          pluginTrace: _pluginTrace,
           gameManager: _gameManager,
         ),
       ),
@@ -734,6 +737,7 @@ class _HomePageState extends State<HomePage> {
           renderer: _renderer,
           angleBackend: _angleBackend,
           forceLandscape: _forceLandscape,
+          pluginTrace: _pluginTrace,
         ),
       ),
     );
@@ -750,6 +754,7 @@ class _HomePageState extends State<HomePage> {
         _renderer = result.renderer;
         _angleBackend = result.angleBackend;
         _forceLandscape = result.forceLandscape;
+        _pluginTrace = result.pluginTrace;
       });
     }
   }
