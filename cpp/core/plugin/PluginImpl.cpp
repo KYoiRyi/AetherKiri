@@ -409,10 +409,11 @@ void TVPLoadInternalPlugins() {
     PluginCallTracer::Instance().InitLogger(
         TVPGetInternalPreferencePath() + "plugin_trace.log");
     {
-        ttstr val;
-        if (TVPGetCommandLine(TJS_W("plugin_trace"), val)) {
+        tTJSVariant val;
+        if (TVPGetCommandLine(TJS_W("plugin_trace"), &val)) {
+            ttstr s(val);
             PluginCallTracer::Instance().SetEnabled(
-                val == TJS_W("1") || val == TJS_W("true"));
+                s == TJS_W("1") || s == TJS_W("true"));
         }
     }
 
