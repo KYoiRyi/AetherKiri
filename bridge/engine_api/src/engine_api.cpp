@@ -564,6 +564,14 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #endif
   spdlog::default_logger()->flush();
 
+  // Initialize plugin trace logger in game directory
+  if (PluginCallTracer::Instance().IsEnabled()) {
+    std::string trace_path = normalized_game_root_path;
+    if (!trace_path.empty() && trace_path.back() != '/') trace_path += "/";
+    trace_path += "plugin_trace.log";
+    PluginCallTracer::Instance().InitLogger(trace_path);
+  }
+
   try {
     spdlog::debug("engine_open_game: calling Application->StartApplication...");
 #if defined(__ANDROID__)

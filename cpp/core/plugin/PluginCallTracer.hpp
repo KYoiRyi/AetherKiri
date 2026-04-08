@@ -279,6 +279,14 @@ public:
     void LogPropSet(const std::string &className, const std::string &memberName,
                     const tTJSVariant *value);
 
+    // Registration phase logging
+    void LogRegistrationStart();
+    void LogRegistration(const ttstr &className, const ttstr &memberName,
+                         tTJSNativeInstanceType type, tjs_uint32 flags);
+    void LogRegistrationEnd();
+
+    void LogPluginLoad(const std::string &name, bool success, const char *stub);
+
 private:
     PluginCallTracer() = default;
     ~PluginCallTracer() = default;

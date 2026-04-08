@@ -7,6 +7,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <cstring>
+#include <sys/stat.h>
 
 // ===========================================================================
 // PluginCallTracer singleton
@@ -517,3 +518,58 @@ tjs_error PluginPropertyProxy::ClassInstanceInfo(tjs_uint32 flag, tjs_uint num,
 
 tjs_error PluginPropertyProxy::Reserved2() { return m_original->Reserved2(); }
 tjs_error PluginPropertyProxy::Reserved3() { return m_original->Reserved3(); }
+
+// ===========================================================================
+// Registration phase logging
+// ===========================================================================
+
+static const char *TypeToStr(tTJSNativeInstanceType type) {
+    switch (type) {
+    case nitMethod:     return "method";
+    case nitProperty:   return "property";
+    case nitClass:      return "class";
+    case nitConstructor:return "constructor";
+    default:            return "unknown";
+    }
+}
+
+void PluginCallTracer::LogRegistrationStart() {
+    if (!m_logger) return;
+    m_logger->info("");
+    m_logger->info("====== Plugin Registration ======");
+}
+
+void PluginCallTracer::LogRegistration(const ttstr &className,
+                                       const ttstr &memberName,
+                                       tTJSNativeInstanceType type,
+                                       tjs_uint32 flags) {
+    if (!m_logger) return;
+    tTJSNarrowStringHolder nc(className.c_str());
+    tTJSNarrowStringHolder nm(memberName.c_str());
+    std::string cn = nc.operator const char *();
+    std::string mn = nm.operator const char *();
+    const char *ts = TypeToStr(type);
+    bool isStatic = (flags & TJS_STATICMEMBER) != 0;
+
+    m_logger->info("  [{}] {}.{}{}", ts, cn, mn, isStatic ? " (static)" : "");
+}
+
+void PluginCallTracer::LogRegistrationEnd() {
+    if (!m_logger) return;
+    m_logger->info("====== Registration Complete ======");
+    m_logger->info("");
+    m_logger->flush();
+}
+
+void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
+                                     const char *stub) {
+    if (!m_logger) return;
+    if (success) {
+        m_logger->info("[Plugin] {} loaded OK", name);
+    } else if (stub) {
+        m_logger->info("[Plugin] {} MISSING → fallback: {}", name, stub);
+    } else {
+        m_logger->info("[Plugin] {} MISSING (no fallback)", name);
+    }
+    m_logger->flush();
+}

@@ -37,8 +37,6 @@
 #include "FilePathUtil.h"
 #include "Application.h"
 #include "SysInitImpl.h"
-#include "SysInitIntf.h"
-#include "Platform.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -356,15 +354,21 @@ void TVPLoadPlugin(const ttstr &name) {
 
     if(TVPLoadInternalPlugin(pluginName)) {
         spdlog::debug("Loading Plugin: {} Success", name.AsStdString());
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), true, nullptr);
     } else {
         spdlog::error("Loading Plugin: {} Failed", name.AsStdString());
+        const char *stub = nullptr;
         if(name == TJS_W("proxyfs.dll")) {
             TVPRegisterProxyFsStub();
+            stub = "ProxyStorageMap stub";
         } else if(name == TJS_W("gamepad.dll")) {
             TVPRegisterGamepadStub();
+            stub = "GamepadStub";
         } else if(name == TJS_W("gfxEffect.dll") || name == TJS_W("gfxfire.dll") || name == TJS_W("gfxFire.dll")) {
             TVPRegisterGfxFireStub();
+            stub = "gfxFireStub";
         }
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), false, stub);
     }
 }
 
@@ -405,20 +409,10 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin> &list,
 }
 
 void TVPLoadInternalPlugins() {
-    // Initialize plugin call tracer before any plugin registration
-    PluginCallTracer::Instance().InitLogger(
-        TVPGetInternalPreferencePath() + "plugin_trace.log");
-    {
-        tTJSVariant val;
-        if (TVPGetCommandLine(TJS_W("plugin_trace"), &val)) {
-            ttstr s(val);
-            PluginCallTracer::Instance().SetEnabled(
-                s == TJS_W("1") || s == TJS_W("true"));
-        }
-    }
-
+    PluginCallTracer::Instance().LogRegistrationStart();
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadAllModules();
+    PluginCallTracer::Instance().LogRegistrationEnd();
 }
 
 bool TVPLoadInternalPlugin(const ttstr &_name) {

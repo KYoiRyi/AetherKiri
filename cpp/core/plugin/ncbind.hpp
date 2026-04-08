@@ -1883,6 +1883,10 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase {
 			_hasCtor = true;
 		}
 		if (item) {
+			// Log registration info
+			PluginCallTracer::Instance().LogRegistration(
+				ttstr(_className), ttstr(name), item->GetType(), item->GetFlags());
+
 			iTJSDispatch2 *dsp = item->GetDispatch();
 			if (PluginCallTracer::Instance().IsEnabled())
 				dsp = PluginCallTracer::Instance().WrapDispatch(ttstr(_className), ttstr(name), dsp, item->GetType());
