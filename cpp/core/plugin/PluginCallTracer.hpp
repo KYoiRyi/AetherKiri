@@ -295,6 +295,9 @@ private:
 
     void EnsureLogger();
 
+    /// Direct logger access for proxy diagnostics.
+    std::shared_ptr<spdlog::logger> GetLogger() const { return m_logger; }
+
     std::shared_ptr<spdlog::logger> m_logger;
     std::string m_logFilePath;
     std::mutex m_mutex;

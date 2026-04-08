@@ -141,6 +141,10 @@ PluginMethodProxy::PluginMethodProxy(const std::string &className,
                                      iTJSDispatch2 *original)
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
+    PluginCallTracer::Instance().EnsureLogger();
+    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
+        logger->info("[PROXY CREATED] {}.{} (method)", className, memberName);
+    }
 }
 
 PluginMethodProxy::~PluginMethodProxy() {
@@ -155,10 +159,18 @@ tjs_error PluginMethodProxy::FuncCall(tjs_uint32 flag,
                                       tjs_uint32 *hint, tTJSVariant *result,
                                       tjs_int numparams, tTJSVariant **param,
                                       iTJSDispatch2 *objthis) {
-    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
+    if (!membername) {
         // Actual method invocation (membername==nullptr means resolved)
-        PluginCallTracer::Instance().LogMethodCall(
-            m_className, m_memberName, numparams, param);
+        auto logger = PluginCallTracer::Instance().GetLogger();
+        if (logger) {
+            logger->info("[FUNCALL] {}.{}(argc={}) enabled={}",
+                         m_className, m_memberName, numparams,
+                         PluginCallTracer::Instance().IsEnabled());
+        }
+        if (PluginCallTracer::Instance().IsEnabled()) {
+            PluginCallTracer::Instance().LogMethodCall(
+                m_className, m_memberName, numparams, param);
+        }
     }
     return m_original->FuncCall(flag, membername, hint, result, numparams, param, objthis);
 }
@@ -334,6 +346,10 @@ PluginPropertyProxy::PluginPropertyProxy(const std::string &className,
                                          iTJSDispatch2 *original)
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
+    PluginCallTracer::Instance().EnsureLogger();
+    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
+        logger->info("[PROXY CREATED] {}.{} (property)", className, memberName);
+    }
 }
 
 PluginPropertyProxy::~PluginPropertyProxy() {
@@ -347,8 +363,16 @@ tjs_error PluginPropertyProxy::PropGet(tjs_uint32 flag,
                                        const tjs_char *membername,
                                        tjs_uint32 *hint, tTJSVariant *result,
                                        iTJSDispatch2 *objthis) {
-    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
-        PluginCallTracer::Instance().LogPropGet(m_className, m_memberName);
+    if (!membername) {
+        auto logger = PluginCallTracer::Instance().GetLogger();
+        if (logger) {
+            logger->info("[PROPGET] {}.{} enabled={}",
+                         m_className, m_memberName,
+                         PluginCallTracer::Instance().IsEnabled());
+        }
+        if (PluginCallTracer::Instance().IsEnabled()) {
+            PluginCallTracer::Instance().LogPropGet(m_className, m_memberName);
+        }
     }
     return m_original->PropGet(flag, membername, hint, result, objthis);
 }
@@ -358,8 +382,16 @@ tjs_error PluginPropertyProxy::PropSet(tjs_uint32 flag,
                                        tjs_uint32 *hint,
                                        const tTJSVariant *param,
                                        iTJSDispatch2 *objthis) {
-    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
-        PluginCallTracer::Instance().LogPropSet(m_className, m_memberName, param);
+    if (!membername) {
+        auto logger = PluginCallTracer::Instance().GetLogger();
+        if (logger) {
+            logger->info("[PROPSET] {}.{} enabled={}",
+                         m_className, m_memberName,
+                         PluginCallTracer::Instance().IsEnabled());
+        }
+        if (PluginCallTracer::Instance().IsEnabled()) {
+            PluginCallTracer::Instance().LogPropSet(m_className, m_memberName, param);
+        }
     }
     return m_original->PropSet(flag, membername, hint, param, objthis);
 }
