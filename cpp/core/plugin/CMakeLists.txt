@@ -6,6 +6,7 @@ set(PLUGIN_SOURCE_FILES
         ${PLUGIN_PATH}/ncbind.cpp
         ${PLUGIN_PATH}/PluginIntf.cpp
         ${PLUGIN_PATH}/PluginImpl.cpp
+        ${PLUGIN_PATH}/PluginCallTracer.cpp
 )
 
 set(PLUGIN_HEADERS_DIR

@@ -50,6 +50,7 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "visual/RenderManager.h"
 #include "psbfile/PSBMedia.h"
 #include "engine_options.h"
+#include "PluginCallTracer.hpp"
 
 int TVPDrawSceneOnce(int interval);
 
@@ -1457,6 +1458,19 @@ engine_result_t engine_set_option(engine_handle_t handle,
       impl->render.angle_backend = krkr::AngleBackend::OpenGLES;
     }
     spdlog::info("engine_set_option: angle_backend={}", option->value_utf8);
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
+  // Handle plugin_trace option: enable/disable plugin call tracing
+  if (key == ENGINE_OPTION_PLUGIN_TRACE) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    PluginCallTracer::Instance().SetEnabled(enabled);
+    spdlog::info("engine_set_option: plugin_trace={}", enabled);
+    // Also store in command line so TVPLoadInternalPlugins can read it
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
     ClearHandleErrorLocked(impl);
     SetThreadError(nullptr);
     return ENGINE_RESULT_OK;

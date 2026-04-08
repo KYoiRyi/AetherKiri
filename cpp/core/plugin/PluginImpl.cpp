@@ -37,6 +37,8 @@
 #include "FilePathUtil.h"
 #include "Application.h"
 #include "SysInitImpl.h"
+#include "SysInitIntf.h"
+#include "Platform.h"
 
 #ifdef _MSC_VER
 #define strcasecmp _stricmp
@@ -403,6 +405,17 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin> &list,
 }
 
 void TVPLoadInternalPlugins() {
+    // Initialize plugin call tracer before any plugin registration
+    PluginCallTracer::Instance().InitLogger(
+        TVPGetInternalPreferencePath() + "plugin_trace.log");
+    {
+        ttstr val;
+        if (TVPGetCommandLine(TJS_W("plugin_trace"), val)) {
+            PluginCallTracer::Instance().SetEnabled(
+                val == TJS_W("1") || val == TJS_W("true"));
+        }
+    }
+
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadAllModules();
 }

@@ -94,6 +94,8 @@
   "fpsLimitOff": "Off (VSync)",
   "forceLandscape": "Lock Landscape",
   "forceLandscapeDesc": "Force landscape orientation when running games (recommended for phones)",
+  "pluginTrace": "Plugin Trace Log",
+  "pluginTraceDesc": "Record all plugin native calls to plugin_trace.log for debugging",
   "targetFrameRate": "Target Frame Rate",
   "targetFrameRateDesc": "Maximum rendering frequency when limit is enabled",
   "fpsLabel": "{fps} FPS",
