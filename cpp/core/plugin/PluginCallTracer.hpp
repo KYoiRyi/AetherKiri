@@ -264,6 +264,10 @@ public:
 
     bool IsEnabled() const { return m_enabled; }
 
+    /// Direct logger access (used by proxy objects for diagnostics).
+    void EnsureLogger();
+    std::shared_ptr<spdlog::logger> GetLogger() const { return m_logger; }
+
     /// Wrap a dispatch object with the appropriate proxy.
     /// Returns the original pointer unchanged if tracing is disabled.
     iTJSDispatch2 *WrapDispatch(const ttstr &className, const ttstr &memberName,
@@ -292,11 +296,6 @@ private:
     ~PluginCallTracer() = default;
     PluginCallTracer(const PluginCallTracer &) = delete;
     PluginCallTracer &operator=(const PluginCallTracer &) = delete;
-
-    void EnsureLogger();
-
-    /// Direct logger access for proxy diagnostics.
-    std::shared_ptr<spdlog::logger> GetLogger() const { return m_logger; }
 
     std::shared_ptr<spdlog::logger> m_logger;
     std::string m_logFilePath;
