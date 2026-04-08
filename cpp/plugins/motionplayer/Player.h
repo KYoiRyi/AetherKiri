@@ -113,7 +113,6 @@ namespace motion {
             }
         }
         void clear(iTJSDispatch2 *target, tjs_int color) {
-            _composited = false;
             if(!target) return;
             tTJSVariant width, height;
             if(TJS_SUCCEEDED(target->PropGet(0, TJS_W("width"), nullptr, &width, target)) &&

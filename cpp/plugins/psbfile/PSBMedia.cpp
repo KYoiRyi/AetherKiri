@@ -760,15 +760,6 @@ namespace PSB {
                 if(!std::dynamic_pointer_cast<PSBDictionary>((*motionDict)[motionName])) {
                     motionName = "bt";
                 }
-                // If none of the common names exist, use the first available motion
-                if(!std::dynamic_pointer_cast<PSBDictionary>((*motionDict)[motionName])) {
-                    for(const auto &[mk, mv] : *motionDict) {
-                        if(std::dynamic_pointer_cast<PSBDictionary>(mv)) {
-                            motionName = mk;
-                            break;
-                        }
-                    }
-                }
 
                 CollectLayersFromMotion(motionDict, motionName, sceneName,
                     0, 0, objectTree, positions, &buttons, logger);
