@@ -57,8 +57,9 @@ iTJSDispatch2 *PluginCallTracer::WrapDispatch(const ttstr &className,
                                                iTJSDispatch2 *original,
                                                tTJSNativeInstanceType type) {
     if (!original) return nullptr;
-    if (!m_enabled) return original;
 
+    // Always create proxies so that logging can be enabled at any time.
+    // Each proxy checks IsEnabled() at call time.
     std::string cn, mn;
     { // Convert ttstr to narrow strings for logging
         tTJSNarrowStringHolder nc(className.c_str());
@@ -154,7 +155,7 @@ tjs_error PluginMethodProxy::FuncCall(tjs_uint32 flag,
                                       tjs_uint32 *hint, tTJSVariant *result,
                                       tjs_int numparams, tTJSVariant **param,
                                       iTJSDispatch2 *objthis) {
-    if (!membername) {
+    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         // Actual method invocation (membername==nullptr means resolved)
         PluginCallTracer::Instance().LogMethodCall(
             m_className, m_memberName, numparams, param);
@@ -346,7 +347,7 @@ tjs_error PluginPropertyProxy::PropGet(tjs_uint32 flag,
                                        const tjs_char *membername,
                                        tjs_uint32 *hint, tTJSVariant *result,
                                        iTJSDispatch2 *objthis) {
-    if (!membername) {
+    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropGet(m_className, m_memberName);
     }
     return m_original->PropGet(flag, membername, hint, result, objthis);
@@ -357,7 +358,7 @@ tjs_error PluginPropertyProxy::PropSet(tjs_uint32 flag,
                                        tjs_uint32 *hint,
                                        const tTJSVariant *param,
                                        iTJSDispatch2 *objthis) {
-    if (!membername) {
+    if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropSet(m_className, m_memberName, param);
     }
     return m_original->PropSet(flag, membername, hint, param, objthis);

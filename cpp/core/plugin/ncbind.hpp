@@ -1888,8 +1888,7 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase {
 				ttstr(_className), ttstr(name), item->GetType(), item->GetFlags());
 
 			iTJSDispatch2 *dsp = item->GetDispatch();
-			if (PluginCallTracer::Instance().IsEnabled())
-				dsp = PluginCallTracer::Instance().WrapDispatch(ttstr(_className), ttstr(name), dsp, item->GetType());
+			dsp = PluginCallTracer::Instance().WrapDispatch(ttstr(_className), ttstr(name), dsp, item->GetType());
 			TJSNativeClassRegisterNCM(_classobj, name, dsp, _className, item->GetType(), item->GetFlags());
 			if (!TJS_strcmp(name, TJS_W("missing"))) {
 				tTJSVariant missingVar(TJS_W("missing"));
