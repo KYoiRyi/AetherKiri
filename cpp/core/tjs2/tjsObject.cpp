@@ -13,7 +13,7 @@
 #include "tjsObject.h"
 #include "tjsUtils.h"
 #include "tjsNative.h"
-#include "plugin/PluginCallTracer.hpp"
+#include "../plugin/PluginCallTracer.hpp"
 #include "tjsHashSearch.h"
 #include "tjsGlobalStringMap.h"
 #include "tjsDebug.h"
