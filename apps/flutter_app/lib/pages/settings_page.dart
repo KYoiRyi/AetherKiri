@@ -453,7 +453,19 @@ class _SettingsPageState extends State<SettingsPage> {
                       },
                     ),
                   ],
-                  const Divider(height: 1),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ── Development section ──
+            _SectionHeader(
+              icon: Icons.developer_mode,
+              label: l10n.settingsDevelopment,
+            ),
+            Card(
+              child: Column(
+                children: [
                   SwitchListTile(
                     title: Text(l10n.pluginTrace),
                     subtitle: Text(l10n.pluginTraceDesc),

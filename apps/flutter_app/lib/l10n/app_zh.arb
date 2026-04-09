@@ -64,6 +64,7 @@
   "selectEngineDylib": "选择引擎 dylib",
 
   "settingsRendering": "渲染",
+  "settingsDevelopment": "开发者",
   "renderPipeline": "渲染管线",
   "renderPipelineHint": "需要重启游戏后生效",
   "opengl": "OpenGL",

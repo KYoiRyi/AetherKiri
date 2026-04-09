@@ -79,6 +79,7 @@
   "selectEngineDylib": "Select Engine dylib",
 
   "settingsRendering": "Rendering",
+  "settingsDevelopment": "Development",
   "renderPipeline": "Render Pipeline",
   "renderPipelineHint": "Requires restarting the game to take effect",
   "opengl": "OpenGL",

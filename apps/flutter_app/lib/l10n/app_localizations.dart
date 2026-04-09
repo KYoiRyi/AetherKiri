@@ -394,6 +394,12 @@ abstract class AppLocalizations {
   /// **'Rendering'**
   String get settingsRendering;
 
+  /// No description provided for @settingsDevelopment.
+  ///
+  /// In en, this message translates to:
+  /// **'Development'**
+  String get settingsDevelopment;
+
   /// No description provided for @renderPipeline.
   ///
   /// In en, this message translates to:
