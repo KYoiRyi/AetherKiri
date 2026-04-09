@@ -13,7 +13,7 @@
 #include "tjsNative.h"
 #include "tjsError.h"
 #include "tjsGlobalStringMap.h"
-#include "plugin/PluginCallTracer.hpp"
+#include "../plugin/PluginCallTracer.hpp"
 #include "tjsDebug.h"
 
 namespace TJS {
