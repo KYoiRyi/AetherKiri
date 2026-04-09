@@ -564,9 +564,9 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #endif
   spdlog::default_logger()->flush();
 
-  // Always initialize plugin trace logger in game directory.
-  // Proxies check IsEnabled() at call time; the logger must exist regardless.
-  {
+  // Only initialize plugin trace logger when tracing is enabled.
+  // The toggle is set via engine_set_option before engine_open_game.
+  if (PluginCallTracer::Instance().IsEnabled()) {
     std::string trace_path = normalized_game_root_path;
     if (!trace_path.empty() && trace_path.back() != '/') trace_path += "/";
     trace_path += "plugin_trace.log";
