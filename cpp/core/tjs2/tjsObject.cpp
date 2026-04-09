@@ -1252,7 +1252,7 @@ namespace TJS {
                                               numparams, param, objthis);
             }
 
-            PluginCallTracer::Instance().LogMissingMember(membername, "FuncCall");
+            PluginCallTracer::Instance().LogMissingMember(membername, "FuncCall", objthis);
             return TJS_E_MEMBERNOTFOUND; // member not found
         }
 
@@ -1337,7 +1337,7 @@ namespace TJS {
         }
 
         if(!data) {
-            PluginCallTracer::Instance().LogMissingMember(membername, "PropGet");
+            PluginCallTracer::Instance().LogMissingMember(membername, "PropGet", objthis);
             return TJS_E_MEMBERNOTFOUND; // not found
         }
 
@@ -1413,7 +1413,7 @@ namespace TJS {
             data = Find(membername, hint);
 
         if(!data) {
-            PluginCallTracer::Instance().LogMissingMember(membername, "PropSet");
+            PluginCallTracer::Instance().LogMissingMember(membername, "PropSet", objthis);
             return TJS_E_MEMBERNOTFOUND; // not found
         }
 

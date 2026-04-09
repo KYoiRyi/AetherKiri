@@ -576,8 +576,25 @@ void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
 }
 
 void PluginCallTracer::LogMissingMember(const tjs_char *membername,
-                                         const char *operation) {
+                                         const char *operation,
+                                         iTJSDispatch2 *obj) {
     if (!m_logger) return;
     tTJSNarrowStringHolder ns(membername);
-    m_logger->info("[MISSING] {} \"{}\"", operation, ns.operator const char *());
+    std::string className;
+    if (obj) {
+        // Try to get the first class name from ClassInstanceInfo
+        tTJSVariant val;
+        if (TJS_SUCCEEDED(obj->ClassInstanceInfo(TJS_CII_GET, 0, &val))) {
+            ttstr cn(val);
+            tTJSNarrowStringHolder nc(cn.c_str());
+            className = nc.operator const char *();
+        }
+    }
+    if (className.empty()) {
+        m_logger->info("[MISSING] {} \"{}\"", operation,
+                       ns.operator const char *());
+    } else {
+        m_logger->info("[MISSING] {}.{} \"{}\"", className, operation,
+                       ns.operator const char *());
+    }
 }

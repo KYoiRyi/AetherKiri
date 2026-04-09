@@ -293,7 +293,10 @@ public:
 
     /// Log a call to a member that does not exist (missing plugin function).
     /// operation is "FuncCall", "PropGet", or "PropSet".
-    void LogMissingMember(const tjs_char *membername, const char *operation);
+    /// obj is the dispatch object on which the member was not found;
+    /// used to extract the class name for context.
+    void LogMissingMember(const tjs_char *membername, const char *operation,
+                          iTJSDispatch2 *obj);
 
 private:
     PluginCallTracer() = default;
