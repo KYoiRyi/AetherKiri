@@ -540,6 +540,11 @@ void PluginCallTracer::LogRegistrationStart() {
     m_logger->info("====== Plugin Registration ======");
 }
 
+void PluginCallTracer::LogModuleStart(const std::string &moduleName) {
+    if (!m_logger) return;
+    m_logger->info("--- Module: {} ---", moduleName);
+}
+
 void PluginCallTracer::LogRegistration(const ttstr &className,
                                        const ttstr &memberName,
                                        tTJSNativeInstanceType type,

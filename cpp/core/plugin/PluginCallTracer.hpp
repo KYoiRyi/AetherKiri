@@ -285,6 +285,7 @@ public:
 
     // Registration phase logging
     void LogRegistrationStart();
+    void LogModuleStart(const std::string &moduleName);
     void LogRegistration(const ttstr &className, const ttstr &memberName,
                          tTJSNativeInstanceType type, tjs_uint32 flags);
     void LogRegistrationEnd();

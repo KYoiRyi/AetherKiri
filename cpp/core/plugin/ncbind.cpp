@@ -1,4 +1,5 @@
 #include "ncbind.hpp"
+#include "PluginCallTracer.hpp"
 #include <set>
 #include <spdlog/spdlog.h>
 
@@ -20,6 +21,7 @@ bool ncbAutoRegister::LoadModule(const ttstr &_name)
     }
 	auto it = _internal_plugins.find(name);
 	if (it != _internal_plugins.end()) {
+        PluginCallTracer::Instance().LogModuleStart(name.AsStdString());
         spdlog::trace("ncbAutoRegister::LoadModule('{}'): found internal module",
                       name.AsStdString());
 		for (int line = 0; line < LINE_COUNT; ++line) {
@@ -66,6 +68,7 @@ void ncbAutoRegister::LoadAllModules()
 		const ttstr &name = kv.first;
 		if (TVPRegisteredPlugins.find(name) != TVPRegisteredPlugins.end())
 			continue;
+        PluginCallTracer::Instance().LogModuleStart(name.AsStdString());
         spdlog::trace("ncbAutoRegister::LoadAllModules: register '{}'",
                       name.AsStdString());
 		for (int line = 0; line < LINE_COUNT; ++line) {
