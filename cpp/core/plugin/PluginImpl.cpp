@@ -29,6 +29,7 @@
 #include "tjs.h"
 #include "tjsConfig.h"
 #include "ncbind.hpp"
+#include "combase.h"
 
 #ifdef TVP_SUPPORT_KPI
 #include "kmp_pi.h"
@@ -47,6 +48,7 @@ bool TVPLoadInternalPlugin(const ttstr &_name);
 bool TVPRegisterGlobalObject(const tjs_char *name, iTJSDispatch2 *dsp);
 
 static iTJSDispatch2 *s_ProxyStorageMap = nullptr;
+static iTVPStorageMedia *s_ProxyStorageMedia = nullptr;
 
 class tTJSNI_GamepadStub : public tTJSNativeInstance {
 public:
@@ -242,62 +244,190 @@ protected:
 tjs_uint32 tTJSNC_GamepadStub::ClassID = static_cast<tjs_uint32>(-1);
 tjs_uint32 tTJSNC_gfxFireStub::ClassID = static_cast<tjs_uint32>(-1);
 
+static ttstr TVPGetNormalizedPluginName(const ttstr &name) {
+    ttstr shortName = TVPExtractStorageName(name);
+    shortName.ToLowerCase();
+    return shortName;
+}
+
+static bool TVPIsProxyPluginName(const ttstr &name) {
+    return name == TJS_W("proxyfs.dll") || name == TJS_W("yuzuex.dll");
+}
+
+static bool TVPHasRegisteredProxyPluginAlias() {
+    return TVPRegisteredPlugins.find(TJS_W("proxyfs.dll")) !=
+               TVPRegisteredPlugins.end() ||
+           TVPRegisteredPlugins.find(TJS_W("yuzuex.dll")) !=
+               TVPRegisteredPlugins.end();
+}
+
+static bool TVPQueryProxyValue(const ttstr &name, tTJSVariant &value) {
+    if(!s_ProxyStorageMap)
+        return false;
+
+    ttstr key = TVPExtractStorageName(name);
+    if(key.IsEmpty())
+        return false;
+
+    key.ToLowerCase();
+
+    return TJS_SUCCEEDED(s_ProxyStorageMap->PropGet(
+        TJS_MEMBERMUSTEXIST, key.c_str(), nullptr, &value, s_ProxyStorageMap));
+}
+
+static bool TVPLookupProxyTarget(const ttstr &name, ttstr *resolved) {
+    tTJSVariant value;
+    if(!TVPQueryProxyValue(name, value) || value.Type() != tvtString)
+        return false;
+
+    if(resolved) {
+        *resolved = value.GetString();
+        return !resolved->IsEmpty();
+    }
+
+    return true;
+}
+
+class tTVPProxyObjectLister : public tTJSDispatch {
+    iTVPStorageLister *Lister;
+    ttstr RequestedPath;
+
+public:
+    tTVPProxyObjectLister(const ttstr &requestedPath, iTVPStorageLister *lister) :
+        Lister(lister), RequestedPath(requestedPath) {}
+
+    tjs_error FuncCall(tjs_uint32, const tjs_char *, tjs_uint32 *,
+                       tTJSVariant *result, tjs_int numparams,
+                       tTJSVariant **param, iTJSDispatch2 *) override {
+        if(numparams > 1 && !(param[1]->AsInteger() & TJS_HIDDENMEMBER)) {
+            ttstr memberName = param[0]->GetString();
+            if(TVPExtractStoragePath(memberName) == RequestedPath)
+                Lister->Add(TVPExtractStorageName(memberName));
+        }
+
+        if(result)
+            *result = true;
+
+        return TJS_S_OK;
+    }
+};
+
+struct tTVPProxyLocalNameTryData {
+    ttstr *Name;
+};
+
+static void TJS_USERENTRY TVPProxyLocalNameTry(void *data) {
+    auto *arg = static_cast<tTVPProxyLocalNameTryData *>(data);
+    TVPGetLocalName(*arg->Name);
+}
+
+static bool TJS_USERENTRY TVPProxyLocalNameCatch(void *data,
+                                                 const tTVPExceptionDesc &) {
+    auto *arg = static_cast<tTVPProxyLocalNameTryData *>(data);
+    arg->Name->Clear();
+    return false;
+}
+
 class tTVPProxyStorageMedia : public iTVPStorageMedia {
     tjs_uint RefCount = 1;
-
-    ttstr ResolveProxy(const ttstr &name) {
-        if(!s_ProxyStorageMap) return ttstr();
-        tjs_int lastSlash = -1;
-        const tjs_char *p = name.c_str();
-        for(tjs_int i = 0; p[i]; i++) {
-            if(p[i] == TJS_W('/')) lastSlash = i;
-        }
-        ttstr key = (lastSlash >= 0) ? ttstr(p + lastSlash + 1) : name;
-        tTJSVariant val;
-        if(s_ProxyStorageMap->PropGet(TJS_MEMBERMUSTEXIST, key.c_str(),
-            nullptr, &val, s_ProxyStorageMap) == TJS_S_OK) {
-            return val.GetString();
-        }
-        return ttstr();
-    }
 public:
     void AddRef() override { RefCount++; }
     void Release() override { if(RefCount == 1) delete this; else RefCount--; }
     void GetName(ttstr &name) override { name = TJS_W("proxy"); }
-    void NormalizeDomainName(ttstr &name) override {
-        tjs_char *p = name.Independ();
-        while(*p) { if(*p >= TJS_W('A') && *p <= TJS_W('Z')) *p += TJS_W('a') - TJS_W('A'); p++; }
-    }
-    void NormalizePathName(ttstr &name) override {
-        tjs_char *p = name.Independ();
-        while(*p) { if(*p == TJS_W('\\')) *p = TJS_W('/'); if(*p >= TJS_W('A') && *p <= TJS_W('Z')) *p += TJS_W('a') - TJS_W('A'); p++; }
-    }
+    void NormalizeDomainName(ttstr &) override {}
+    void NormalizePathName(ttstr &) override {}
     bool CheckExistentStorage(const ttstr &name) override {
-        ttstr resolved = ResolveProxy(name);
-        if(resolved.IsEmpty()) return false;
-        return TVPIsExistentStorage(resolved);
+        return TVPLookupProxyTarget(name, nullptr);
     }
     tTJSBinaryStream *Open(const ttstr &name, tjs_uint32 flags) override {
-        ttstr resolved = ResolveProxy(name);
-        if(resolved.IsEmpty()) return nullptr;
-        return TVPCreateStream(resolved, flags);
+        ttstr resolved;
+        if(!TVPLookupProxyTarget(name, &resolved)) {
+            TVPThrowExceptionMessage(TJS_W("cannot open proxyfile:%1"), name);
+            return nullptr;
+        }
+
+        IStream *stream = nullptr;
+        tTJSBinaryStream *adapter = nullptr;
+
+        try {
+            stream = TVPCreateIStream(resolved, flags);
+            if(stream)
+                adapter = TVPCreateBinaryStreamAdapter(stream);
+        } catch(...) {
+            if(stream)
+                stream->Release();
+            TVPThrowExceptionMessage(TJS_W("cannot open proxyfile:%1"), name);
+            return nullptr;
+        }
+
+        if(stream)
+            stream->Release();
+
+        if(adapter)
+            return adapter;
+
+        TVPThrowExceptionMessage(TJS_W("cannot open proxyfile:%1"), name);
+        return nullptr;
     }
-    void GetListAt(const ttstr &, iTVPStorageLister *) override {}
-    void GetLocallyAccessibleName(ttstr &name) override { name.Clear(); }
+    void GetListAt(const ttstr &name, iTVPStorageLister *lister) override {
+        if(!s_ProxyStorageMap)
+            return;
+
+        tTJSVariantClosure closure(new tTVPProxyObjectLister(name, lister));
+        s_ProxyStorageMap->EnumMembers(TJS_IGNOREPROP, &closure,
+                                       s_ProxyStorageMap);
+        closure.Release();
+    }
+    void GetLocallyAccessibleName(ttstr &name) override {
+        ttstr resolved;
+        if(!TVPLookupProxyTarget(name, &resolved)) {
+            name.Clear();
+            return;
+        }
+
+        name = resolved;
+        tTVPProxyLocalNameTryData data{ &name };
+        TVPDoTryBlock(TVPProxyLocalNameTry, TVPProxyLocalNameCatch, nullptr,
+                      &data);
+    }
 };
 
-static void TVPRegisterProxyFsStub() {
+static bool TVPRegisterProxyFsStub() {
+    if(s_ProxyStorageMap && s_ProxyStorageMedia)
+        return true;
+
     iTJSDispatch2 *dict = TJSCreateDictionaryObject();
-    if(!dict) return;
+    if(!dict)
+        return false;
+
+    if(!TVPRegisterGlobalObject(TJS_W("ProxyStorageMap"), dict)) {
+        dict->Release();
+        return false;
+    }
+
     s_ProxyStorageMap = dict;
     s_ProxyStorageMap->AddRef();
-    TVPRegisterGlobalObject(TJS_W("ProxyStorageMap"), dict);
     dict->Release();
 
-    auto *media = new tTVPProxyStorageMedia();
-    TVPRegisterStorageMedia(media);
-    media->Release();
-    spdlog::info("Registered proxy storage media stub for missing proxyfs.dll");
+    s_ProxyStorageMedia = new tTVPProxyStorageMedia();
+    TVPRegisterStorageMedia(s_ProxyStorageMedia);
+
+    spdlog::info("Registered proxy storage media compatibility layer");
+    return true;
+}
+
+static void TVPUnregisterProxyFsStub() {
+    if(s_ProxyStorageMedia) {
+        TVPUnregisterStorageMedia(s_ProxyStorageMedia);
+        s_ProxyStorageMedia->Release();
+        s_ProxyStorageMedia = nullptr;
+    }
+
+    if(s_ProxyStorageMap) {
+        TVPRemoveGlobalObject(TJS_W("ProxyStorageMap"));
+        s_ProxyStorageMap->Release();
+        s_ProxyStorageMap = nullptr;
+    }
 }
 
 // gamepad.dll 未实现时注册 stub，避免 exgamepad.tjs 访问 GamepadPort 报错（逆向见：global["GamepadPort"]/["Gamepad"]，脚本用 SystemConfig.GamepadPort）
@@ -348,23 +478,33 @@ static void TVPRegisterGfxFireStub() {
 }
 
 void TVPLoadPlugin(const ttstr &name) {
+    ttstr normalizedShortName = TVPGetNormalizedPluginName(name);
+
     auto pluginName = name;
-    if(name == TJS_W("emoteplayer.dll"))
+    if(normalizedShortName == TJS_W("emoteplayer.dll"))
         pluginName = "motionplayer.dll";
 
-    if(TVPLoadInternalPlugin(pluginName)) {
+    const char *stub = nullptr;
+    bool loaded = TVPLoadInternalPlugin(pluginName);
+    if(!loaded && TVPIsProxyPluginName(normalizedShortName)) {
+        loaded = TVPRegisterProxyFsStub();
+        if(loaded) {
+            TVPRegisteredPlugins.insert(normalizedShortName);
+            stub = "ProxyStorageMap compatibility layer";
+        }
+    }
+
+    if(loaded) {
         spdlog::debug("Loading Plugin: {} Success", name.AsStdString());
-        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), true, nullptr);
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), true,
+                                                   stub);
     } else {
         spdlog::error("Loading Plugin: {} Failed", name.AsStdString());
-        const char *stub = nullptr;
-        if(name == TJS_W("proxyfs.dll")) {
-            TVPRegisterProxyFsStub();
-            stub = "ProxyStorageMap stub";
-        } else if(name == TJS_W("gamepad.dll")) {
+        if(normalizedShortName == TJS_W("gamepad.dll")) {
             TVPRegisterGamepadStub();
             stub = "GamepadStub";
-        } else if(name == TJS_W("gfxEffect.dll") || name == TJS_W("gfxfire.dll") || name == TJS_W("gfxFire.dll")) {
+        } else if(normalizedShortName == TJS_W("gfxeffect.dll") ||
+                  normalizedShortName == TJS_W("gfxfire.dll")) {
             TVPRegisterGfxFireStub();
             stub = "gfxFireStub";
         }
@@ -374,6 +514,14 @@ void TVPLoadPlugin(const ttstr &name) {
 
 //---------------------------------------------------------------------------
 bool TVPUnloadPlugin(const ttstr &name) {
+    ttstr normalizedShortName = TVPGetNormalizedPluginName(name);
+    if(TVPIsProxyPluginName(normalizedShortName)) {
+        TVPRegisteredPlugins.erase(normalizedShortName);
+        if(!TVPHasRegisteredProxyPluginAlias())
+            TVPUnregisterProxyFsStub();
+        return true;
+    }
+
     // unload plugin
     return true;
 }
