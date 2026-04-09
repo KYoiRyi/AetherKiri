@@ -574,3 +574,10 @@ void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
     }
     m_logger->flush();
 }
+
+void PluginCallTracer::LogMissingMember(const tjs_char *membername,
+                                         const char *operation) {
+    if (!m_logger) return;
+    tTJSNarrowStringHolder ns(membername);
+    m_logger->info("[MISSING] {} \"{}\"", operation, ns.operator const char *());
+}

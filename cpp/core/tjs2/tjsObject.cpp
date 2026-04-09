@@ -13,6 +13,7 @@
 #include "tjsObject.h"
 #include "tjsUtils.h"
 #include "tjsNative.h"
+#include "plugin/PluginCallTracer.hpp"
 #include "tjsHashSearch.h"
 #include "tjsGlobalStringMap.h"
 #include "tjsDebug.h"
@@ -1251,6 +1252,7 @@ namespace TJS {
                                               numparams, param, objthis);
             }
 
+            PluginCallTracer::Instance().LogMissingMember(membername, "FuncCall");
             return TJS_E_MEMBERNOTFOUND; // member not found
         }
 
@@ -1334,8 +1336,10 @@ namespace TJS {
             data = Add(membername, hint);
         }
 
-        if(!data)
+        if(!data) {
+            PluginCallTracer::Instance().LogMissingMember(membername, "PropGet");
             return TJS_E_MEMBERNOTFOUND; // not found
+        }
 
         return TJSDefaultPropGet(flag, GetValue(data), result, objthis);
     }
@@ -1408,8 +1412,10 @@ namespace TJS {
         else
             data = Find(membername, hint);
 
-        if(!data)
+        if(!data) {
+            PluginCallTracer::Instance().LogMissingMember(membername, "PropSet");
             return TJS_E_MEMBERNOTFOUND; // not found
+        }
 
         if(flag & TJS_HIDDENMEMBER)
             data->SymFlags |= TJS_SYMBOL_HIDDEN;

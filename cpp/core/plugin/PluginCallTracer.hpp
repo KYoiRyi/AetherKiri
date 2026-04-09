@@ -291,6 +291,10 @@ public:
 
     void LogPluginLoad(const std::string &name, bool success, const char *stub);
 
+    /// Log a call to a member that does not exist (missing plugin function).
+    /// operation is "FuncCall", "PropGet", or "PropSet".
+    void LogMissingMember(const tjs_char *membername, const char *operation);
+
 private:
     PluginCallTracer() = default;
     ~PluginCallTracer() = default;
