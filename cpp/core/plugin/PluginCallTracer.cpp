@@ -142,16 +142,9 @@ PluginMethodProxy::PluginMethodProxy(const std::string &className,
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
     PluginCallTracer::Instance().EnsureLogger();
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY CREATED] {}.{} (method)", className, memberName);
-    }
 }
 
 PluginMethodProxy::~PluginMethodProxy() {
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY DESTROYED] {}.{} (method)", m_className, m_memberName);
-        logger->flush();
-    }
     if (m_original) m_original->Release();
 }
 
@@ -163,16 +156,6 @@ tjs_error PluginMethodProxy::FuncCall(tjs_uint32 flag,
                                       tjs_uint32 *hint, tTJSVariant *result,
                                       tjs_int numparams, tTJSVariant **param,
                                       iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL FuncCall invocations to verify proxy is reached
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[FUNCALL] {}.{} membername={} argc={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     numparams,
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogMethodCall(
             m_className, m_memberName, numparams, param);
@@ -352,16 +335,9 @@ PluginPropertyProxy::PluginPropertyProxy(const std::string &className,
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
     PluginCallTracer::Instance().EnsureLogger();
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY CREATED] {}.{} (property)", className, memberName);
-    }
 }
 
 PluginPropertyProxy::~PluginPropertyProxy() {
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY DESTROYED] {}.{} (property)", m_className, m_memberName);
-        logger->flush();
-    }
     if (m_original) m_original->Release();
 }
 
@@ -372,15 +348,6 @@ tjs_error PluginPropertyProxy::PropGet(tjs_uint32 flag,
                                        const tjs_char *membername,
                                        tjs_uint32 *hint, tTJSVariant *result,
                                        iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL PropGet invocations
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[PROPGET] {}.{} membername={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropGet(m_className, m_memberName);
     }
@@ -392,15 +359,6 @@ tjs_error PluginPropertyProxy::PropSet(tjs_uint32 flag,
                                        tjs_uint32 *hint,
                                        const tTJSVariant *param,
                                        iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL PropSet invocations
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[PROPSET] {}.{} membername={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropSet(m_className, m_memberName, param);
     }

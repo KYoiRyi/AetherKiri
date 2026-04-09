@@ -1099,21 +1099,6 @@ engine_result_t engine_tick(engine_handle_t handle, uint32_t delta_ms) {
   }
   impl->tick_count += 1;
 
-  // Diagnostic heartbeat: log every 300 ticks to confirm engine is running
-  // and tracer logger is accessible at runtime.
-  if (impl->tick_count == 1 || impl->tick_count % 300 == 0) {
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-      logger->info("[HEARTBEAT] tick={} logger=ok enabled={}",
-                   impl->tick_count,
-                   PluginCallTracer::Instance().IsEnabled());
-      logger->flush();
-    } else {
-      spdlog::warn("[HEARTBEAT] tick={} tracer logger is NULL!",
-                   impl->tick_count);
-    }
-  }
-
   while (!impl->input.pending_events.empty()) {
     const engine_input_event_t queued_event = impl->input.pending_events.front();
     impl->input.pending_events.pop_front();
