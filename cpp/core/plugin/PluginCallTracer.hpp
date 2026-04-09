@@ -285,11 +285,19 @@ public:
 
     // Registration phase logging
     void LogRegistrationStart();
+    void LogModuleStart(const std::string &moduleName);
     void LogRegistration(const ttstr &className, const ttstr &memberName,
                          tTJSNativeInstanceType type, tjs_uint32 flags);
     void LogRegistrationEnd();
 
     void LogPluginLoad(const std::string &name, bool success, const char *stub);
+
+    /// Log a call to a member that does not exist (missing plugin function).
+    /// operation is "FuncCall", "PropGet", or "PropSet".
+    /// obj is the dispatch object on which the member was not found;
+    /// used to extract the class name for context.
+    void LogMissingMember(const tjs_char *membername, const char *operation,
+                          iTJSDispatch2 *obj);
 
 private:
     PluginCallTracer() = default;

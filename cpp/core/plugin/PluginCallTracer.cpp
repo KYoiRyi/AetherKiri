@@ -40,6 +40,9 @@ void PluginCallTracer::InitLogger(const std::string &logFilePath) {
 
 void PluginCallTracer::SetEnabled(bool enabled) {
     m_enabled = enabled;
+    if (enabled && !m_loggerInitialized && !m_logFilePath.empty()) {
+        InitLogger(m_logFilePath);
+    }
     if (m_logger) {
         m_logger->info("=== Plugin tracing {} ===", enabled ? "enabled" : "disabled");
         m_logger->flush();
@@ -80,7 +83,7 @@ void PluginCallTracer::LogMethodCall(const std::string &className,
                                      const std::string &memberName,
                                      tjs_int numparams,
                                      tTJSVariant **param) {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     std::string msg = className + "." + memberName + "(argc=" +
                       std::to_string(numparams);
 
@@ -108,14 +111,14 @@ void PluginCallTracer::LogMethodCall(const std::string &className,
 
 void PluginCallTracer::LogPropGet(const std::string &className,
                                   const std::string &memberName) {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     m_logger->info("{}.{} [GET]", className, memberName);
 }
 
 void PluginCallTracer::LogPropSet(const std::string &className,
                                   const std::string &memberName,
                                   const tTJSVariant *value) {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     std::string valStr;
     if (value) {
         try {
@@ -141,17 +144,9 @@ PluginMethodProxy::PluginMethodProxy(const std::string &className,
                                      iTJSDispatch2 *original)
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
-    PluginCallTracer::Instance().EnsureLogger();
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY CREATED] {}.{} (method)", className, memberName);
-    }
 }
 
 PluginMethodProxy::~PluginMethodProxy() {
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY DESTROYED] {}.{} (method)", m_className, m_memberName);
-        logger->flush();
-    }
     if (m_original) m_original->Release();
 }
 
@@ -163,16 +158,6 @@ tjs_error PluginMethodProxy::FuncCall(tjs_uint32 flag,
                                       tjs_uint32 *hint, tTJSVariant *result,
                                       tjs_int numparams, tTJSVariant **param,
                                       iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL FuncCall invocations to verify proxy is reached
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[FUNCALL] {}.{} membername={} argc={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     numparams,
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogMethodCall(
             m_className, m_memberName, numparams, param);
@@ -351,17 +336,9 @@ PluginPropertyProxy::PluginPropertyProxy(const std::string &className,
                                          iTJSDispatch2 *original)
     : m_className(className), m_memberName(memberName), m_original(original) {
     if (m_original) m_original->AddRef();
-    PluginCallTracer::Instance().EnsureLogger();
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY CREATED] {}.{} (property)", className, memberName);
-    }
 }
 
 PluginPropertyProxy::~PluginPropertyProxy() {
-    if (auto logger = PluginCallTracer::Instance().GetLogger()) {
-        logger->info("[PROXY DESTROYED] {}.{} (property)", m_className, m_memberName);
-        logger->flush();
-    }
     if (m_original) m_original->Release();
 }
 
@@ -372,15 +349,6 @@ tjs_error PluginPropertyProxy::PropGet(tjs_uint32 flag,
                                        const tjs_char *membername,
                                        tjs_uint32 *hint, tTJSVariant *result,
                                        iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL PropGet invocations
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[PROPGET] {}.{} membername={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropGet(m_className, m_memberName);
     }
@@ -392,15 +360,6 @@ tjs_error PluginPropertyProxy::PropSet(tjs_uint32 flag,
                                        tjs_uint32 *hint,
                                        const tTJSVariant *param,
                                        iTJSDispatch2 *objthis) {
-    // Diagnostic: log ALL PropSet invocations
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-        logger->info("[PROPSET] {}.{} membername={} this={}",
-                     m_className, m_memberName,
-                     membername ? "non-null" : "null",
-                     static_cast<void*>(this));
-        logger->flush();
-    }
     if (!membername && PluginCallTracer::Instance().IsEnabled()) {
         PluginCallTracer::Instance().LogPropSet(m_className, m_memberName, param);
     }
@@ -577,16 +536,21 @@ static const char *TypeToStr(tTJSNativeInstanceType type) {
 }
 
 void PluginCallTracer::LogRegistrationStart() {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     m_logger->info("");
     m_logger->info("====== Plugin Registration ======");
+}
+
+void PluginCallTracer::LogModuleStart(const std::string &moduleName) {
+    if (!m_enabled || !m_logger) return;
+    m_logger->info("--- Module: {} ---", moduleName);
 }
 
 void PluginCallTracer::LogRegistration(const ttstr &className,
                                        const ttstr &memberName,
                                        tTJSNativeInstanceType type,
                                        tjs_uint32 flags) {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     tTJSNarrowStringHolder nc(className.c_str());
     tTJSNarrowStringHolder nm(memberName.c_str());
     std::string cn = nc.operator const char *();
@@ -598,7 +562,7 @@ void PluginCallTracer::LogRegistration(const ttstr &className,
 }
 
 void PluginCallTracer::LogRegistrationEnd() {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     m_logger->info("====== Registration Complete ======");
     m_logger->info("");
     m_logger->flush();
@@ -606,7 +570,7 @@ void PluginCallTracer::LogRegistrationEnd() {
 
 void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
                                      const char *stub) {
-    if (!m_logger) return;
+    if (!m_enabled || !m_logger) return;
     if (success) {
         m_logger->info("[Plugin] {} loaded OK", name);
     } else if (stub) {
@@ -615,4 +579,28 @@ void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
         m_logger->info("[Plugin] {} MISSING (no fallback)", name);
     }
     m_logger->flush();
+}
+
+void PluginCallTracer::LogMissingMember(const tjs_char *membername,
+                                         const char *operation,
+                                         iTJSDispatch2 *obj) {
+    if (!m_enabled || !m_logger) return;
+    tTJSNarrowStringHolder ns(membername);
+    std::string className;
+    if (obj) {
+        // Try to get the first class name from ClassInstanceInfo
+        tTJSVariant val;
+        if (TJS_SUCCEEDED(obj->ClassInstanceInfo(TJS_CII_GET, 0, &val))) {
+            ttstr cn(val);
+            tTJSNarrowStringHolder nc(cn.c_str());
+            className = nc.operator const char *();
+        }
+    }
+    if (className.empty()) {
+        m_logger->info("[MISSING] {} \"{}\"", operation,
+                       ns.operator const char *());
+    } else {
+        m_logger->info("[MISSING] {}.{} \"{}\"", className, operation,
+                       ns.operator const char *());
+    }
 }

@@ -13,6 +13,7 @@
 #include "tjsNative.h"
 #include "tjsError.h"
 #include "tjsGlobalStringMap.h"
+#include "../plugin/PluginCallTracer.hpp"
 #include "tjsDebug.h"
 
 namespace TJS {
@@ -274,6 +275,16 @@ namespace TJS {
                 default:
                     break;
             }
+        }
+
+        // Wrap dispatch for plugin call tracing at the lowest level.
+        // This catches ALL registrations including re-registrations from
+        // external plugins, not just ncbind-based registrations.
+        iTJSDispatch2 *wrapped = PluginCallTracer::Instance().WrapDispatch(
+            ttstr(classname), ttstr(name), dsp, type);
+        if(wrapped != dsp) {
+            dsp->Release();       // release original reference
+            dsp = wrapped;        // use proxy instead
         }
 
         // add to this

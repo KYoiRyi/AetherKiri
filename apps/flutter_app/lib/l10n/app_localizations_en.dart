@@ -171,6 +171,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRendering => 'Rendering';
 
   @override
+  String get settingsDevelopment => 'Development';
+
+  @override
   String get renderPipeline => 'Render Pipeline';
 
   @override

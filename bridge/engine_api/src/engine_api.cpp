@@ -564,9 +564,9 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #endif
   spdlog::default_logger()->flush();
 
-  // Always initialize plugin trace logger in game directory.
-  // Proxies check IsEnabled() at call time; the logger must exist regardless.
-  {
+  // Only initialize plugin trace logger when tracing is enabled.
+  // The toggle is set via engine_set_option before engine_open_game.
+  if (PluginCallTracer::Instance().IsEnabled()) {
     std::string trace_path = normalized_game_root_path;
     if (!trace_path.empty() && trace_path.back() != '/') trace_path += "/";
     trace_path += "plugin_trace.log";
@@ -1098,21 +1098,6 @@ engine_result_t engine_tick(engine_handle_t handle, uint32_t delta_ms) {
                                          "engine is not in opened state");
   }
   impl->tick_count += 1;
-
-  // Diagnostic heartbeat: log every 300 ticks to confirm engine is running
-  // and tracer logger is accessible at runtime.
-  if (impl->tick_count == 1 || impl->tick_count % 300 == 0) {
-    auto logger = PluginCallTracer::Instance().GetLogger();
-    if (logger) {
-      logger->info("[HEARTBEAT] tick={} logger=ok enabled={}",
-                   impl->tick_count,
-                   PluginCallTracer::Instance().IsEnabled());
-      logger->flush();
-    } else {
-      spdlog::warn("[HEARTBEAT] tick={} tracer logger is NULL!",
-                   impl->tick_count);
-    }
-  }
 
   while (!impl->input.pending_events.empty()) {
     const engine_input_event_t queued_event = impl->input.pending_events.front();

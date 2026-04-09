@@ -165,6 +165,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsRendering => '渲染';
 
   @override
+  String get settingsDevelopment => '开发者';
+
+  @override
   String get renderPipeline => '渲染管线';
 
   @override

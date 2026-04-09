@@ -64,6 +64,7 @@
   "selectEngineDylib": "エンジンdylibを選択",
 
   "settingsRendering": "レンダリング",
+  "settingsDevelopment": "開発",
   "renderPipeline": "レンダリングパイプライン",
   "renderPipelineHint": "ゲームの再起動後に有効になります",
   "opengl": "OpenGL",
