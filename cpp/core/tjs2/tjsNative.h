@@ -28,6 +28,7 @@ namespace TJS {
 
     // Global mock fallback
     extern iTJSDispatch2* TVPGetGlobalMockObject();
+    extern bool TVPIsMockEnabled();
     //---------------------------------------------------------------------------
 
     /*[*/
@@ -309,7 +310,7 @@ namespace TJS {
     if(!objthis)                                                               \
         return TJS_E_NATIVECLASSCRASH;                                         \
     {                                                                          \
-        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
+        if(TJS::TVPIsMockEnabled() && objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK; \
     }                                                                          \
     typename *varname;                                                         \
     {                                                                          \
@@ -325,7 +326,7 @@ namespace TJS {
     if(!objthis)                                                               \
         return TJS_E_NATIVECLASSCRASH;                                         \
     {                                                                          \
-        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
+        if(TJS::TVPIsMockEnabled() && objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK; \
     }                                                                          \
     typename *varname;                                                         \
     {                                                                          \
@@ -395,7 +396,7 @@ namespace TJS {
     typename *varname;                                                         \
     {                                                                          \
         tjs_error hr;                                                          \
-        if(objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK;          \
+        if(TJS::TVPIsMockEnabled() && objthis == TJS::TVPGetGlobalMockObject()) return TJS_S_OK; \
         hr = objthis->NativeInstanceSupport(TJS_NIS_GETINSTANCE,               \
                                             TJS_NATIVE_CLASSID_NAME,           \
                                             (iTJSNativeInstance **)&varname);  \

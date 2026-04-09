@@ -1891,7 +1891,7 @@ struct ncbRegistNativeClass : public ncbRegistNativeClassBase {
 			// Wrapping is now done in tTJSNativeClass::RegisterNCM so that
 			// ALL registrations (including external plugins) are intercepted.
 			TJSNativeClassRegisterNCM(_classobj, name, dsp, _className, item->GetType(), item->GetFlags());
-			if (!TJS_strcmp(name, TJS_W("missing"))) {
+			if (!TJS_strcmp(name, TJS_W("missing")) && TJS::TVPIsMockEnabled()) {
 				tTJSVariant missingVar(TJS_W("missing"));
 				_classobj->ClassInstanceInfo(TJS_CII_SET_MISSING, 0, &missingVar);
 			}

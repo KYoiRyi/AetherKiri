@@ -223,6 +223,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Force landscape orientation when running games (recommended for phones)';
 
   @override
+  String get pluginTrace => 'Plugin Trace Log';
+
+  @override
+  String get pluginTraceDesc =>
+      'Record all plugin native calls to plugin_trace.log for debugging';
+
+  @override
+  String get mockBypass => 'Mock Bypass';
+
+  @override
+  String get mockBypassDesc =>
+      'Suppress errors from missing plugins by returning mock objects. Disable to expose real errors for debugging.';
+
+  @override
   String get targetFrameRate => 'Target Frame Rate';
 
   @override

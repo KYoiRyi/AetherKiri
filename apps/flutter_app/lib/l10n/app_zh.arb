@@ -82,6 +82,8 @@
   "forceLandscapeDesc": "游戏运行时强制横屏显示（手机推荐开启）",
   "pluginTrace": "插件调用追踪",
   "pluginTraceDesc": "将所有插件原生调用记录到 plugin_trace.log 用于调试",
+  "mockBypass": "Mock 绕过",
+  "mockBypassDesc": "为缺失插件返回 mock 对象以抑制错误。关闭可暴露真实错误用于调试。",
   "targetFrameRate": "目标帧率",
   "targetFrameRateDesc": "启用限制时的最大渲染频率",
   "fpsLabel": "{fps} FPS",

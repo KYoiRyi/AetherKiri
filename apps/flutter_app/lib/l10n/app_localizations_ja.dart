@@ -215,6 +215,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get forceLandscapeDesc => 'ゲーム実行時に横向き表示を強制します（スマートフォン推奨）';
 
   @override
+  String get pluginTrace => 'プラグインコールトレース';
+
+  @override
+  String get pluginTraceDesc => 'すべてのプラグインネイティブ呼び出しを plugin_trace.log に記録します';
+
+  @override
+  String get mockBypass => 'Mock バイパス';
+
+  @override
+  String get mockBypassDesc => '未実装プラグインのエラーを mock オブジェクトで回避します。無効化すると実際のエラーが表示されます。';
+
+  @override
   String get targetFrameRate => '目標フレームレート';
 
   @override

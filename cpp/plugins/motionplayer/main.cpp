@@ -746,6 +746,10 @@ public:
 };
 
 static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+    if (!TJS::TVPIsMockEnabled()) {
+        if (result) *result = tTJSVariant(static_cast<tjs_int>(0));
+        return TJS_S_OK;
+    }
     if (numparams >= 3) {
         bool is_set = (tjs_int)*param[0];
         if (!is_set) {

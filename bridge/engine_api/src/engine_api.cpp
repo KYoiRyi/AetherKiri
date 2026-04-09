@@ -52,6 +52,9 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "engine_options.h"
 #include "PluginCallTracer.hpp"
 
+// Mock bypass toggle (defined in tjsVariant.cpp, namespace TJS)
+namespace TJS { void TVPSetMockEnabled(bool enabled); }
+
 int TVPDrawSceneOnce(int interval);
 
 extern "C" void TVPRegisterKrkrGLESPluginAnchor();
@@ -1479,6 +1482,18 @@ engine_result_t engine_set_option(engine_handle_t handle,
     PluginCallTracer::Instance().SetEnabled(enabled);
     spdlog::info("engine_set_option: plugin_trace={}", enabled);
     // Also store in command line so TVPLoadInternalPlugins can read it
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
+  // Handle mock_enabled option: enable/disable runtime mock bypass
+  if (key == ENGINE_OPTION_MOCK_ENABLED) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    TJS::TVPSetMockEnabled(enabled);
+    spdlog::info("engine_set_option: mock_enabled={}", enabled);
     TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
     ClearHandleErrorLocked(impl);
     SetThreadError(nullptr);

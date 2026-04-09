@@ -490,6 +490,30 @@ abstract class AppLocalizations {
   /// **'Force landscape orientation when running games (recommended for phones)'**
   String get forceLandscapeDesc;
 
+  /// No description provided for @pluginTrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugin Trace Log'**
+  String get pluginTrace;
+
+  /// No description provided for @pluginTraceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Record all plugin native calls to plugin_trace.log for debugging'**
+  String get pluginTraceDesc;
+
+  /// No description provided for @mockBypass.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock Bypass'**
+  String get mockBypass;
+
+  /// No description provided for @mockBypassDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Suppress errors from missing plugins by returning mock objects. Disable to expose real errors for debugging.'**
+  String get mockBypassDesc;
+
   /// No description provided for @targetFrameRate.
   ///
   /// In en, this message translates to:

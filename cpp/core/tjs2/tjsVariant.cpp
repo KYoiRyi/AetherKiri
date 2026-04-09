@@ -88,7 +88,14 @@ public:
     }
 };
 
+// --- Mock Toggle (controlled via engine_set_option("mock_enabled")) ---
+static bool g_MockEnabled = true; // default ON — existing behavior
+
+bool TVPIsMockEnabled() { return g_MockEnabled; }
+void TVPSetMockEnabled(bool enabled) { g_MockEnabled = enabled; }
+
 iTJSDispatch2* TVPGetGlobalMockObject() {
+    if (!g_MockEnabled) return nullptr;
     static iTJSDispatch2* g_GlobalMockObject = new GenericMockObjectForVariant();
     return g_GlobalMockObject;
 }

@@ -213,6 +213,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get forceLandscapeDesc => '游戏运行时强制横屏显示（手机推荐开启）';
 
   @override
+  String get pluginTrace => '插件调用追踪';
+
+  @override
+  String get pluginTraceDesc => '将所有插件原生调用记录到 plugin_trace.log 用于调试';
+
+  @override
+  String get mockBypass => 'Mock 绕过';
+
+  @override
+  String get mockBypassDesc => '为缺失插件返回 mock 对象以抑制错误。关闭可暴露真实错误用于调试。';
+
+  @override
   String get targetFrameRate => '目标帧率';
 
   @override

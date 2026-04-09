@@ -166,6 +166,10 @@ namespace TJS {
     //---------------------------------------------------------------------------
     extern tTJSVariantClosure_S TJSNullVariantClosure;
 
+    // Global mock fallback declarations
+    extern bool TVPIsMockEnabled();
+    extern tTJSVariantClosure_S& TVPGetGlobalMockClosure_S();
+
 /*[*/
 //---------------------------------------------------------------------------
 // tTJSVariantClosure
@@ -220,157 +224,127 @@ namespace TJS {
                 ObjThis->Release();
         }
 
+        // Resolve the effective dispatch target.
+        // When Object is null, falls back to the global mock object only when
+        // the mock bypass is enabled; otherwise returns nullptr.
+        iTJSDispatch2 *Dispatch() const {
+            if (Object) return Object;
+            if (TJS::TVPIsMockEnabled()) return TJS::TVPGetGlobalMockObject();
+            return nullptr;
+        }
+
+        // Helper to resolve the effective objthis.
+        iTJSDispatch2 *ThisObj(iTJSDispatch2 *objthis) const {
+            return ObjThis ? ObjThis : (objthis ? objthis : Object);
+        }
+
+#define TJS_CLOSURE_DISPATCH(expr) do { \
+    iTJSDispatch2 *d = Dispatch(); \
+    if (!d) return TJS_E_INVALIDOBJECT; \
+    return (expr); \
+} while(0)
+
         tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
                            tjs_uint32 *hint, tTJSVariant *result,
                            tjs_int numparams, tTJSVariant **param,
                            iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->FuncCall(
-                flag, membername, hint, result, numparams, param,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->FuncCall(flag, membername, hint, result, numparams, param, ThisObj(objthis)));
         }
 
         tjs_error FuncCallByNum(tjs_uint32 flag, tjs_int num,
                                 tTJSVariant *result, tjs_int numparams,
                                 tTJSVariant **param,
                                 iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->FuncCallByNum(
-                flag, num, result, numparams, param,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->FuncCallByNum(flag, num, result, numparams, param, ThisObj(objthis)));
         }
 
         tjs_error PropGet(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, tTJSVariant *result,
                           iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropGet(flag, membername, hint, result,
-                                   ObjThis ? ObjThis
-                                           : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->PropGet(flag, membername, hint, result, ThisObj(objthis)));
         }
 
         tjs_error PropGetByNum(tjs_uint32 flag, tjs_int num,
                                tTJSVariant *result,
                                iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropGetByNum(flag, num, result,
-                                        ObjThis ? ObjThis
-                                                : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->PropGetByNum(flag, num, result, ThisObj(objthis)));
         }
 
         tjs_error PropSet(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, const tTJSVariant *param,
                           iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSet(flag, membername, hint, param,
-                                   ObjThis ? ObjThis
-                                           : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->PropSet(flag, membername, hint, param, ThisObj(objthis)));
         }
 
         tjs_error PropSetByNum(tjs_uint32 flag, tjs_int num,
                                const tTJSVariant *param,
                                iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSetByNum(flag, num, param,
-                                        ObjThis ? ObjThis
-                                                : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->PropSetByNum(flag, num, param, ThisObj(objthis)));
         }
 
         tjs_error GetCount(tjs_int *result, const tjs_char *membername,
                            tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->GetCount(result, membername, hint,
-                                    ObjThis ? ObjThis
-                                            : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->GetCount(result, membername, hint, ThisObj(objthis)));
         }
 
         tjs_error GetCountByNum(tjs_int *result, tjs_int num,
                                 iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->GetCountByNum(
-                result, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->GetCountByNum(result, num, ThisObj(objthis)));
         }
 
         tjs_error PropSetByVS(tjs_uint32 flag, tTJSVariantString *membername,
                               const tTJSVariant *param,
                               iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->PropSetByVS(flag, membername, param,
-                                       ObjThis ? ObjThis
-                                               : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->PropSetByVS(flag, membername, param, ThisObj(objthis)));
         }
 
         tjs_error EnumMembers(tjs_uint32 flag, tTJSVariantClosure *callback,
                               iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->EnumMembers(flag, callback,
-                                       ObjThis ? ObjThis
-                                               : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->EnumMembers(flag, callback, ThisObj(objthis)));
         }
 
         tjs_error DeleteMember(tjs_uint32 flag, const tjs_char *membername,
                                tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->DeleteMember(flag, membername, hint,
-                                        ObjThis ? ObjThis
-                                                : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->DeleteMember(flag, membername, hint, ThisObj(objthis)));
         }
 
         tjs_error DeleteMemberByNum(tjs_uint32 flag, tjs_int num,
                                     iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->DeleteMemberByNum(
-                flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->DeleteMemberByNum(flag, num, ThisObj(objthis)));
         }
 
         tjs_error Invalidate(tjs_uint32 flag, const tjs_char *membername,
                              tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->Invalidate(flag, membername, hint,
-                                      ObjThis ? ObjThis
-                                              : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->Invalidate(flag, membername, hint, ThisObj(objthis)));
         }
 
         tjs_error InvalidateByNum(tjs_uint32 flag, tjs_int num,
                                   iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->InvalidateByNum(
-                flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->InvalidateByNum(flag, num, ThisObj(objthis)));
         }
 
         tjs_error IsValid(tjs_uint32 flag, const tjs_char *membername,
                           tjs_uint32 *hint, iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsValid(flag, membername, hint,
-                                   ObjThis ? ObjThis
-                                           : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->IsValid(flag, membername, hint, ThisObj(objthis)));
         }
 
         tjs_error IsValidByNum(tjs_uint32 flag, tjs_int num,
                                iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsValidByNum(
-                flag, num, ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->IsValidByNum(flag, num, ThisObj(objthis)));
         }
 
         tjs_error CreateNew(tjs_uint32 flag, const tjs_char *membername,
                             tjs_uint32 *hint, iTJSDispatch2 **result,
                             tjs_int numparams, tTJSVariant **param,
                             iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->CreateNew(
-                flag, membername, hint, result, numparams, param,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->CreateNew(flag, membername, hint, result, numparams, param, ThisObj(objthis)));
         }
 
         tjs_error CreateNewByNum(tjs_uint32 flag, tjs_int num,
                                  iTJSDispatch2 **result, tjs_int numparams,
                                  tTJSVariant **param,
                                  iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->CreateNewByNum(
-                flag, num, result, numparams, param,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->CreateNewByNum(flag, num, result, numparams, param, ThisObj(objthis)));
         }
 
         /*
@@ -381,39 +355,29 @@ namespace TJS {
         tjs_error IsInstanceOf(tjs_uint32 flag, const tjs_char *membername,
                                tjs_uint32 *hint, const tjs_char *classname,
                                iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsInstanceOf(flag, membername, hint, classname,
-                                        ObjThis ? ObjThis
-                                                : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->IsInstanceOf(flag, membername, hint, classname, ThisObj(objthis)));
         }
 
         tjs_error IsInstanceOf(tjs_uint32 flag, tjs_int num,
                                tjs_char *classname,
                                iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->IsInstanceOfByNum(
-                flag, num, classname,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->IsInstanceOfByNum(flag, num, classname, ThisObj(objthis)));
         }
 
         tjs_error Operation(tjs_uint32 flag, const tjs_char *membername,
                             tjs_uint32 *hint, tTJSVariant *result,
                             const tTJSVariant *param,
                             iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->Operation(flag, membername, hint, result, param,
-                                     ObjThis ? ObjThis
-                                             : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->Operation(flag, membername, hint, result, param, ThisObj(objthis)));
         }
 
         tjs_error OperationByNum(tjs_uint32 flag, tjs_int num,
                                  tTJSVariant *result, const tTJSVariant *param,
                                  iTJSDispatch2 *objthis) const {
-            
-            return (Object ? Object : TJS::TVPGetGlobalMockObject())->OperationByNum(
-                flag, num, result, param,
-                ObjThis ? ObjThis : (objthis ? objthis : Object));
+            TJS_CLOSURE_DISPATCH(d->OperationByNum(flag, num, result, param, ThisObj(objthis)));
         }
+
+#undef TJS_CLOSURE_DISPATCH
 
         /*
                 tjs_error
@@ -449,10 +413,6 @@ namespace TJS {
                                             tTJSVariantType to1,
                                             tTJSVariantType to2);
     //---------------------------------------------------------------------------
-
-    // Global mock fallback declarations
-    extern iTJSDispatch2* TVPGetGlobalMockObject();
-    extern tTJSVariantClosure_S& TVPGetGlobalMockClosure_S();
 
     //---------------------------------------------------------------------------
     // tTJSVariant
@@ -674,9 +634,13 @@ namespace TJS {
                 return TJSGetCompatBoolObject(true);
 
             if(vt == tvtVoid) {
-                iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
-                if(mock) mock->AddRef();
-                return mock;
+                if(TJS::TVPIsMockEnabled()) {
+                    iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
+                    if(mock) mock->AddRef();
+                    return mock;
+                }
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return nullptr;
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -691,7 +655,10 @@ namespace TJS {
                 return TJSGetCompatBoolObject(false);
 
             if(vt == tvtVoid) {
-                return TJS::TVPGetGlobalMockObject();
+                if(TJS::TVPIsMockEnabled())
+                    return TJS::TVPGetGlobalMockObject();
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return nullptr;
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -708,9 +675,13 @@ namespace TJS {
                 return TJSGetCompatBoolObject(true);
 
             if(vt == tvtVoid) {
-                iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
-                if(mock) mock->AddRef();
-                return mock;
+                if(TJS::TVPIsMockEnabled()) {
+                    iTJSDispatch2* mock = TJS::TVPGetGlobalMockObject();
+                    if(mock) mock->AddRef();
+                    return mock;
+                }
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return nullptr;
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -725,7 +696,10 @@ namespace TJS {
                 return TJSGetCompatBoolObject(false);
 
             if(vt == tvtVoid) {
-                return TJS::TVPGetGlobalMockObject();
+                if(TJS::TVPIsMockEnabled())
+                    return TJS::TVPGetGlobalMockObject();
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return nullptr;
             }
 
             TJSThrowVariantConvertError(*this, tvtObject);
@@ -738,7 +712,10 @@ namespace TJS {
                 return *(tTJSVariantClosure *)&Object;
             }
             if(vt == tvtVoid) {
-                return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S(); // already has ref inside TVPGetGlobalMockObject but it doesn't matter
+                if(TJS::TVPIsMockEnabled())
+                    return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S();
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return *(tTJSVariantClosure *)&TJSNullVariantClosure;
             }
             TJSThrowVariantConvertError(*this, tvtObject);
             return *(tTJSVariantClosure *)&TJSNullVariantClosure;
@@ -750,7 +727,10 @@ namespace TJS {
                 return *(tTJSVariantClosure *)&Object;
             }
             if(vt == tvtVoid) {
-                return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S();
+                if(TJS::TVPIsMockEnabled())
+                    return *(tTJSVariantClosure *)&TJS::TVPGetGlobalMockClosure_S();
+                TJSThrowVariantConvertError(*this, tvtObject);
+                return *(tTJSVariantClosure *)&TJSNullVariantClosure;
             }
             TJSThrowVariantConvertError(*this, tvtObject);
             return *(tTJSVariantClosure *)&TJSNullVariantClosure;

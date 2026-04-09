@@ -27,6 +27,7 @@ class SettingsPage extends StatefulWidget {
     required this.angleBackend,
     required this.forceLandscape,
     required this.pluginTrace,
+    required this.mockEnabled,
   });
 
   final EngineMode engineMode;
@@ -40,6 +41,7 @@ class SettingsPage extends StatefulWidget {
   final String angleBackend;
   final bool forceLandscape;
   final bool pluginTrace;
+  final bool mockEnabled;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -57,6 +59,7 @@ class SettingsResult {
     required this.angleBackend,
     required this.forceLandscape,
     required this.pluginTrace,
+    required this.mockEnabled,
   });
 
   final EngineMode engineMode;
@@ -68,6 +71,7 @@ class SettingsResult {
   final String angleBackend;
   final bool forceLandscape;
   final bool pluginTrace;
+  final bool mockEnabled;
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -80,6 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String _angleBackend = PrefsKeys.angleBackendGles;
   late bool _forceLandscape;
   late bool _pluginTrace;
+  late bool _mockEnabled;
   String _localeCode = 'system';
   String _themeModeCode = 'dark';
   bool _dirty = false;
@@ -96,6 +101,7 @@ class _SettingsPageState extends State<SettingsPage> {
     _angleBackend = widget.angleBackend;
     _forceLandscape = widget.forceLandscape;
     _pluginTrace = widget.pluginTrace;
+    _mockEnabled = widget.mockEnabled;
     _loadLocale();
     _loadThemeMode();
   }
@@ -136,6 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString(PrefsKeys.angleBackend, _angleBackend);
     await prefs.setBool(PrefsKeys.forceLandscape, _forceLandscape);
     await prefs.setBool(PrefsKeys.pluginTrace, _pluginTrace);
+    await prefs.setBool(PrefsKeys.mockEnabled, _mockEnabled);
 
     if (mounted) {
       Navigator.pop(
@@ -150,6 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
           angleBackend: _angleBackend,
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
+          mockEnabled: _mockEnabled,
         ),
       );
     }
@@ -472,6 +480,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: _pluginTrace,
                     onChanged: (value) {
                       setState(() => _pluginTrace = value);
+                      _markDirty();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.mockBypass),
+                    subtitle: Text(l10n.mockBypassDesc),
+                    value: _mockEnabled,
+                    onChanged: (value) {
+                      setState(() => _mockEnabled = value);
                       _markDirty();
                     },
                   ),

@@ -82,6 +82,8 @@
   "forceLandscapeDesc": "ゲーム実行時に横向き表示を強制します（スマートフォン推奨）",
   "pluginTrace": "プラグインコールトレース",
   "pluginTraceDesc": "すべてのプラグインネイティブ呼び出しを plugin_trace.log に記録します",
+  "mockBypass": "Mock バイパス",
+  "mockBypassDesc": "未実装プラグインのエラーを mock オブジェクトで回避します。無効化すると実際のエラーが表示されます。",
   "targetFrameRate": "目標フレームレート",
   "targetFrameRateDesc": "制限有効時の最大描画頻度",
   "fpsLabel": "{fps} FPS",

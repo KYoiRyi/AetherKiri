@@ -24,6 +24,7 @@ class GamePage extends StatefulWidget {
     this.engineBridgeBuilder = createEngineBridge,
     this.forceLandscape = true,
     this.pluginTrace = false,
+    this.mockEnabled = true,
     this.gameManager,
   });
 
@@ -32,6 +33,7 @@ class GamePage extends StatefulWidget {
   final EngineBridgeBuilder engineBridgeBuilder;
   final bool forceLandscape;
   final bool pluginTrace;
+  final bool mockEnabled;
 
   /// If set, play duration is recorded when leaving this page.
   final GameManager? gameManager;
@@ -403,6 +405,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
 
     await _applyMemoryGovernorOptions();
+
+    // Set mock_enabled before plugin_trace — disabling mock affects trace behavior.
+    _log('Setting mock_enabled=${widget.mockEnabled}');
+    await _bridge.engineSetOption(
+      key: PrefsKeys.optionMockEnabled,
+      value: widget.mockEnabled ? '1' : '0',
+    );
 
     if (widget.pluginTrace) {
       _log('Enabling plugin_trace');

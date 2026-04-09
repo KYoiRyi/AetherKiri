@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   String _angleBackend = PrefsKeys.angleBackendGles;
   bool _forceLandscape = true;
   bool _pluginTrace = false;
+  bool _mockEnabled = true;
 
   String? _resolveBuiltInDylibPath() {
     if (Platform.isIOS) {
@@ -102,6 +103,7 @@ class _HomePageState extends State<HomePage> {
     _angleBackend = prefs.getString(PrefsKeys.angleBackend) ?? PrefsKeys.angleBackendGles;
     _forceLandscape = prefs.getBool(PrefsKeys.forceLandscape) ?? true;
     _pluginTrace = prefs.getBool(PrefsKeys.pluginTrace) ?? false;
+    _mockEnabled = prefs.getBool(PrefsKeys.mockEnabled) ?? true;
     await _gameManager.load();
     await _gameManager.applyPendingPlaySession();
 
@@ -556,6 +558,7 @@ class _HomePageState extends State<HomePage> {
           ffiLibraryPath: dylibPath,
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
+          mockEnabled: _mockEnabled,
           gameManager: _gameManager,
         ),
       ),
@@ -738,6 +741,7 @@ class _HomePageState extends State<HomePage> {
           angleBackend: _angleBackend,
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
+          mockEnabled: _mockEnabled,
         ),
       ),
     );
@@ -755,6 +759,7 @@ class _HomePageState extends State<HomePage> {
         _angleBackend = result.angleBackend;
         _forceLandscape = result.forceLandscape;
         _pluginTrace = result.pluginTrace;
+        _mockEnabled = result.mockEnabled;
       });
     }
   }

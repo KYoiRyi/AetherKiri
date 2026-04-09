@@ -46,6 +46,11 @@
 /** Enable plugin call tracing to plugin_trace.log ("0"/"1"). */
 #define ENGINE_OPTION_PLUGIN_TRACE "plugin_trace"
 
+/** Enable/disable runtime mock bypass ("0"/"1", default "1").
+ *  When disabled, missing plugins/classes cause real errors instead of
+ *  being silently absorbed by mock objects. Useful for debugging. */
+#define ENGINE_OPTION_MOCK_ENABLED "mock_enabled"
+
 /* ── ANGLE Backend Values ───────────────────────────────────────── */
 
 /** Use ANGLE's OpenGL ES backend (default). */

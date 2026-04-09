@@ -17,6 +17,7 @@ class PrefsKeys {
   static const String themeMode = 'krkr2_theme_mode';
   static const String forceLandscape = 'krkr2_force_landscape';
   static const String pluginTrace = 'krkr2_plugin_trace';
+  static const String mockEnabled = 'krkr2_mock_enabled';
 
   /// Pending play session: JSON { "path": "...", "startTime": "ISO8601" }. Cleared on normal exit or applied on next launch.
   static const String pendingPlaySession = 'krkr2_pending_play_session';
@@ -36,6 +37,7 @@ class PrefsKeys {
   static const String optionArchiveCacheCount = 'archive_cache_count';
   static const String optionAutoPathCacheCount = 'autopath_cache_count';
   static const String optionPluginTrace = 'plugin_trace';
+  static const String optionMockEnabled = 'mock_enabled';
 
   // ── Engine option values ────────────────────────────────────────
   static const String angleBackendGles = 'gles';
