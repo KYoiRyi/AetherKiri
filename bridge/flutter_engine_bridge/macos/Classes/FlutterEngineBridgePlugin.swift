@@ -1,6 +1,7 @@
 import Accelerate
 import Cocoa
 import CoreVideo
+import Darwin
 import FlutterMacOS
 import IOSurface
 
@@ -194,6 +195,13 @@ public class FlutterEngineBridgePlugin: NSObject, FlutterPlugin {
     switch call.method {
     case "getPlatformVersion":
       result("macOS " + ProcessInfo.processInfo.operatingSystemVersionString)
+
+    case "forceQuitApp":
+      result(nil)
+      DispatchQueue.main.async {
+        fflush(nil)
+        Darwin._exit(0)
+      }
 
     // --- Legacy RGBA texture ---
     case "createTexture":

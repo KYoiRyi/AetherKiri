@@ -59,6 +59,9 @@ class EngineSurface extends StatefulWidget {
 }
 
 class EngineSurfaceState extends State<EngineSurface> {
+  static const MethodChannel _platformChannel = MethodChannel(
+    'flutter_engine_bridge',
+  );
   final FocusNode _focusNode = FocusNode(debugLabel: 'engine-surface-focus');
   bool _vsyncScheduled = false;
   bool _frameInFlight = false;
@@ -725,6 +728,18 @@ class EngineSurfaceState extends State<EngineSurface> {
 
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (!widget.active) {
+      return KeyEventResult.ignored;
+    }
+
+    if (Platform.isMacOS &&
+        event is KeyDownEvent &&
+        HardwareKeyboard.instance.isMetaPressed &&
+        event.logicalKey == LogicalKeyboardKey.keyQ) {
+      unawaited(_platformChannel.invokeMethod<void>('forceQuitApp'));
+      return KeyEventResult.handled;
+    }
+
+    if (Platform.isMacOS && HardwareKeyboard.instance.isMetaPressed) {
       return KeyEventResult.ignored;
     }
 

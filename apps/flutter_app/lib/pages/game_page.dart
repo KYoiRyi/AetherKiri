@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show AppExitResponse;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -88,6 +89,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   int _tickCount = 0;
   final List<String> _logs = [];
   static const int _maxLogs = 2000;
+  Future<void>? _engineDestroyFuture;
+  bool _isExitingPage = false;
+  bool _appExitRequested = false;
 
   // ScrollController for boot log auto-scroll
   final ScrollController _bootLogScrollController = ScrollController();
@@ -196,19 +200,76 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _destroyEngine() {
+    final existing = _engineDestroyFuture;
+    if (existing != null) {
+      return existing;
+    }
+
+    final bridge = _bridge;
+    final future = bridge.engineDestroy().then((_) {});
+    _engineDestroyFuture = future;
+    return future;
+  }
+
+  Future<void> _shutdownForExit() async {
+    _stopStartupPolling();
+    _stopMemoryStatsPolling();
+    _stopTickLoop(notify: false);
+    await _waitForTickLoopToSettle();
+    await _finalizePlaySession();
+    await _destroyEngine();
+  }
+
+  Future<void> _prepareForAppExit() async {
+    _appExitRequested = true;
+    _stopStartupPolling();
+    _stopMemoryStatsPolling();
+    _stopTickLoop(notify: false);
+    await _waitForTickLoopToSettle();
+    await _finalizePlaySession();
+  }
+
+  Future<void> _waitForTickLoopToSettle() async {
+    if (!_tickInFlight) {
+      return;
+    }
+
+    final deadline = DateTime.now().add(const Duration(milliseconds: 300));
+    while (_tickInFlight && DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+  }
+
   @override
   void dispose() {
-    if (widget.gameManager != null) {
-      unawaited(_finalizePlaySession());
-    }
     _stopStartupPolling();
     _stopMemoryStatsPolling();
     _bootLogScrollController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     _stopTickLoop(notify: false);
-    unawaited(_bridge.engineDestroy());
+    if (_appExitRequested && Platform.isMacOS) {
+      _restoreOrientation();
+      super.dispose();
+      return;
+    }
+    if (widget.gameManager != null) {
+      unawaited(_finalizePlaySession());
+    }
+    unawaited(_destroyEngine());
     _restoreOrientation();
     super.dispose();
+  }
+
+  @override
+  Future<AppExitResponse> didRequestAppExit() async {
+    if (Platform.isMacOS) {
+      await _prepareForAppExit();
+      return AppExitResponse.exit;
+    }
+
+    await _shutdownForExit();
+    return AppExitResponse.exit;
   }
 
   @override
@@ -535,7 +596,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
           final error = _bridge.engineGetLastError();
           _log('Tick ended: result=$result, error=$error');
           if (error == 'runtime has been terminated') {
-            _exitGame();
+            unawaited(_exitGame());
             return;
           }
           setState(() {
@@ -884,9 +945,22 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     setState(() => _showDebug = !_showDebug);
   }
 
-  void _exitGame() {
-    _stopTickLoop(notify: false);
+  Future<void> _exitGame() async {
+    if (_isExitingPage) return;
+    _isExitingPage = true;
+
     _restoreOrientation();
+    _stopStartupPolling();
+    _stopMemoryStatsPolling();
+    _stopTickLoop(notify: false);
+
+    unawaited(() async {
+      await _waitForTickLoopToSettle();
+      await _finalizePlaySession();
+      await _destroyEngine();
+    }());
+
+    if (!mounted) return;
     Navigator.of(context).pop();
   }
 
@@ -1120,7 +1194,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                   ),
                   const Spacer(),
                   GestureDetector(
-                    onTap: _exitGame,
+                    onTap: () => unawaited(_exitGame()),
                     child: Text(
                       'Cancel',
                       style: TextStyle(
@@ -1184,7 +1258,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
               mainAxisSize: MainAxisSize.min,
               children: [
                 OutlinedButton.icon(
-                  onPressed: _exitGame,
+                  onPressed: () => unawaited(_exitGame()),
                   icon: const Icon(Icons.arrow_back),
                   label: const Text('Exit Game'),
                   style: OutlinedButton.styleFrom(
@@ -1213,13 +1287,14 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                 ),
                 const SizedBox(width: 12),
                 FilledButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       _phase = _EnginePhase.initializing;
                       _errorMessage = null;
                       _tickCount = 0;
                     });
-                    unawaited(_bridge.engineDestroy());
+                    await _destroyEngine();
+                    _engineDestroyFuture = null;
                     _bridge = widget.engineBridgeBuilder(
                       ffiLibraryPath: widget.ffiLibraryPath,
                     );
@@ -1276,7 +1351,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                 _overlayItem(
                   icon: Icons.exit_to_app,
                   label: 'Exit Game',
-                  onTap: _exitGame,
+                  onTap: () => unawaited(_exitGame()),
                   destructive: true,
                 ),
               ],
