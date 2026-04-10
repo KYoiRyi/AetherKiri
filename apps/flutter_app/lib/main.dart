@@ -5,6 +5,7 @@ import 'config/stats_base_url.dart' if (dart.library.io) 'config/stats_base_url_
 import 'l10n/app_localizations.dart';
 import 'pages/home_page.dart';
 import 'services/first_open_analytics.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,32 +90,8 @@ class _Krkr2AppState extends State<Krkr2App> {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       themeMode: _themeMode,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.pink,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.pink,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
       home: const HomePage(),
     );
   }

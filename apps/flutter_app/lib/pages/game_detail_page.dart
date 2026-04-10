@@ -12,6 +12,7 @@ import '../models/game_info.dart';
 import '../models/game_metadata_candidate.dart';
 import '../services/game_manager.dart';
 import '../services/game_metadata_scraper.dart';
+import '../theme/app_theme.dart';
 import '../utils/xp3_utils.dart';
 import 'scrape_select_page.dart';
 
@@ -91,9 +92,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
             if (game.coverPath != null)
               ListTile(
                 leading:
-                    const Icon(Icons.delete_outline, color: Colors.redAccent),
+                    const Icon(Icons.delete_outline, color: AppColors.errorCrimson),
                 title: Text(l10n.coverRemove,
-                    style: const TextStyle(color: Colors.redAccent)),
+                    style: const TextStyle(color: AppColors.errorCrimson)),
                 onTap: () => Navigator.pop(ctx, 'remove'),
               ),
           ],
@@ -517,11 +518,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
   Widget _buildTopCoverCard(ColorScheme colorScheme) {
     final height = _coverCardWidth / _coverCardAspectRatio;
     return Card(
-      elevation: 12,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.4),
+      elevation: 4,
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: SizedBox(
         width: _coverCardWidth,
@@ -564,8 +565,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(_sheetRadius)),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.08),
-            blurRadius: 12,
+            color: AppColors.nearBlack.withValues(alpha: 0.06),
+            blurRadius: 16,
             offset: const Offset(0, -4),
           ),
         ],
@@ -670,6 +671,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
         label: Text(l10n.launchGame),
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -682,7 +686,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
       child: Card(
         elevation: 0,
         color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
         child: Column(
           children: [
             ListTile(
@@ -724,7 +734,13 @@ class _GameDetailPageState extends State<GameDetailPage> {
       child: Card(
         elevation: 0,
         color: colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: colorScheme.outlineVariant,
+            width: 1,
+          ),
+        ),
         child: ListTile(
           leading: Icon(Icons.delete_outline, color: colorScheme.error),
           title: Text(l10n.remove, style: TextStyle(color: colorScheme.error)),

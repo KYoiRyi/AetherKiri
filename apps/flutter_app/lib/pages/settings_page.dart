@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../constants/prefs_keys.dart';
+import '../theme/app_theme.dart';
 import 'home_page.dart';
 
 /// Standalone settings page with MD3 styling and i18n support.
@@ -240,6 +241,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 onPressed: _dirty ? _save : null,
                 icon: const Icon(Icons.save, size: 18),
                 label: Text(l10n.save),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.terracottaBrand,
+                  foregroundColor: AppColors.ivory,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ],
@@ -823,12 +831,12 @@ class _SectionHeader extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
+          Icon(icon, size: 18, color: AppColors.terracottaBrand),
           const SizedBox(width: 8),
           Text(
             label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: AppColors.terracottaBrand,
                   fontWeight: FontWeight.w600,
                 ),
           ),

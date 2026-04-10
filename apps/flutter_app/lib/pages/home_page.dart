@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../models/game_info.dart';
 import '../services/game_manager.dart';
+import '../theme/app_theme.dart';
 import '../utils/xp3_utils.dart';
 import 'game_detail_page.dart';
 import 'game_page.dart';
@@ -448,8 +449,8 @@ class _HomePageState extends State<HomePage> {
             ),
             if (game.coverPath != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                title: Text(l10n.coverRemove, style: const TextStyle(color: Colors.redAccent)),
+                leading: const Icon(Icons.delete_outline, color: AppColors.errorCrimson),
+                title: Text(l10n.coverRemove, style: const TextStyle(color: AppColors.errorCrimson)),
                 onTap: () => Navigator.pop(ctx, 'remove'),
               ),
           ],
@@ -900,23 +901,28 @@ class _HomePageState extends State<HomePage> {
           Icon(
             Icons.videogame_asset_off,
             size: 80,
-            color: colorScheme.onSurface.withValues(alpha: 0.3),
+            color: colorScheme.primary.withValues(alpha: 0.35),
           ),
           const SizedBox(height: 24),
           Text(
             l10n.noGamesYet,
             style: TextStyle(
               fontSize: 20,
+              fontWeight: FontWeight.w500,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            Platform.isIOS ? l10n.noGamesHintIos : l10n.noGamesHintDesktop,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: colorScheme.onSurface.withValues(alpha: 0.4),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              Platform.isIOS ? l10n.noGamesHintIos : l10n.noGamesHintDesktop,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.6,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              ),
             ),
           ),
         ],
@@ -1006,7 +1012,7 @@ class _CoverCard extends StatelessWidget {
         ),
         PopupMenuItem(
           value: 'remove',
-          child: _menuTile(Icons.delete, l10n.remove, color: Colors.redAccent),
+          child: _menuTile(Icons.delete, l10n.remove, color: AppColors.errorCrimson),
         ),
       ],
     ).then((value) {
@@ -1040,9 +1046,13 @@ class _CoverCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 1,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant,
+          width: 1,
+        ),
       ),
       child: Stack(
         fit: StackFit.expand,
@@ -1110,7 +1120,7 @@ class _CoverCard extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.transparent,
-              Colors.black54,
+              Color(0x8C141413),
             ],
           ),
         ),

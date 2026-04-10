@@ -12,6 +12,7 @@ import '../engine/engine_bridge.dart';
 import '../engine/flutter_engine_bridge_adapter.dart';
 import '../constants/prefs_keys.dart';
 import '../services/game_manager.dart';
+import '../theme/app_theme.dart';
 import '../widgets/engine_surface.dart';
 import '../widgets/performance_overlay.dart';
 
@@ -925,7 +926,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
               opacity: _showOverlay ? 1.0 : 0.6,
               duration: const Duration(milliseconds: 200),
               child: Material(
-                color: Colors.black45,
+                color: AppColors.deepDark.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(8),
@@ -934,7 +935,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     padding: const EdgeInsets.all(8),
                     child: Icon(
                       _showOverlay ? Icons.close : Icons.menu,
-                      color: Colors.white70,
+                      color: AppColors.warmSilver,
                       size: 24,
                     ),
                   ),
@@ -1003,8 +1004,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _phase == _EnginePhase.opening
-                          ? Colors.orangeAccent
-                          : Colors.greenAccent,
+                          ? AppColors.coralAccent
+                          : AppColors.terracottaBrand,
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1071,9 +1072,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                             log,
                             style: TextStyle(
                               color: isError
-                                  ? Colors.redAccent
+                                  ? AppColors.errorCrimson
                                   : isOk
-                                  ? Colors.greenAccent
+                                  ? AppColors.coralAccent
                                   : Colors.white.withValues(alpha: 0.6),
                               fontSize: 12,
                               fontFamily: 'monospace',
@@ -1096,7 +1097,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                   const Text(
                     '█',
                     style: TextStyle(
-                      color: Colors.greenAccent,
+                      color: AppColors.coralAccent,
                       fontSize: 14,
                       fontFamily: 'monospace',
                     ),
@@ -1142,7 +1143,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: Colors.redAccent, size: 64),
+            const Icon(Icons.error_outline, color: AppColors.errorCrimson, size: 64),
             const SizedBox(height: 16),
             const Text(
               'Engine Error',
@@ -1280,7 +1281,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     required VoidCallback onTap,
     bool destructive = false,
   }) {
-    final color = destructive ? Colors.redAccent : Colors.white70;
+    final color = destructive ? AppColors.errorCrimson : Colors.white70;
     return InkWell(
       onTap: onTap,
       child: Padding(
