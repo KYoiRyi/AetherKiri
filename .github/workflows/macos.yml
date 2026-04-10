@@ -1,0 +1,54 @@
+name: macOS Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build macOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Disable Analytics
+        run: flutter config --no-analytics
+
+      - name: vcpkg cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
+          save-always: 'true'
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-macos-
+            ${{ runner.os }}-vcpkg-
+
+      - name: Build macOS Release
+        run: |
+          chmod +x ./build.sh
+          ./build.sh macos release --jobs=4
+
+      - name: Find built .app
+        id: find_app
+        run: |
+          APP_PATH=$(find apps/flutter_app/build/macos -name "*.app" -type d | head -1)
+          echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KrKr2-Next-macOS
+          path: ${{ steps.find_app.outputs.app_path }}
+          retention-days: 7
