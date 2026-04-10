@@ -51,11 +51,9 @@
  *  being silently absorbed by mock objects. Useful for debugging. */
 #define ENGINE_OPTION_MOCK_ENABLED "mock_enabled"
 
-/** Enable/disable krkr2.log file output ("0"/"1", default "1"). */
-#define ENGINE_OPTION_FILE_LOG "file_log"
-
-/** Enable/disable TVP console log output to spdlog ("0"/"1", default "1"). */
-#define ENGINE_OPTION_CONSOLE_LOG "console_log"
+/** Enable/disable krkr.console.log file output ("0"/"1", default "1").
+ *  Controls the TJS2 engine console log file written by TVPLogStreamHolder. */
+#define ENGINE_OPTION_CONSOLE_LOG_FILE "console_log_file"
 
 /* ── ANGLE Backend Values ───────────────────────────────────────── */
 

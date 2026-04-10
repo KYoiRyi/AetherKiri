@@ -237,18 +237,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Suppress errors from missing plugins by returning mock objects. Disable to expose real errors for debugging.';
 
   @override
-  String get fileLog => 'File Log (krkr2.log)';
+  String get consoleLogFile => 'Console Log File';
 
   @override
-  String get fileLogDesc =>
-      'Write engine log to krkr2.log file in the game directory';
-
-  @override
-  String get consoleLog => 'Console Log';
-
-  @override
-  String get consoleLogDesc =>
-      'Output TVP console messages to the engine log';
+  String get consoleLogFileDesc =>
+      'Write engine console log to krkr.console.log file';
 
   @override
   String get targetFrameRate => 'Target Frame Rate';

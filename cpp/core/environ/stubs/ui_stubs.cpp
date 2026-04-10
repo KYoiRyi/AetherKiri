@@ -583,8 +583,6 @@ iWindowLayer *TVPCreateAndAddWindow(tTJSNI_Window *w) {
 // ---------------------------------------------------------------------------
 void TVPConsoleLog(const ttstr &mes, bool important) {
     // Convert TJS string to UTF-8 for spdlog
-    extern bool TVPIsConsoleLogEnabled();
-    if (!TVPIsConsoleLogEnabled()) return;
     tTJSNarrowStringHolder narrow_mes(mes.c_str());
     if (important) {
         spdlog::info("[TVP Console] {}", narrow_mes.operator const char *());
@@ -598,8 +596,6 @@ void TVPConsoleLog(const ttstr &mes, bool important) {
 // ---------------------------------------------------------------------------
 namespace TJS {
 void TVPConsoleLog(const tTJSString &str) {
-    extern bool TVPIsConsoleLogEnabled();
-    if (!TVPIsConsoleLogEnabled()) return;
     tTJSNarrowStringHolder narrow(str.c_str());
     spdlog::debug("[TJS Console] {}", narrow.operator const char *());
 }

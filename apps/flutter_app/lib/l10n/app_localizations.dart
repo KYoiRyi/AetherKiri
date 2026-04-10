@@ -514,29 +514,17 @@ abstract class AppLocalizations {
   /// **'Suppress errors from missing plugins by returning mock objects. Disable to expose real errors for debugging.'**
   String get mockBypassDesc;
 
-  /// No description provided for @fileLog.
+  /// No description provided for @consoleLogFile.
   ///
   /// In en, this message translates to:
-  /// **'File Log (krkr2.log)'**
-  String get fileLog;
+  /// **'Console Log File'**
+  String get consoleLogFile;
 
-  /// No description provided for @fileLogDesc.
+  /// No description provided for @consoleLogFileDesc.
   ///
   /// In en, this message translates to:
-  /// **'Write engine log to krkr2.log file in the game directory'**
-  String get fileLogDesc;
-
-  /// No description provided for @consoleLog.
-  ///
-  /// In en, this message translates to:
-  /// **'Console Log'**
-  String get consoleLog;
-
-  /// No description provided for @consoleLogDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Output TVP console messages to the engine log'**
-  String get consoleLogDesc;
+  /// **'Write engine console log to krkr.console.log file'**
+  String get consoleLogFileDesc;
 
   /// No description provided for @targetFrameRate.
   ///

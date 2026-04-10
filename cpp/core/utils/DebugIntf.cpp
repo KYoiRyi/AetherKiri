@@ -393,8 +393,11 @@ void TVPAddLog(const ttstr &line, bool appendtoimportant) {
 
     Application->PrintConsole(buf, appendtoimportant);
 
-    if(TVPLoggingToFile)
-        TVPLogStreamHolder.Log(buf);
+    if(TVPLoggingToFile) {
+        extern bool TVPIsConsoleLogFileEnabled();
+        if(TVPIsConsoleLogFileEnabled())
+            TVPLogStreamHolder.Log(buf);
+    }
 }
 
 //---------------------------------------------------------------------------
