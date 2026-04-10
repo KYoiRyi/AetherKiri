@@ -1,0 +1,50 @@
+name: macOS Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build macOS App
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Disable Analytics
+        run: flutter config --no-analytics
+
+      - name: Install autoconf and automake
+        run: brew install autoconf automake libtool
+
+      - name: Restore vcpkg cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-macos-
+            ${{ runner.os }}-vcpkg-
+
+      - name: vcpkg cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
+
+      - name: Build macOS Release
+        run: |
+          chmod +x ./build.sh
+          ./build.sh macos release --jobs=4
