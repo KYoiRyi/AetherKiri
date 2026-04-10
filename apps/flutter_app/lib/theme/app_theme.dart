@@ -127,7 +127,6 @@ ThemeData _buildTheme(ColorScheme colorScheme, Brightness brightness) {
       elevation: 0,
       scrolledUnderElevation: 0,
       surfaceTintColor: Colors.transparent,
-      border: Border(bottom: BorderSide(color: borderColor, width: 1)),
     ),
 
     // ── Cards ──
