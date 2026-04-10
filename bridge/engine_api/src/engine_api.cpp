@@ -55,6 +55,13 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 // Mock bypass toggle (defined in tjsVariant.cpp, namespace TJS)
 namespace TJS { void TVPSetMockEnabled(bool enabled); }
 
+// Log toggles (default ON — existing behavior)
+static bool g_FileLogEnabled = true;
+static bool g_ConsoleLogEnabled = true;
+
+bool TVPIsFileLogEnabled() { return g_FileLogEnabled; }
+bool TVPIsConsoleLogEnabled() { return g_ConsoleLogEnabled; }
+
 int TVPDrawSceneOnce(int interval);
 
 extern "C" void TVPRegisterKrkrGLESPluginAnchor();
@@ -545,6 +552,7 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #if defined(__ANDROID__)
   AndroidInfoLog("engine_open_game: input='%s' normalized='%s'",
                  game_root_path_utf8, normalized_game_root_path.c_str());
+  if (g_FileLogEnabled) {
   try {
     std::string log_file_path = normalized_game_root_path;
     if (!log_file_path.empty() && log_file_path.back() != '/') {
@@ -564,6 +572,7 @@ engine_result_t OpenGameCore(engine_handle_t handle,
   } catch (const std::exception& e) {
     AndroidInfoLog("engine_open_game: Failed to create Android log file: %s", e.what());
   }
+  } // g_FileLogEnabled
 #endif
   spdlog::default_logger()->flush();
 
@@ -1494,6 +1503,30 @@ engine_result_t engine_set_option(engine_handle_t handle,
     const bool enabled = (v == "1" || v == "true");
     TJS::TVPSetMockEnabled(enabled);
     spdlog::info("engine_set_option: mock_enabled={}", enabled);
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
+  // Handle file_log option: enable/disable krkr2.log file output
+  if (key == ENGINE_OPTION_FILE_LOG) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    g_FileLogEnabled = enabled;
+    spdlog::info("engine_set_option: file_log={}", enabled);
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
+  // Handle console_log option: enable/disable TVP console output
+  if (key == ENGINE_OPTION_CONSOLE_LOG) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    g_ConsoleLogEnabled = enabled;
+    spdlog::info("engine_set_option: console_log={}", enabled);
     TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
     ClearHandleErrorLocked(impl);
     SetThreadError(nullptr);

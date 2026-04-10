@@ -25,6 +25,8 @@ class GamePage extends StatefulWidget {
     this.forceLandscape = true,
     this.pluginTrace = false,
     this.mockEnabled = true,
+    this.fileLog = true,
+    this.consoleLog = true,
     this.gameManager,
   });
 
@@ -34,6 +36,8 @@ class GamePage extends StatefulWidget {
   final bool forceLandscape;
   final bool pluginTrace;
   final bool mockEnabled;
+  final bool fileLog;
+  final bool consoleLog;
 
   /// If set, play duration is recorded when leaving this page.
   final GameManager? gameManager;
@@ -411,6 +415,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     await _bridge.engineSetOption(
       key: PrefsKeys.optionMockEnabled,
       value: widget.mockEnabled ? '1' : '0',
+    );
+
+    _log('Setting file_log=${widget.fileLog}');
+    await _bridge.engineSetOption(
+      key: PrefsKeys.optionFileLog,
+      value: widget.fileLog ? '1' : '0',
+    );
+
+    _log('Setting console_log=${widget.consoleLog}');
+    await _bridge.engineSetOption(
+      key: PrefsKeys.optionConsoleLog,
+      value: widget.consoleLog ? '1' : '0',
     );
 
     if (widget.pluginTrace) {

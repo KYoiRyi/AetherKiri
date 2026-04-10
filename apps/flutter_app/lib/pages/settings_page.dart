@@ -28,6 +28,8 @@ class SettingsPage extends StatefulWidget {
     required this.forceLandscape,
     required this.pluginTrace,
     required this.mockEnabled,
+    required this.fileLog,
+    required this.consoleLog,
   });
 
   final EngineMode engineMode;
@@ -42,6 +44,8 @@ class SettingsPage extends StatefulWidget {
   final bool forceLandscape;
   final bool pluginTrace;
   final bool mockEnabled;
+  final bool fileLog;
+  final bool consoleLog;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -60,6 +64,8 @@ class SettingsResult {
     required this.forceLandscape,
     required this.pluginTrace,
     required this.mockEnabled,
+    required this.fileLog,
+    required this.consoleLog,
   });
 
   final EngineMode engineMode;
@@ -72,6 +78,8 @@ class SettingsResult {
   final bool forceLandscape;
   final bool pluginTrace;
   final bool mockEnabled;
+  final bool fileLog;
+  final bool consoleLog;
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -85,6 +93,8 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool _forceLandscape;
   late bool _pluginTrace;
   late bool _mockEnabled;
+  late bool _fileLog;
+  late bool _consoleLog;
   String _localeCode = 'system';
   String _themeModeCode = 'dark';
   bool _dirty = false;
@@ -102,6 +112,8 @@ class _SettingsPageState extends State<SettingsPage> {
     _forceLandscape = widget.forceLandscape;
     _pluginTrace = widget.pluginTrace;
     _mockEnabled = widget.mockEnabled;
+    _fileLog = widget.fileLog;
+    _consoleLog = widget.consoleLog;
     _loadLocale();
     _loadThemeMode();
   }
@@ -143,6 +155,8 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setBool(PrefsKeys.forceLandscape, _forceLandscape);
     await prefs.setBool(PrefsKeys.pluginTrace, _pluginTrace);
     await prefs.setBool(PrefsKeys.mockEnabled, _mockEnabled);
+    await prefs.setBool(PrefsKeys.fileLog, _fileLog);
+    await prefs.setBool(PrefsKeys.consoleLog, _consoleLog);
 
     if (mounted) {
       Navigator.pop(
@@ -158,6 +172,8 @@ class _SettingsPageState extends State<SettingsPage> {
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
+          fileLog: _fileLog,
+          consoleLog: _consoleLog,
         ),
       );
     }
@@ -490,6 +506,26 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: _mockEnabled,
                     onChanged: (value) {
                       setState(() => _mockEnabled = value);
+                      _markDirty();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.fileLog),
+                    subtitle: Text(l10n.fileLogDesc),
+                    value: _fileLog,
+                    onChanged: (value) {
+                      setState(() => _fileLog = value);
+                      _markDirty();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.consoleLog),
+                    subtitle: Text(l10n.consoleLogDesc),
+                    value: _consoleLog,
+                    onChanged: (value) {
+                      setState(() => _consoleLog = value);
                       _markDirty();
                     },
                   ),

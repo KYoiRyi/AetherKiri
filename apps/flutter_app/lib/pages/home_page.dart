@@ -46,6 +46,8 @@ class _HomePageState extends State<HomePage> {
   bool _forceLandscape = true;
   bool _pluginTrace = false;
   bool _mockEnabled = true;
+  bool _fileLog = true;
+  bool _consoleLog = true;
 
   String? _resolveBuiltInDylibPath() {
     if (Platform.isIOS) {
@@ -104,6 +106,8 @@ class _HomePageState extends State<HomePage> {
     _forceLandscape = prefs.getBool(PrefsKeys.forceLandscape) ?? true;
     _pluginTrace = prefs.getBool(PrefsKeys.pluginTrace) ?? false;
     _mockEnabled = prefs.getBool(PrefsKeys.mockEnabled) ?? true;
+    _fileLog = prefs.getBool(PrefsKeys.fileLog) ?? true;
+    _consoleLog = prefs.getBool(PrefsKeys.consoleLog) ?? true;
     await _gameManager.load();
     await _gameManager.applyPendingPlaySession();
 
@@ -559,6 +563,8 @@ class _HomePageState extends State<HomePage> {
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
+          fileLog: _fileLog,
+          consoleLog: _consoleLog,
           gameManager: _gameManager,
         ),
       ),
@@ -742,6 +748,8 @@ class _HomePageState extends State<HomePage> {
           forceLandscape: _forceLandscape,
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
+          fileLog: _fileLog,
+          consoleLog: _consoleLog,
         ),
       ),
     );
@@ -760,6 +768,8 @@ class _HomePageState extends State<HomePage> {
         _forceLandscape = result.forceLandscape;
         _pluginTrace = result.pluginTrace;
         _mockEnabled = result.mockEnabled;
+        _fileLog = result.fileLog;
+        _consoleLog = result.consoleLog;
       });
     }
   }

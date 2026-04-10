@@ -225,6 +225,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mockBypassDesc => '为缺失插件返回 mock 对象以抑制错误。关闭可暴露真实错误用于调试。';
 
   @override
+  String get fileLog => '文件日志 (krkr2.log)';
+
+  @override
+  String get fileLogDesc => '将引擎日志写入游戏目录中的 krkr2.log 文件';
+
+  @override
+  String get consoleLog => '控制台日志';
+
+  @override
+  String get consoleLogDesc => '将 TVP 控制台消息输出到引擎日志';
+
+  @override
   String get targetFrameRate => '目标帧率';
 
   @override

@@ -227,6 +227,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mockBypassDesc => '未実装プラグインのエラーを mock オブジェクトで回避します。無効化すると実際のエラーが表示されます。';
 
   @override
+  String get fileLog => 'ファイルログ (krkr2.log)';
+
+  @override
+  String get fileLogDesc => 'ゲームディレクトリに krkr2.log ファイルを出力します';
+
+  @override
+  String get consoleLog => 'コンソールログ';
+
+  @override
+  String get consoleLogDesc => 'TVP コンソールメッセージをエンジンログに出力します';
+
+  @override
   String get targetFrameRate => '目標フレームレート';
 
   @override
