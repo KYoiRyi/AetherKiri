@@ -806,9 +806,9 @@ class _HomePageState extends State<HomePage> {
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.only(
-                    top: topPadding + 16,
-                    left: 20,
-                    right: 20,
+                    top: topPadding + 24,
+                    left: 24,
+                    right: 24,
                     bottom: 8,
                   ),
                   sliver: SliverToBoxAdapter(
@@ -934,7 +934,7 @@ class _HomePageState extends State<HomePage> {
       builder: (context, constraints) {
         final crossAxisCount = _gridCrossAxisCount(constraints.crossAxisExtent);
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
@@ -1047,7 +1047,7 @@ class _CoverCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(
           color: Theme.of(context).colorScheme.outlineVariant,
           width: 1,
@@ -1132,9 +1132,9 @@ class _CoverCard extends StatelessWidget {
     final totalSeconds = game.playDurationSeconds ?? 0;
     final hasDuration = totalSeconds >= 60;
     return Positioned(
-      left: 12,
-      right: 12,
-      bottom: 10,
+      left: 14,
+      right: 14,
+      bottom: 12,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -1143,23 +1143,25 @@ class _CoverCard extends StatelessWidget {
             game.displayTitle,
             style: const TextStyle(
               color: Colors.white,
+              fontFamily: 'Georgia',
               fontSize: 13,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
+              fontWeight: FontWeight.w500,
+              height: 1.25,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           if (lastPlayed != null || hasDuration) ...[
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               [
                 if (lastPlayed != null) _formatDate(lastPlayed),
                 if (hasDuration) l10n.playDuration(GameInfo.formatPlayDuration(totalSeconds)),
               ].join(' · '),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
+                color: Colors.white.withValues(alpha: 0.65),
                 fontSize: 11,
+                height: 1.30,
               ),
             ),
           ],

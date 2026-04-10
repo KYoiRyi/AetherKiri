@@ -253,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
             // ── Engine section (desktop only) ──
             // On Android/iOS the engine is always bundled; no switching needed.
@@ -264,7 +264,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -314,7 +314,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -365,7 +365,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (Platform.isAndroid) ...[                  
                     const Divider(height: 24),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -614,8 +614,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: Text(l10n.aboutAuthor),
                     trailing: Text(
                       l10n.aboutAuthorName,
-                      style: TextStyle(
-                        color: colorScheme.primary,
+                      style: const TextStyle(
+                        color: AppColors.terracottaBrand,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -626,8 +626,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: Text(l10n.aboutEmail),
                     trailing: Text(
                       'wangguanzhiabcd@126.com',
-                      style: TextStyle(
-                        color: colorScheme.primary,
+                      style: const TextStyle(
+                        color: AppColors.terracottaBrand,
                         fontSize: 13,
                       ),
                     ),
@@ -699,12 +699,12 @@ class _SettingsPageState extends State<SettingsPage> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: widget.builtInAvailable
-            ? Colors.green.withValues(alpha: 0.1)
+            ? AppColors.warmSand.withValues(alpha: 0.4)
             : colorScheme.errorContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: widget.builtInAvailable
-              ? Colors.green.withValues(alpha: 0.3)
+              ? AppColors.ringWarm
               : colorScheme.error.withValues(alpha: 0.3),
         ),
       ),
@@ -713,7 +713,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Icon(
             widget.builtInAvailable ? Icons.check_circle : Icons.warning_amber,
             color: widget.builtInAvailable
-                ? Colors.green
+                ? AppColors.terracottaBrand
                 : colorScheme.error,
             size: 20,
           ),
@@ -730,7 +730,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: widget.builtInAvailable
-                        ? Colors.green
+                        ? AppColors.terracottaBrand
                         : colorScheme.error,
                   ),
                 ),
@@ -765,7 +765,7 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
@@ -828,7 +828,7 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8, top: 4),
+      padding: const EdgeInsets.only(left: 4, bottom: 10, top: 4),
       child: Row(
         children: [
           Icon(icon, size: 18, color: AppColors.terracottaBrand),

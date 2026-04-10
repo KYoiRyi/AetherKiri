@@ -133,8 +133,9 @@ ThemeData _buildTheme(ColorScheme colorScheme, Brightness brightness) {
     cardTheme: CardThemeData(
       elevation: 0,
       color: colorScheme.surfaceContainerLow,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: borderColor, width: 1),
       ),
     ),

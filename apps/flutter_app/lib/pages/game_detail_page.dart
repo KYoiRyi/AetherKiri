@@ -412,7 +412,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
   }
 
   static const double _coverCardAspectRatio = 3 / 4;
-  static const double _coverCardWidth = 140;
+  static const double _coverCardWidth = 160;
 
   /// 下方信息块顶部圆角，并与顶部区域留出重叠
   static const double _sheetRadius = 24;
@@ -436,7 +436,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(child: _buildTopCoverCard(colorScheme)),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Center(
                 child: Text(
                   game.displayTitle,
@@ -524,10 +524,10 @@ class _GameDetailPageState extends State<GameDetailPage> {
     final height = _coverCardWidth / _coverCardAspectRatio;
     return Card(
       elevation: 4,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
       ),
       child: SizedBox(
         width: _coverCardWidth,
@@ -592,7 +592,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
       AppLocalizations l10n, TextTheme textTheme, ColorScheme colorScheme) {
     final lastPlayed = game.lastPlayed;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -665,7 +665,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
   Widget _buildLaunchButton(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: FilledButton.icon(
         onPressed: () {
           gm.markPlayed(game.path);
@@ -688,12 +688,12 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
   Widget _buildManageSection(AppLocalizations l10n, ColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Card(
         elevation: 0,
         color: colorScheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: BorderSide(
             color: colorScheme.outlineVariant,
             width: 1,
@@ -736,12 +736,12 @@ class _GameDetailPageState extends State<GameDetailPage> {
 
   Widget _buildDangerSection(AppLocalizations l10n, ColorScheme colorScheme) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Card(
         elevation: 0,
         color: colorScheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: BorderSide(
             color: colorScheme.outlineVariant,
             width: 1,
