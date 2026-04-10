@@ -997,10 +997,8 @@ class _CoverCard extends StatefulWidget {
   final VoidCallback onSetCover;
   final VoidCallback onPackUnpack;
 
-  bool get _isXp3 => game.path.toLowerCase().endsWith('.xp3');
-
-  bool get _hasCover =>
-      game.coverPath != null && File(game.coverPath!).existsSync();
+  @override
+  State<_CoverCard> createState() => _CoverCardState();
 }
 
 class _CoverCardState extends State<_CoverCard> {
