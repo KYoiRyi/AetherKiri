@@ -9,10 +9,19 @@ jobs:
   build:
     name: Build macOS App
     runs-on: macos-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install Build Systems
+        run: |
+          brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison
+          # gettext and bison are often keg-only, ensure their tools are in PATH
+          echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
+          echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -21,9 +30,6 @@ jobs:
 
       - name: Disable Analytics
         run: flutter config --no-analytics
-
-      - name: Install autoconf and automake
-        run: brew install autoconf automake libtool
 
       - name: Restore vcpkg cache
         uses: actions/cache/restore@v4
@@ -34,17 +40,31 @@ jobs:
           key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
             ${{ runner.os }}-vcpkg-macos-
-            ${{ runner.os }}-vcpkg-
 
-      - name: vcpkg cache
+      - name: Build macOS Release
+        run: |
+          chmod +x ./build.sh
+          ./build.sh macos release --jobs=4
+
+      - name: Find built .app
+        id: find_app
+        run: |
+          APP_PATH=$(find apps/flutter_app/build/macos -name "*.app" -type d | head -1)
+          echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: KrKr2-Next-macOS
+          path: ${{ steps.find_app.outputs.app_path }}
+          retention-days: 7
+
+      - name: Save vcpkg cache
+        if: success()
         uses: actions/cache/save@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
           key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
-
-      - name: Build macOS Release
-        run: |
-          chmod +x ./build.sh
-          ./build.sh macos release --jobs=4
