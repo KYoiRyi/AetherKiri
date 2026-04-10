@@ -12,6 +12,7 @@ import '../l10n/app_localizations.dart';
 import '../models/game_info.dart';
 import '../services/game_manager.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
 import 'game_detail_page.dart';
 import 'game_page.dart';
@@ -555,8 +556,8 @@ class _HomePageState extends State<HomePage> {
     }
     _gameManager.markPlayed(game.path);
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => GamePage(
+      AppAnimations.fadeRoute(
+        GamePage(
           gamePath: game.path,
           ffiLibraryPath: dylibPath,
           forceLandscape: _forceLandscape,
@@ -571,8 +572,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _openGameDetail(GameInfo game) async {
     final result = await Navigator.of(context).push<GameDetailResult>(
-      MaterialPageRoute<GameDetailResult>(
-        builder: (_) => GameDetailPage(
+      AppAnimations.fadeSlideRoute<GameDetailResult>(
+        GameDetailPage(
           game: game,
           gameManager: _gameManager,
         ),
@@ -608,8 +609,8 @@ class _HomePageState extends State<HomePage> {
     );
     if (shouldScrape != true || !mounted) return;
     final result = await Navigator.of(context).push<GameDetailResult>(
-      MaterialPageRoute<GameDetailResult>(
-        builder: (_) => GameDetailPage(
+      AppAnimations.fadeSlideRoute<GameDetailResult>(
+        GameDetailPage(
           game: game,
           gameManager: _gameManager,
           openScrapeOnLoad: true,
@@ -732,8 +733,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _openSettings() async {
     final result = await Navigator.of(context).push<SettingsResult>(
-      MaterialPageRoute<SettingsResult>(
-        builder: (_) => SettingsPage(
+      AppAnimations.fadeRoute<SettingsResult>(
+        SettingsPage(
           engineMode: _engineMode,
           customDylibPath: _customDylibPath,
           builtInDylibPath: _builtInDylibPath,
@@ -801,7 +802,17 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: AppAnimations.gentle,
+                curve: AppAnimations.warmEaseOut,
+                builder: (_, value, __) => Opacity(
+                  opacity: value,
+                  child: const CircularProgressIndicator(),
+                ),
+              ),
+            )
           : CustomScrollView(
               slivers: [
                 SliverPadding(
@@ -945,14 +956,17 @@ class _HomePageState extends State<HomePage> {
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 final game = games[index];
-                return _CoverCard(
-                  game: game,
-                  l10n: l10n,
-                  onTap: () => _openGameDetail(game),
-                  onRename: () => _renameGame(game),
-                  onRemove: () => _removeGame(game),
-                  onSetCover: () => _setCoverImage(game),
-                  onPackUnpack: () => _packUnpackGame(game),
+                return AppAnimations.staggeredEntrance(
+                  index: index,
+                  child: _CoverCard(
+                    game: game,
+                    l10n: l10n,
+                    onTap: () => _openGameDetail(game),
+                    onRename: () => _renameGame(game),
+                    onRemove: () => _removeGame(game),
+                    onSetCover: () => _setCoverImage(game),
+                    onPackUnpack: () => _packUnpackGame(game),
+                  ),
                 );
               },
               childCount: games.length,
@@ -964,7 +978,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _CoverCard extends StatelessWidget {
+class _CoverCard extends StatefulWidget {
   const _CoverCard({
     required this.game,
     required this.l10n,
@@ -985,6 +999,16 @@ class _CoverCard extends StatelessWidget {
 
   bool get _isXp3 => game.path.toLowerCase().endsWith('.xp3');
 
+  bool get _hasCover =>
+      game.coverPath != null && File(game.coverPath!).existsSync();
+}
+
+class _CoverCardState extends State<_CoverCard> {
+  double _scale = 1.0;
+
+  GameInfo get game => widget.game;
+  AppLocalizations get l10n => widget.l10n;
+  bool get _isXp3 => game.path.toLowerCase().endsWith('.xp3');
   bool get _hasCover =>
       game.coverPath != null && File(game.coverPath!).existsSync();
 
@@ -1018,13 +1042,13 @@ class _CoverCard extends StatelessWidget {
       if (value == null) return;
       switch (value) {
         case 'cover':
-          onSetCover();
+          widget.onSetCover();
         case 'rename':
-          onRename();
+          widget.onRename();
         case 'pack_unpack':
-          onPackUnpack();
+          widget.onPackUnpack();
         case 'remove':
-          onRemove();
+          widget.onRemove();
       }
     });
   }
@@ -1043,31 +1067,39 @@ class _CoverCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant,
-          width: 1,
-        ),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildBackground(colorScheme),
-          _buildGradientOverlay(),
-          _buildTitleOverlay(game),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              onLongPress: () => _showContextMenu(context),
-              onSecondaryTap: () => _showContextMenu(context),
-            ),
+    return AnimatedScale(
+      scale: _scale,
+      duration: AppAnimations.quick,
+      curve: AppAnimations.warmEaseOut,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            width: 1,
           ),
-        ],
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildBackground(colorScheme),
+            _buildGradientOverlay(),
+            _buildTitleOverlay(game),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: widget.onTap,
+                onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
+                onTapUp: (_) => setState(() => _scale = 1.0),
+                onTapCancel: () => setState(() => _scale = 1.0),
+                onLongPress: () => _showContextMenu(context),
+                onSecondaryTap: () => _showContextMenu(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

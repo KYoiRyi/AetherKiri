@@ -11,6 +11,7 @@ import '../l10n/app_localizations.dart';
 import '../main.dart';
 import '../constants/prefs_keys.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_animations.dart';
 import 'home_page.dart';
 
 /// Standalone settings page with MD3 styling and i18n support.
@@ -252,9 +253,17 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-        body: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          children: [
+        body: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.0, end: 1.0),
+          duration: AppAnimations.gentle,
+          curve: AppAnimations.warmEaseOut,
+          builder: (_, value, child) => Opacity(
+            opacity: value,
+            child: child,
+          ),
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            children: [
             // ── Engine section (desktop only) ──
             // On Android/iOS the engine is always bundled; no switching needed.
             if (!Platform.isAndroid && !Platform.isIOS) ...[
@@ -688,6 +697,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 32),
           ],
+        ),
         ),
       ),
     );

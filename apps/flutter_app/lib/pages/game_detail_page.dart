@@ -13,6 +13,7 @@ import '../models/game_metadata_candidate.dart';
 import '../services/game_manager.dart';
 import '../services/game_metadata_scraper.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
 import 'scrape_select_page.dart';
 
@@ -234,8 +235,8 @@ class _GameDetailPageState extends State<GameDetailPage> {
     Navigator.of(context).pop(); // close loading dialog
     if (!mounted) return;
     final applied = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (ctx) => ScrapeSelectPage(
+      AppAnimations.fadeSlideRoute<bool>(
+        ScrapeSelectPage(
           candidates: candidates,
           game: game,
           gameManager: gm,
@@ -399,9 +400,27 @@ class _GameDetailPageState extends State<GameDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildTopHeroSection(colorScheme, textTheme),
-              Transform.translate(
-                offset: const Offset(0, -_sheetRadius),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: AppAnimations.gentle,
+                curve: AppAnimations.warmEaseOut,
+                builder: (_, value, child) => Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+                child: _buildTopHeroSection(colorScheme, textTheme),
+              ),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: AppAnimations.standard,
+                curve: AppAnimations.warmEaseOut,
+                builder: (_, value, child) => Transform.translate(
+                  offset: Offset(0, -_sheetRadius + 16 * (1 - value)),
+                  child: Opacity(
+                    opacity: value,
+                    child: child,
+                  ),
+                ),
                 child: _buildBottomSheet(colorScheme, l10n, textTheme),
               ),
             ],
