@@ -213,22 +213,27 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final bool pauseOnLifecycle = Platform.isAndroid || Platform.isIOS;
+
     switch (state) {
       case AppLifecycleState.resumed:
-        unawaited(_resumeForLifecycle());
+        if (pauseOnLifecycle) {
+          unawaited(_resumeForLifecycle());
+        }
         break;
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
-        // Only pause when the app is truly invisible (hidden/paused).
-        // On macOS desktop, switching windows only triggers 'inactive',
-        // which should NOT pause the engine — the window is still
-        // partially visible and the user expects the game to keep running.
-        unawaited(_pauseForLifecycle());
+        // Desktop builds should keep running even when focus changes or the
+        // app becomes hidden/minimized. Only mobile lifecycle transitions
+        // auto-pause the engine.
+        if (pauseOnLifecycle) {
+          unawaited(_pauseForLifecycle());
+        }
         break;
       case AppLifecycleState.inactive:
-        // On mobile, 'inactive' precedes 'hidden'/'paused' so we let those
-        // handle the pause. On desktop, 'inactive' is just focus-lost and
-        // should be ignored to avoid freezing the game on window switch.
+        // Focus loss should not pause the desktop engine. On mobile,
+        // 'inactive' usually precedes 'hidden'/'paused', so we let those
+        // states handle pause/resume.
         break;
       case AppLifecycleState.detached:
         break;
@@ -342,7 +347,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       final initUpper = File('$path/data/system/Initialize.tjs');
       final dataXp3Lower = File('$path/data.xp3');
       final dataXp3Upper = File('$path/data.XP3');
-      
+
       if (!await startup.exists() &&
           !await init.exists() &&
           !await initUpper.exists() &&
@@ -1143,7 +1148,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: AppColors.errorCrimson, size: 64),
+            const Icon(
+              Icons.error_outline,
+              color: AppColors.errorCrimson,
+              size: 64,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Engine Error',
@@ -1190,7 +1199,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                       ClipboardData(text: _errorMessage ?? 'Unknown error'),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Error copied to clipboard')),
+                      const SnackBar(
+                        content: Text('Error copied to clipboard'),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.copy, size: 18),
