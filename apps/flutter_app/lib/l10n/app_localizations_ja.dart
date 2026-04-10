@@ -224,7 +224,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mockBypass => 'Mock バイパス';
 
   @override
-  String get mockBypassDesc => '未実装プラグインのエラーを mock オブジェクトで回避します。無効化すると実際のエラーが表示されます。';
+  String get mockBypassDesc =>
+      '未実装プラグインのエラーを mock オブジェクトで回避します。無効化すると実際のエラーが表示されます。';
 
   @override
   String get consoleLogFile => 'コンソールログファイル';

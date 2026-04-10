@@ -139,13 +139,10 @@ log_step "Step 1/3: Building C++ engine"
 
 export VCPKG_ROOT
 
-# Configure (only if needed)
-if [[ ! -f "$CMAKE_BUILD_DIR/build.ninja" ]]; then
-    log_info "Running CMake configure..."
-    cmake --preset "$CMAKE_CONFIG_PRESET"
-else
-    log_info "Build directory already configured, skipping configure."
-fi
+# Always re-run configure so preset cache variables stay in sync with the
+# current macOS build expectations (for example BUILD_TOOLS=OFF).
+log_info "Running CMake configure..."
+cmake --preset "$CMAKE_CONFIG_PRESET"
 
 # Build
 log_info "Building C++ engine with $PARALLEL_JOBS parallel jobs..."
