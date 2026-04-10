@@ -349,9 +349,112 @@ ThemeData _buildTheme(ColorScheme colorScheme, Brightness brightness) {
     ),
 
     // ── Typography ──
-    textTheme: Typography.material2021().black.apply(
-          bodyColor: colorScheme.onSurface,
-          displayColor: colorScheme.onSurface,
-        ),
+    // Serif (Georgia) for display/headline/titleLarge/titleMedium — weight 500, tight line-heights
+    // Sans (system) for body/label — relaxed line-heights (1.6)
+    textTheme: TextTheme(
+      // ── Serif headlines ──
+      displayLarge: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 32,
+        fontWeight: FontWeight.w500,
+        height: 1.10,
+        color: colorScheme.onSurface,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 28,
+        fontWeight: FontWeight.w500,
+        height: 1.15,
+        color: colorScheme.onSurface,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 24,
+        fontWeight: FontWeight.w500,
+        height: 1.20,
+        color: colorScheme.onSurface,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 22,
+        fontWeight: FontWeight.w500,
+        height: 1.20,
+        color: colorScheme.onSurface,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+        height: 1.20,
+        color: colorScheme.onSurface,
+      ),
+      headlineSmall: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        height: 1.25,
+        color: colorScheme.onSurface,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        height: 1.25,
+        color: colorScheme.onSurface,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: 'Georgia',
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.30,
+        color: colorScheme.onSurface,
+      ),
+      // ── Sans body / UI ──
+      titleSmall: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.43,
+        color: colorScheme.onSurface,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        height: 1.60,
+        color: colorScheme.onSurface,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        height: 1.60,
+        color: colorScheme.onSurface,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        height: 1.43,
+        color: colorScheme.onSurface,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        height: 1.43,
+        letterSpacing: 0.12,
+        color: colorScheme.onSurface,
+      ),
+      labelMedium: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        height: 1.25,
+        letterSpacing: 0.12,
+        color: colorScheme.onSurface,
+      ),
+      labelSmall: TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.w400,
+        height: 1.60,
+        letterSpacing: 0.5,
+        color: colorScheme.onSurface,
+      ),
+    ),
   );
 }

@@ -1014,8 +1014,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Georgia',
                       letterSpacing: 1.2,
                     ),
                   ),
@@ -1150,7 +1150,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Georgia',
               ),
             ),
             const SizedBox(height: 12),

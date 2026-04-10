@@ -302,7 +302,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
             ],
 
             // ── Rendering section ──
@@ -480,7 +480,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // ── Development section ──
             _SectionHeader(
@@ -522,7 +522,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // ── General section ──
             _SectionHeader(
@@ -586,7 +586,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
             // ── About section ──
             _SectionHeader(
@@ -835,10 +835,13 @@ class _SectionHeader extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppColors.terracottaBrand,
-                  fontWeight: FontWeight.w600,
-                ),
+            style: const TextStyle(
+              fontFamily: 'Georgia',
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              height: 1.30,
+              color: AppColors.terracottaBrand,
+            ),
           ),
         ],
       ),

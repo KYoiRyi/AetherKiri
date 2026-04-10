@@ -818,10 +818,7 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: Text(
                             l10n.appTitle,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.headlineMedium,
                           ),
                         ),
                         if (isDesktop)
@@ -895,37 +892,39 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildEmptyState(ColorScheme colorScheme, AppLocalizations l10n) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.videogame_asset_off,
-            size: 80,
-            color: colorScheme.primary.withValues(alpha: 0.35),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.noGamesYet,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.videogame_asset_off,
+              size: 72,
+              color: colorScheme.primary.withValues(alpha: 0.3),
             ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
+            const SizedBox(height: 32),
+            Text(
+              l10n.noGamesYet,
+              style: TextStyle(
+                fontFamily: 'Georgia',
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+                height: 1.20,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
               Platform.isIOS ? l10n.noGamesHintIos : l10n.noGamesHintDesktop,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 14,
-                height: 1.6,
-                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                fontSize: 15,
+                height: 1.60,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -939,8 +938,8 @@ class _HomePageState extends State<HomePage> {
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
               childAspectRatio: 3 / 4,
             ),
             delegate: SliverChildBuilderDelegate(

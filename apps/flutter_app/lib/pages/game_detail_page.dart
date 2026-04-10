@@ -440,8 +440,11 @@ class _GameDetailPageState extends State<GameDetailPage> {
               Center(
                 child: Text(
                   game.displayTitle,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    fontFamily: 'Georgia',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    height: 1.20,
                     color: colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.center,
@@ -454,7 +457,9 @@ class _GameDetailPageState extends State<GameDetailPage> {
                 Center(
                   child: Text(
                     game.developer!,
-                    style: textTheme.bodyMedium?.copyWith(
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.60,
                       color: colorScheme.onSurfaceVariant,
                     ),
                     textAlign: TextAlign.center,
@@ -646,6 +651,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
               text,
               style: TextStyle(
                 fontSize: 13,
+                height: 1.60,
                 color: colorScheme.onSurfaceVariant,
               ),
               maxLines: 2,
