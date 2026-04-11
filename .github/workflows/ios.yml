@@ -74,7 +74,7 @@ jobs:
           retention-days: 7
 
       - name: Save vcpkg cache
-        if: success()
+        if: always()
         uses: actions/cache/save@v4
         with:
           path: |
