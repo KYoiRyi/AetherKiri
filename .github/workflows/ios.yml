@@ -102,7 +102,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Fetching list of caches..."
-          gh api -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches > caches.json || exit 0
+          gh api -H "Accept: application/vnd.github+json" "/repos/$GITHUB_REPOSITORY/actions/caches?ref=$GITHUB_REF" > caches.json || exit 0
           
           CURRENT_VCPKG_KEY="${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}"
           jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-ios-vcpkg-\")) | select(.key != \"$CURRENT_VCPKG_KEY\") | .id" caches.json | while read id; do
