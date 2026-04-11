@@ -11,6 +11,7 @@ jobs:
     runs-on: macos-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
 
     steps:
       - name: Checkout Repository
@@ -18,15 +19,22 @@ jobs:
 
       - name: Install Build Systems
         run: |
-          brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison
+          brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison ccache jq
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
           echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
         with:
-          key: ${{ runner.os }}-ccache
-          max-size: 1000M
+          path: .ccache
+          key: ${{ runner.os }}-ios-ccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-ios-ccache-
+
+      - name: Setup ccache config
+        run: |
+          ccache --max-size=1000M
+          ccache -z
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -43,9 +51,9 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-
+             ${{ runner.os }}-ios-vcpkg-
 
       - name: Build iOS Release
         run: |
@@ -74,10 +82,37 @@ jobs:
           retention-days: 7
 
       - name: Save vcpkg cache
-        if: always()
+        if: success()
         uses: actions/cache/save@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+      - name: Save ccache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-ios-ccache-${{ github.run_id }}
+
+      - name: Clean up older caches
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching list of caches..."
+          gh api -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches > caches.json || exit 0
+          
+          CURRENT_VCPKG_KEY="${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}"
+          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-ios-vcpkg-\")) | select(.key != \"$CURRENT_VCPKG_KEY\") | .id" caches.json | while read id; do
+            echo "Deleting old vcpkg cache ID: $id"
+            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
+          done
+          
+          CURRENT_CCACHE_KEY="${{ runner.os }}-ios-ccache-${{ github.run_id }}"
+          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-ios-ccache-\")) | select(.key != \"$CURRENT_CCACHE_KEY\") | .id" caches.json | while read id; do
+            echo "Deleting old ccache ID: $id"
+            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
+          done
