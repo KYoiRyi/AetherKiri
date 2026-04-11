@@ -584,7 +584,6 @@ void PluginCallTracer::LogPluginLoad(const std::string &name, bool success,
 void PluginCallTracer::LogMissingMember(const tjs_char *membername,
                                          const char *operation,
                                          iTJSDispatch2 *obj) {
-    if (!m_enabled || !m_logger) return;
     tTJSNarrowStringHolder ns(membername);
     std::string className;
     if (obj) {
@@ -596,11 +595,23 @@ void PluginCallTracer::LogMissingMember(const tjs_char *membername,
             className = nc.operator const char *();
         }
     }
-    if (className.empty()) {
-        m_logger->info("[MISSING] {} \"{}\"", operation,
-                       ns.operator const char *());
-    } else {
-        m_logger->info("[MISSING] {}.{} \"{}\"", className, operation,
-                       ns.operator const char *());
+
+    if (m_enabled && m_logger) {
+        if (className.empty()) {
+            m_logger->info("[MISSING] {} \"{}\"", operation,
+                           ns.operator const char *());
+        } else {
+            m_logger->info("[MISSING] {}.{} \"{}\"", className, operation,
+                           ns.operator const char *());
+        }
+    }
+
+    extern bool TVPIsConsoleLogFileEnabled();
+    if (TVPIsConsoleLogFileEnabled()) {
+        if (className.empty()) {
+            spdlog::error("TJS script error: missing member {} at {}", ns.operator const char *(), operation);
+        } else {
+            spdlog::error("TJS script error: missing member {}.{} at {}", className, ns.operator const char *(), operation);
+        }
     }
 }
