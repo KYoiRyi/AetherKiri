@@ -1,4 +1,4 @@
-#include "ncb_inc.h"
+#include "ncbind.hpp"
 #include <vector>
 
 struct MultiImageEntry {
