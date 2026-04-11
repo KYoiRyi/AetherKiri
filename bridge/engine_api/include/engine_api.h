@@ -265,6 +265,22 @@ ENGINE_API_EXPORT engine_result_t engine_send_input(engine_handle_t handle,
                                                     const engine_input_event_t* event);
 
 /*
+ * Exports the current main window menu tree as UTF-8 JSON.
+ * Writes bytes written in out_bytes_written.
+ * Returns an empty JSON array ("[]") when no menu is available.
+ */
+ENGINE_API_EXPORT engine_result_t engine_get_main_menu_json(
+    engine_handle_t handle, char* out_buffer, uint32_t buffer_size,
+    uint32_t* out_bytes_written);
+
+/*
+ * Activates one exported menu item by slash-separated index path
+ * (for example "0/2/1").
+ */
+ENGINE_API_EXPORT engine_result_t engine_activate_menu_item(
+    engine_handle_t handle, const char* item_path_utf8);
+
+/*
  * Sets an IOSurface as the render target for the engine.
  * When set, engine_tick renders directly to this IOSurface (zero-copy),
  * bypassing the glReadPixels path used by engine_read_frame_rgba.

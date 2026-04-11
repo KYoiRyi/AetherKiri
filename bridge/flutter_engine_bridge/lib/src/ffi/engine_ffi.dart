@@ -404,6 +404,37 @@ class EngineFfiBridge {
     }
   }
 
+  String? getMainMenuJson() {
+    const int bufferSize = 262144;
+    final buffer = calloc<Uint8>(bufferSize);
+    final outBytesWritten = calloc<Uint32>();
+    try {
+      final result = _bindings.engineGetMainMenuJson(
+        _handle,
+        buffer.cast<Utf8>(),
+        bufferSize,
+        outBytesWritten,
+      );
+      if (result != kEngineResultOk) {
+        return null;
+      }
+      final length = outBytesWritten.value;
+      return String.fromCharCodes(buffer.asTypedList(length));
+    } finally {
+      calloc.free(outBytesWritten);
+      calloc.free(buffer);
+    }
+  }
+
+  int activateMenuItem(String path) {
+    final pathPtr = path.toNativeUtf8();
+    try {
+      return _bindings.engineActivateMenuItem(_handle, pathPtr);
+    } finally {
+      calloc.free(pathPtr);
+    }
+  }
+
   int setRenderTargetIOSurface({
     required int iosurfaceId,
     required int width,

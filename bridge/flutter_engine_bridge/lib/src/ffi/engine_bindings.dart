@@ -287,6 +287,16 @@ typedef _EngineSendInputNative =
 typedef _EngineSendInputDart =
     int Function(Pointer<Void>, Pointer<EngineInputEvent>);
 
+typedef _EngineGetMainMenuJsonNative =
+    Int32 Function(Pointer<Void>, Pointer<Utf8>, Uint32, Pointer<Uint32>);
+typedef _EngineGetMainMenuJsonDart =
+    int Function(Pointer<Void>, Pointer<Utf8>, int, Pointer<Uint32>);
+
+typedef _EngineActivateMenuItemNative =
+    Int32 Function(Pointer<Void>, Pointer<Utf8>);
+typedef _EngineActivateMenuItemDart =
+    int Function(Pointer<Void>, Pointer<Utf8>);
+
 typedef _EngineSetRenderTargetIOSurfaceNative =
     Int32 Function(Pointer<Void>, Uint32, Uint32, Uint32);
 typedef _EngineSetRenderTargetIOSurfaceDart =
@@ -377,6 +387,16 @@ class EngineBindings {
           .lookupFunction<_EngineSendInputNative, _EngineSendInputDart>(
             'engine_send_input',
           ),
+      engineGetMainMenuJson = library
+          .lookupFunction<
+            _EngineGetMainMenuJsonNative,
+            _EngineGetMainMenuJsonDart
+          >('engine_get_main_menu_json'),
+      engineActivateMenuItem = library
+          .lookupFunction<
+            _EngineActivateMenuItemNative,
+            _EngineActivateMenuItemDart
+          >('engine_activate_menu_item'),
       engineSetRenderTargetIOSurface = library
           .lookupFunction<
             _EngineSetRenderTargetIOSurfaceNative,
@@ -427,6 +447,9 @@ class EngineBindings {
   engineGetFrameDesc;
   final int Function(Pointer<Void>, Pointer<Void>, int) engineReadFrameRgba;
   final int Function(Pointer<Void>, Pointer<EngineInputEvent>) engineSendInput;
+  final int Function(Pointer<Void>, Pointer<Utf8>, int, Pointer<Uint32>)
+  engineGetMainMenuJson;
+  final int Function(Pointer<Void>, Pointer<Utf8>) engineActivateMenuItem;
   final int Function(Pointer<Void>, int, int, int)
   engineSetRenderTargetIOSurface;
   final int Function(Pointer<Void>, Pointer<Void>, int, int)

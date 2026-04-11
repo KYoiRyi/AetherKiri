@@ -158,6 +158,16 @@ class FlutterEngineBridgeAdapter implements EngineBridge {
   }
 
   @override
+  Future<String?> engineGetMainMenuJson() {
+    return _delegate.engineGetMainMenuJson();
+  }
+
+  @override
+  Future<int> engineActivateMenuItem(String path) {
+    return _delegate.engineActivateMenuItem(path);
+  }
+
+  @override
   Future<int?> createTexture({required int width, required int height}) {
     return _delegate.createTexture(width: width, height: height);
   }

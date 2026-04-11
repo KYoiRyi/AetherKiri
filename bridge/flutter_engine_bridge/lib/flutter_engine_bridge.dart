@@ -232,6 +232,34 @@ class FlutterEngineBridge {
     );
   }
 
+  Future<String?> engineGetMainMenuJson() async {
+    final ffi = _ffiBridge;
+    if (ffi == null) {
+      final platformVersion = await _platform.getPlatformVersion();
+      final versionLabel = platformVersion ?? 'unknown';
+      _fallbackLastError = _buildFallbackError(
+        'FFI unavailable for engine_get_main_menu_json. '
+        'MethodChannel fallback active ($versionLabel).',
+      );
+      return null;
+    }
+
+    final json = ffi.getMainMenuJson();
+    if (json == null) {
+      _fallbackLastError = ffi.lastError();
+    } else {
+      _fallbackLastError = '';
+    }
+    return json;
+  }
+
+  Future<int> engineActivateMenuItem(String path) async {
+    return _withFfiCall(
+      apiName: 'engine_activate_menu_item',
+      call: (ffi) => ffi.activateMenuItem(path),
+    );
+  }
+
   Future<int> engineSetRenderTargetIOSurface({
     required int iosurfaceId,
     required int width,
