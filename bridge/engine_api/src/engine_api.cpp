@@ -550,6 +550,8 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #if defined(__ANDROID__)
   AndroidInfoLog("engine_open_game: input='%s' normalized='%s'",
                  game_root_path_utf8, normalized_game_root_path.c_str());
+#endif
+
   try {
     std::string log_file_path = normalized_game_root_path;
     if (!log_file_path.empty() && log_file_path.back() != '/') {
@@ -565,11 +567,10 @@ engine_result_t OpenGameCore(engine_handle_t handle,
     attach_sink("core");
     attach_sink("tjs2");
     attach_sink("plugin");
-    spdlog::info("engine_open_game: Android file logger successfully attached to {}", log_file_path);
+    spdlog::info("engine_open_game: File logger successfully attached to {}", log_file_path);
   } catch (const std::exception& e) {
-    AndroidInfoLog("engine_open_game: Failed to create Android log file: %s", e.what());
+    spdlog::error("engine_open_game: Failed to create log file: {}", e.what());
   }
-#endif
   spdlog::default_logger()->flush();
 
   // Only initialize plugin trace logger when tracing is enabled.
