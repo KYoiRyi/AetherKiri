@@ -356,6 +356,51 @@ static tjs_error Player_setSpeed(tTJSVariant *, tjs_int count, tTJSVariant **p,
     return TJS_S_OK;
 }
 
+static tjs_error Player_getOutline(tTJSVariant *r, tjs_int, tTJSVariant **,
+                                   iTJSDispatch2 *objthis) {
+    auto *player = GetPlayerInstance(objthis);
+    if(!r)
+        return TJS_S_OK;
+    if(!player) {
+        *r = tTJSVariant(static_cast<tjs_int>(0));
+        return TJS_S_OK;
+    }
+    tTJSVariant value = player->getVariable(TJS_W("outline"));
+    if(value.Type() == tvtVoid)
+        *r = tTJSVariant(static_cast<tjs_int>(0));
+    else
+        *r = value;
+    return TJS_S_OK;
+}
+
+static tjs_error Player_setOutline(tTJSVariant *, tjs_int count, tTJSVariant **p,
+                                   iTJSDispatch2 *objthis) {
+    auto *player = GetPlayerInstance(objthis);
+    if(!player || count < 1) return TJS_E_INVALIDPARAM;
+    player->setVariable(TJS_W("outline"), *p[0]);
+    return TJS_S_OK;
+}
+
+static tjs_error Player_getVariableKeys(tTJSVariant *r, tjs_int, tTJSVariant **,
+                                        iTJSDispatch2 *objthis) {
+    auto *player = GetPlayerInstance(objthis);
+    if(!r)
+        return TJS_S_OK;
+    if(!player) {
+        *r = tTJSVariant();
+        return TJS_S_OK;
+    }
+
+    iTJSDispatch2 *keys = player->getVariableKeys();
+    if(keys) {
+        *r = tTJSVariant(keys, keys);
+        keys->Release();
+    } else {
+        *r = tTJSVariant();
+    }
+    return TJS_S_OK;
+}
+
 static tjs_error Player_getCompletionType(tTJSVariant *r, tjs_int, tTJSVariant **,
                                           iTJSDispatch2 *objthis) {
     auto *player = GetPlayerInstance(objthis);
@@ -529,8 +574,11 @@ NCB_REGISTER_SUBCLASS_DELAY(Player) {
     NCB_PROPERTY_RAW_CALLBACK(motion, Player_getMotion, Player_setMotion, 0);
     NCB_PROPERTY_RAW_CALLBACK(chara, Player_getChara, Player_setChara, 0);
     NCB_PROPERTY_RAW_CALLBACK(tickCount, Player_getTickCount, Player_setTickCount, 0);
+    NCB_PROPERTY_RAW_CALLBACK(tickcount, Player_getTickCount, Player_setTickCount, 0);
     NCB_PROPERTY_RAW_CALLBACK(lastTime, Player_getLastTime, Player_setLastTime, 0);
     NCB_PROPERTY_RAW_CALLBACK(speed, Player_getSpeed, Player_setSpeed, 0);
+    NCB_PROPERTY_RAW_CALLBACK(outline, Player_getOutline, Player_setOutline, 0);
+    NCB_PROPERTY_RAW_CALLBACK_RO(variableKeys, Player_getVariableKeys, 0);
     NCB_PROPERTY_RAW_CALLBACK(completionType, Player_getCompletionType, Player_setCompletionType, 0);
     NCB_METHOD_RAW_CALLBACK(play, Player_play, 0);
     NCB_METHOD_RAW_CALLBACK(stop, Player_stop, 0);

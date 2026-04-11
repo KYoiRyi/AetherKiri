@@ -33,6 +33,12 @@ extern "C" void TJS_GetObjByHashBits(int64_t out[8]) {
 }
 
 namespace TJS {
+    static bool TJSIsStartupCompatWritableName(const tjs_char *membername) {
+        return membername &&
+               (!TJS_strcmp(membername, TJS_W("debugWindowEnabled")) ||
+                !TJS_strcmp(membername, TJS_W("inXP3archivePacked")) ||
+                !TJS_strcmp(membername, TJS_W("convertMode")));
+    }
 
     //---------------------------------------------------------------------------
     // utility functions
@@ -1440,7 +1446,9 @@ namespace TJS {
                     if(TJS_SUCCEEDED(hr))
                         return hr;
                     if(hr != TJS_E_NOTIMPL && hr != TJS_E_INVALIDTYPE &&
-                       hr != TJS_E_INVALIDOBJECT)
+                       hr != TJS_E_INVALIDOBJECT &&
+                       !(hr == TJS_E_ACCESSDENYED &&
+                         TJSIsStartupCompatWritableName(membername)))
                         return hr;
                 }
                 data = Find(membername, hint);

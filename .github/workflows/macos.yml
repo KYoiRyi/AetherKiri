@@ -64,6 +64,10 @@ jobs:
         id: find_app
         run: |
           APP_PATH=$(find apps/flutter_app/build/macos -name "*.app" -type d | head -1)
+          if [ -z "$APP_PATH" ] || [ ! -d "$APP_PATH" ]; then
+            echo "Built .app bundle not found"
+            exit 1
+          fi
           echo "app_path=$APP_PATH" >> $GITHUB_OUTPUT
 
       - name: Upload Artifact

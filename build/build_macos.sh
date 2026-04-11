@@ -139,13 +139,11 @@ log_step "Step 1/3: Building C++ engine"
 
 export VCPKG_ROOT
 
-# Configure (only if needed)
-if [[ ! -f "$CMAKE_BUILD_DIR/build.ninja" ]]; then
-    log_info "Running CMake configure..."
-    cmake --preset "$CMAKE_CONFIG_PRESET"
-else
-    log_info "Build directory already configured, skipping configure."
-fi
+# Always run a fresh configure so cached package/library paths do not drift
+# out of sync with the preset's vcpkg mode (for example Debug builds with
+# release-only vcpkg dependencies).
+log_info "Running fresh CMake configure..."
+cmake --preset "$CMAKE_CONFIG_PRESET" --fresh
 
 # Build
 log_info "Building C++ engine with $PARALLEL_JOBS parallel jobs..."

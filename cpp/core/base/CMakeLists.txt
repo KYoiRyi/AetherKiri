@@ -57,3 +57,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     unofficial::minizip::minizip
 )
+
+if(APPLE)
+    # The static libarchive package on macOS requires libb2 for RAR5 checksum
+    # support, but FindLibArchive does not propagate that dependency.
+    find_library(LIBB2_LIBRARY NAMES b2 REQUIRED)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBB2_LIBRARY})
+endif()

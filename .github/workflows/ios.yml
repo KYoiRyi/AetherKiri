@@ -63,12 +63,13 @@ jobs:
       - name: Compress App Bundle
         run: |
           cd apps/flutter_app/build/ios/iphoneos || exit 0
-          if [ -d "Runner.app" ]; then
+          if [ -d "AetherKiri.app" ]; then
             mkdir -p Payload
-            mv Runner.app Payload/
+            mv AetherKiri.app Payload/
             zip -r AetherKiri-iOS.ipa Payload
           else
-            echo "Runner.app not found in expected directory"
+            echo "AetherKiri.app not found in expected directory"
+            exit 1
           fi
 
       - name: Upload Artifact
