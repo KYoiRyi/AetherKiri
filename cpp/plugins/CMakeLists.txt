@@ -22,6 +22,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     xp3filter.cpp
     extrans.cpp
     extNagano.cpp
+    multiimage.cpp
     textrender.cpp
     alphamovie.cpp
     layerExBTOA.cpp
