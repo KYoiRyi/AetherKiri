@@ -106,7 +106,9 @@
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
         "VCPKG_BUILD_TYPE": "release",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "BUILD_TOOLS": false,
+        "ENABLE_TESTS": false
       },
       "condition": {
         "type": "equals",
