@@ -1069,34 +1069,37 @@ class _CoverCardState extends State<_CoverCard> {
       scale: _scale,
       duration: AppAnimations.quick,
       curve: AppAnimations.warmEaseOut,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
-          ),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildBackground(colorScheme),
-            _buildGradientOverlay(),
-            _buildTitleOverlay(game),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: widget.onTap,
-                onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
-                onTapUp: (_) => setState(() => _scale = 1.0),
-                onTapCancel: () => setState(() => _scale = 1.0),
-                onLongPress: () => _showContextMenu(context),
-                onSecondaryTap: () => _showContextMenu(context),
-              ),
+      child: Hero(
+        tag: 'cover_card_${game.path}',
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
             ),
-          ],
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildBackground(colorScheme),
+              _buildGradientOverlay(),
+              _buildTitleOverlay(game),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
+                  onTapUp: (_) => setState(() => _scale = 1.0),
+                  onTapCancel: () => setState(() => _scale = 1.0),
+                  onLongPress: () => _showContextMenu(context),
+                  onSecondaryTap: () => _showContextMenu(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1104,19 +1107,13 @@ class _CoverCardState extends State<_CoverCard> {
 
   Widget _buildBackground(ColorScheme colorScheme) {
     if (_hasCover) {
-      return Hero(
-        tag: 'cover_card_${game.path}',
-        child: Image.file(
-          File(game.coverPath!),
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
-        ),
+      return Image.file(
+        File(game.coverPath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
       );
     }
-    return Hero(
-      tag: 'cover_card_${game.path}',
-      child: _buildPlaceholder(colorScheme),
-    );
+    return _buildPlaceholder(colorScheme);
   }
 
   Widget _buildPlaceholder(ColorScheme colorScheme) {

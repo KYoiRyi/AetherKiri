@@ -12,6 +12,7 @@ import '../main.dart';
 import '../constants/prefs_keys.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_animations.dart';
+import '../widgets/app_sliding_segmented_control.dart';
 import 'home_page.dart';
 
 /// Standalone settings page with MD3 styling and i18n support.
@@ -276,27 +277,30 @@ class _SettingsPageState extends State<SettingsPage> {
                       Text(l10n.engineMode,
                           style: Theme.of(context).textTheme.titleSmall),
                       const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: SegmentedButton<EngineMode>(
-                          segments: [
-                            ButtonSegment<EngineMode>(
-                              value: EngineMode.builtIn,
-                              label: Text(l10n.builtIn),
-                              icon: const Icon(Icons.inventory_2),
-                            ),
-                            ButtonSegment<EngineMode>(
-                              value: EngineMode.custom,
-                              label: Text(l10n.custom),
-                              icon: const Icon(Icons.folder_open),
-                            ),
-                          ],
-                          selected: {_engineMode},
-                          onSelectionChanged: (Set<EngineMode> selected) {
-                            setState(() => _engineMode = selected.first);
-                            _markDirty();
-                          },
-                        ),
+                      AppSlidingSegmentedControl<EngineMode>(
+                        value: _engineMode,
+                        segments: {
+                          EngineMode.builtIn: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.inventory_2),
+                              const SizedBox(width: 8),
+                              Flexible(child: Text(l10n.builtIn, overflow: TextOverflow.ellipsis)),
+                            ],
+                          ),
+                          EngineMode.custom: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.folder_open),
+                              const SizedBox(width: 8),
+                              Flexible(child: Text(l10n.custom, overflow: TextOverflow.ellipsis)),
+                            ],
+                          ),
+                        },
+                        onChanged: (val) {
+                          setState(() => _engineMode = val);
+                          _markDirty();
+                        },
                       ),
                       const SizedBox(height: 12),
                       if (_engineMode == EngineMode.builtIn)
@@ -334,34 +338,32 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                         ),
                         const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: SegmentedButton<String>(
-                            showSelectedIcon: false,
-                            segments: [
-                              ButtonSegment<String>(
-                                value: 'opengl',
-                                label: SvgPicture.asset(
-                                  'assets/icons/opengl.svg',
-                                  height: 20,
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).colorScheme.onSurface,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
+                        AppSlidingSegmentedControl<String>(
+                          value: _renderer,
+                          segments: {
+                            'opengl': SvgPicture.asset(
+                              'assets/icons/opengl.svg',
+                              height: 20,
+                              colorFilter: ColorFilter.mode(
+                                _renderer == 'opengl'
+                                    ? colorScheme.onPrimaryContainer
+                                    : colorScheme.onSurfaceVariant,
+                                BlendMode.srcIn,
                               ),
-                              ButtonSegment<String>(
-                                value: 'software',
-                                label: Text(l10n.software),
-                                icon: const Icon(Icons.computer),
-                              ),
-                            ],
-                            selected: {_renderer},
-                            onSelectionChanged: (Set<String> selected) {
-                              setState(() => _renderer = selected.first);
-                              _markDirty();
-                            },
-                          ),
+                            ),
+                            'software': Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.computer),
+                                const SizedBox(width: 8),
+                                Flexible(child: Text(l10n.software, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                          },
+                          onChanged: (val) {
+                            setState(() => _renderer = val);
+                            _markDirty();
+                          },
                         ),
                       ],
                     ),
@@ -385,40 +387,34 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ),
                           ),
                           const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: SegmentedButton<String>(
-                              showSelectedIcon: false,
-                              segments: [
-                                ButtonSegment<String>(
-                                  value: 'gles',
-                                  label: SvgPicture.asset(
-                                    'assets/icons/opengles.svg',
-                                    height: 20,
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).colorScheme.onSurface,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
+                          AppSlidingSegmentedControl<String>(
+                            value: _angleBackend,
+                            segments: {
+                              'gles': SvgPicture.asset(
+                                'assets/icons/opengles.svg',
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  _angleBackend == 'gles'
+                                      ? colorScheme.onPrimaryContainer
+                                      : colorScheme.onSurfaceVariant,
+                                  BlendMode.srcIn,
                                 ),
-                                ButtonSegment<String>(
-                                  value: 'vulkan',
-                                  label: SvgPicture.asset(
-                                    'assets/icons/vulkan.svg',
-                                    height: 20,
-                                    colorFilter: ColorFilter.mode(
-                                      Theme.of(context).colorScheme.onSurface,
-                                      BlendMode.srcIn,
-                                    ),
-                                  ),
+                              ),
+                              'vulkan': SvgPicture.asset(
+                                'assets/icons/vulkan.svg',
+                                height: 20,
+                                colorFilter: ColorFilter.mode(
+                                  _angleBackend == 'vulkan'
+                                      ? colorScheme.onPrimaryContainer
+                                      : colorScheme.onSurfaceVariant,
+                                  BlendMode.srcIn,
                                 ),
-                              ],
-                              selected: {_angleBackend},
-                              onSelectionChanged: (Set<String> selected) {
-                                setState(() => _angleBackend = selected.first);
-                                _markDirty();
-                              },
-                            ),
+                              ),
+                            },
+                            onChanged: (val) {
+                              setState(() => _angleBackend = val);
+                              _markDirty();
+                            },
                           ),
                         ],
                       ),
@@ -537,30 +533,44 @@ class _SettingsPageState extends State<SettingsPage> {
             Card(
               child: Column(
                 children: [
-                  ListTile(
-                    title: Text(l10n.themeMode),
-                    trailing: SegmentedButton<String>(
-                      segments: [
-                        ButtonSegment<String>(
-                          value: 'system',
-                          label: Text(l10n.themeSystem),
-                          icon: const Icon(Icons.auto_awesome, size: 18),
-                        ),
-                        ButtonSegment<String>(
-                          value: 'dark',
-                          label: Text(l10n.themeDark),
-                          icon: const Icon(Icons.dark_mode, size: 18),
-                        ),
-                        ButtonSegment<String>(
-                          value: 'light',
-                          label: Text(l10n.themeLight),
-                          icon: const Icon(Icons.light_mode, size: 18),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(l10n.themeMode, style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: 12),
+                        AppSlidingSegmentedControl<String>(
+                          value: _themeModeCode,
+                          segments: {
+                            'system': Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.auto_awesome, size: 18),
+                                const SizedBox(width: 6),
+                                Flexible(child: Text(l10n.themeSystem, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                            'dark': Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.dark_mode, size: 18),
+                                const SizedBox(width: 6),
+                                Flexible(child: Text(l10n.themeDark, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                            'light': Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.light_mode, size: 18),
+                                const SizedBox(width: 6),
+                                Flexible(child: Text(l10n.themeLight, overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                          },
+                          onChanged: _changeThemeMode,
                         ),
                       ],
-                      selected: {_themeModeCode},
-                      onSelectionChanged: (Set<String> selected) {
-                        _changeThemeMode(selected.first);
-                      },
                     ),
                   ),
                   const Divider(height: 1),
