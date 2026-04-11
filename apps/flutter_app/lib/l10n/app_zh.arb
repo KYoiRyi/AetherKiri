@@ -1,7 +1,7 @@
 {
   "@@locale": "zh",
 
-"appTitle": "KrKr2 Next",
+"appTitle": "AetherKiri",
   "settings": "设置",
   "addGame": "添加游戏",
   "refresh": "刷新",
@@ -100,6 +100,7 @@
   "themeMode": "主题",
   "themeDark": "深色",
   "themeLight": "浅色",
+  "themeSystem": "跟随系统",
 
   "settingsAbout": "关于",
   "version": "版本",

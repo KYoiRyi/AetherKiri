@@ -19,9 +19,14 @@ jobs:
       - name: Install Build Systems
         run: |
           brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison
-          # gettext and bison are often keg-only, ensure their tools are in PATH
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
           echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-ccache
+          max-size: 1000M
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -29,7 +34,8 @@ jobs:
           channel: 'stable'
 
       - name: Disable Analytics
-        run: flutter config --no-analytics
+        run: |
+          flutter config --no-analytics
 
       - name: Restore vcpkg cache
         uses: actions/cache/restore@v4
@@ -37,13 +43,15 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-macos-
+            ${{ runner.os }}-vcpkg-
 
       - name: Build macOS Release
         run: |
           chmod +x ./build.sh
+          export CMAKE_C_COMPILER_LAUNCHER=ccache
+          export CMAKE_CXX_COMPILER_LAUNCHER=ccache
           ./build.sh macos release --jobs=4
 
       - name: Find built .app
@@ -56,7 +64,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: KrKr2-Next-macOS
+          name: AetherKiri-macOS
           path: ${{ steps.find_app.outputs.app_path }}
           retention-days: 7
 
@@ -67,4 +75,4 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-macos-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}

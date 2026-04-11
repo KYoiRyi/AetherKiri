@@ -93,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool _mockEnabled;
   late bool _consoleLogFile;
   String _localeCode = 'system';
-  String _themeModeCode = 'dark';
+  String _themeModeCode = 'system';
   bool _dirty = false;
 
   @override
@@ -127,7 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() {
-        _themeModeCode = prefs.getString(PrefsKeys.themeMode) ?? 'dark';
+        _themeModeCode = prefs.getString(PrefsKeys.themeMode) ?? 'system';
       });
     }
   }
@@ -198,7 +198,11 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _themeModeCode = code);
 
     // Apply theme change in real-time
-    final mode = code == 'light' ? ThemeMode.light : ThemeMode.dark;
+    final mode = code == 'light'
+        ? ThemeMode.light
+        : code == 'dark'
+            ? ThemeMode.dark
+            : ThemeMode.system;
     Krkr2App.setThemeMode(context, mode);
   }
 
@@ -545,6 +549,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: Text(l10n.themeMode),
                     trailing: SegmentedButton<String>(
                       segments: [
+                        ButtonSegment<String>(
+                          value: 'system',
+                          label: Text(l10n.themeSystem),
+                          icon: const Icon(Icons.auto_awesome, size: 18),
+                        ),
                         ButtonSegment<String>(
                           value: 'dark',
                           label: Text(l10n.themeDark),
