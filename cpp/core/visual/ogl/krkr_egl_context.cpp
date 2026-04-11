@@ -12,7 +12,9 @@
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
-#if !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+#include <IOSurface/IOSurfaceRef.h>
+#else
 #include <IOSurface/IOSurface.h>
 #endif
 #include <EGL/eglext.h>
@@ -316,7 +318,7 @@ void EGLContextManager::DestroySurface() {
 
 bool EGLContextManager::AttachIOSurface(uint32_t iosurface_id,
                                          uint32_t width, uint32_t height) {
-#if defined(__APPLE__) && !TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR
+#if defined(__APPLE__)
     if (context_ == EGL_NO_CONTEXT) {
         spdlog::error("AttachIOSurface: EGL context not initialized");
         return false;

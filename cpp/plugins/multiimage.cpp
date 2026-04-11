@@ -187,7 +187,7 @@ public:
             tjs_uint32 color = 0;
             if (TJS_SUCCEEDED(objthis->PropGet(0, TJS_W("neutralColor"), NULL, &val, objthis))) color = (tjs_int)val;
             tTJSVariant args_clear[5];
-            args_clear[0] = 0; args_clear[1] = 0; args_clear[2] = 0; args_clear[3] = 0; args_clear[4] = color;
+            args_clear[0] = (tjs_int32)0; args_clear[1] = (tjs_int32)0; args_clear[2] = (tjs_int32)0; args_clear[3] = (tjs_int32)0; args_clear[4] = (tjs_int64)color;
             // IF WIDTH/HEIGHT ARE 0, THIS DOES NOTHING!
             tTJSVariant val_w, val_h;
             if (TJS_SUCCEEDED(objthis->PropGet(0, TJS_W("width"), NULL, &val_w, objthis))) args_clear[2] = val_w;
