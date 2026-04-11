@@ -68,27 +68,25 @@ NCB_REGISTER_CLASS(MultiImage)
     NCB_PROPERTY_RO(count, count);
 }
 
-static void ExtractImageInfo(const tTJSVariant& imgVar, tTJSVariant& src, tTJSVariant& sx, tTJSVariant& sy, tTJSVariant& sw, tTJSVariant& sh) {
+static void ExtractImageInfo(const tTJSVariant& imgVar, tTJSVariant& src, tTJSVariant& sx, tTJSVariant& sy, tTJSVariant& sw, tTJSVariant& sh, tjs_real& img_l, tjs_real& img_t) {
     src = imgVar;
     sx = tTJSVariant(0);
     sy = tTJSVariant(0);
     sw = tTJSVariant(0);
     sh = tTJSVariant(0);
+    img_l = 0; img_t = 0;
 
     if (imgVar.Type() == tvtObject) {
         iTJSDispatch2* dsp = imgVar.AsObjectNoAddRef();
         if (dsp) {
             tTJSVariant val;
-            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("src"), NULL, &val, dsp))) {
-                src = val;
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("sleft"), NULL, &val, dsp))) sx = val;
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("stop"), NULL, &val, dsp))) sy = val;
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("swidth"), NULL, &val, dsp))) sw = val;
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("sheight"), NULL, &val, dsp))) sh = val;
-            } else {
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("width"), NULL, &val, dsp))) sw = val;
-                if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("height"), NULL, &val, dsp))) sh = val;
-            }
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipLeft"), NULL, &val, dsp))) sx = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipTop"), NULL, &val, dsp))) sy = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipWidth"), NULL, &val, dsp))) sw = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipHeight"), NULL, &val, dsp))) sh = val;
+
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("imageLeft"), NULL, &val, dsp))) img_l = (tjs_real)val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("imageTop"), NULL, &val, dsp))) img_t = (tjs_real)val;
         }
     }
 }
@@ -122,14 +120,17 @@ public:
         const auto& queue = mi->getQueue();
         for (const auto& entry : queue) {
             tTJSVariant src, sx, sy, sw, sh;
-            ExtractImageInfo(entry.img, src, sx, sy, sw, sh);
+            tjs_real img_l = 0, img_t = 0;
+            ExtractImageInfo(entry.img, src, sx, sy, sw, sh, img_l, img_t);
 
             double final_a = a * entry.zoomX;
             double final_b = b * entry.zoomX;
             double final_c = c * entry.zoomY;
             double final_d = d * entry.zoomY;
-            double final_tx = a * entry.x + c * entry.y + tx;
-            double final_ty = b * entry.x + d * entry.y + ty;
+            tjs_real local_cx = entry.x + img_l;
+            tjs_real local_cy = entry.y + img_t;
+            double final_tx = a * local_cx + c * local_cy + tx;
+            double final_ty = b * local_cx + d * local_cy + ty;
 
             tTJSVariant args[15];
             args[0] = src;
@@ -178,35 +179,53 @@ public:
         if (!mi) return TJS_S_OK;
 
         const auto& queue = mi->getQueue();
+        bool clear = false;
+        if (numparams >= 10 && param[9]->Type() != tvtVoid) clear = (int)*param[9] != 0;
+
+        if (clear) {
+            tTJSVariant val;
+            tjs_uint32 color = 0;
+            if (TJS_SUCCEEDED(objthis->PropGet(0, TJS_W("neutralColor"), NULL, &val, objthis))) color = (tjs_int)val;
+            tTJSVariant args_clear[5];
+            args_clear[0] = 0; args_clear[1] = 0; args_clear[2] = 0; args_clear[3] = 0; args_clear[4] = color;
+            // IF WIDTH/HEIGHT ARE 0, THIS DOES NOTHING!
+            tTJSVariant val_w, val_h;
+            if (TJS_SUCCEEDED(objthis->PropGet(0, TJS_W("width"), NULL, &val_w, objthis))) args_clear[2] = val_w;
+            if (TJS_SUCCEEDED(objthis->PropGet(0, TJS_W("height"), NULL, &val_h, objthis))) args_clear[3] = val_h;
+            
+            tTJSVariant* args_ptr[5] = {&args_clear[0], &args_clear[1], &args_clear[2], &args_clear[3], &args_clear[4]};
+            objthis->FuncCall(0, TJS_W("fillRect"), NULL, NULL, 5, args_ptr, objthis);
+        }
+
         for (const auto& entry : queue) {
-            tTJSVariant src, sx, sy, sw, sh;
-            ExtractImageInfo(entry.img, src, sx, sy, sw, sh);
+            iTJSDispatch2* dsp = entry.img.AsObjectNoAddRef();
+            if (!dsp) continue;
 
-            double final_a = a * entry.zoomX;
-            double final_b = b * entry.zoomX;
-            double final_c = c * entry.zoomY;
-            double final_d = d * entry.zoomY;
-            double final_tx = a * entry.x + c * entry.y + tx;
-            double final_ty = b * entry.x + d * entry.y + ty;
+            tTJSVariant src = entry.img; // imgVar itself is the source layer!
 
-            tTJSVariant args[15];
-            args[0] = src;
-            args[1] = sx;
-            args[2] = sy;
-            args[3] = sw;
-            args[4] = sh;
-            args[5] = tTJSVariant((tjs_int)1); // affine mode
-            args[6] = tTJSVariant(final_a);
-            args[7] = tTJSVariant(final_b);
-            args[8] = tTJSVariant(final_c);
-            args[9] = tTJSVariant(final_d);
-            args[10] = tTJSVariant(final_tx);
-            args[11] = tTJSVariant(final_ty);
-            args[12] = tTJSVariant(mode); // mode
-            args[13] = tTJSVariant(opa);
-            args[14] = tTJSVariant((tjs_int)0); // type (default 0 nearest)
+            tTJSVariant val;
+            tjs_real l = 0, t = 0, w = 0, h = 0;
+            // The original multiimage plugin extracted clip bounds
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipLeft"), NULL, &val, dsp))) l = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipTop"), NULL, &val, dsp))) t = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipWidth"), NULL, &val, dsp))) w = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("clipHeight"), NULL, &val, dsp))) h = val;
 
-            tTJSVariant* args_ptr[15] = {&args[0], &args[1], &args[2], &args[3], &args[4], &args[5], &args[6], &args[7], &args[8], &args[9], &args[10], &args[11], &args[12], &args[13], &args[14]};
+            tjs_real img_l = 0, img_t = 0;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("imageLeft"), NULL, &val, dsp))) img_l = val;
+            if (TJS_SUCCEEDED(dsp->PropGet(0, TJS_W("imageTop"), NULL, &val, dsp))) img_t = val;
+
+            tjs_real local_cx = entry.x + img_l;
+            tjs_real local_cy = entry.y + img_t;
+            double final_tx = a * local_cx + c * local_cy + tx;
+            double final_ty = b * local_cx + d * local_cy + ty;
+
+            tTJSVariant sx(l), sy(t), sw(w), sh(h);
+            tTJSVariant is_affine(1);
+            tTJSVariant var_a(a), var_b(b), var_c(c), var_d(d), var_tx(final_tx), var_ty(final_ty);
+            tTJSVariant param_mode(mode), param_opa(opa), param_type(0); // 0 = stNearest
+
+            tTJSVariant* args_ptr[15] = {&src, &sx, &sy, &sw, &sh, &is_affine, &var_a, &var_b, &var_c, &var_d, &var_tx, &var_ty, &param_mode, &param_opa, &param_type};
             objthis->FuncCall(0, TJS_W("operateAffine"), NULL, NULL, 15, args_ptr, objthis);
         }
 
