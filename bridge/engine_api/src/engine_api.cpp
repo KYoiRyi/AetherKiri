@@ -1624,6 +1624,10 @@ engine_result_t engine_set_surface_size(engine_handle_t handle,
         dd->SetWindowSize(static_cast<tjs_int>(width),
                           static_cast<tjs_int>(height));
       }
+      TVPMainWindow->RequestUpdate();
+    }
+    if (auto* scene = TVPMainScene::GetInstance(); scene != nullptr) {
+      scene->scheduleUpdate();
     }
   }
 
@@ -1969,6 +1973,10 @@ engine_result_t engine_set_render_target_iosurface(engine_handle_t handle,
         dd->SetWindowSize(static_cast<tjs_int>(width),
                           static_cast<tjs_int>(height));
       }
+      TVPMainWindow->RequestUpdate();
+    }
+    if (auto* scene = TVPMainScene::GetInstance(); scene != nullptr) {
+      scene->scheduleUpdate();
     }
   }
 

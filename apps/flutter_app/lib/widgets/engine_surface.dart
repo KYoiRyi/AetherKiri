@@ -230,9 +230,12 @@ class EngineSurfaceState extends State<EngineSurface> {
       return;
     }
 
+    final int requestedWidth = _surfaceWidth;
+    final int requestedHeight = _surfaceHeight;
+
     // Check if we need to resize
     if (_ioSurfaceTextureId != null) {
-      if (_frameWidth == _surfaceWidth && _frameHeight == _surfaceHeight) {
+      if (_frameWidth == requestedWidth && _frameHeight == requestedHeight) {
         return; // Already at correct size
       }
       // Resize needed
@@ -240,8 +243,8 @@ class EngineSurfaceState extends State<EngineSurface> {
       try {
         final result = await widget.bridge.resizeIOSurfaceTexture(
           textureId: _ioSurfaceTextureId!,
-          width: _surfaceWidth,
-          height: _surfaceHeight,
+          width: requestedWidth,
+          height: requestedHeight,
         );
         if (result != null && mounted) {
           final int newIOSurfaceId = result['ioSurfaceID'] as int;
@@ -249,15 +252,17 @@ class EngineSurfaceState extends State<EngineSurface> {
           final int setResult = await widget.bridge
               .engineSetRenderTargetIOSurface(
                 iosurfaceId: newIOSurfaceId,
-                width: _surfaceWidth,
-                height: _surfaceHeight,
+                width: requestedWidth,
+                height: requestedHeight,
               );
           if (setResult == 0) {
-            _ioSurfaceId = newIOSurfaceId;
-            _frameWidth = _surfaceWidth;
-            _frameHeight = _surfaceHeight;
+            setState(() {
+              _ioSurfaceId = newIOSurfaceId;
+              _frameWidth = requestedWidth;
+              _frameHeight = requestedHeight;
+            });
             widget.onLog?.call(
-              'IOSurface resized: ${_surfaceWidth}x$_surfaceHeight (iosurface=$newIOSurfaceId)',
+              'IOSurface resized: ${requestedWidth}x$requestedHeight (iosurface=$newIOSurfaceId)',
             );
           } else {
             _reportError(
@@ -267,6 +272,11 @@ class EngineSurfaceState extends State<EngineSurface> {
         }
       } finally {
         _ioSurfaceInitInFlight = false;
+      }
+      if (mounted &&
+          widget.active &&
+          (_frameWidth != _surfaceWidth || _frameHeight != _surfaceHeight)) {
+        unawaited(_ensureIOSurfaceTexture());
       }
       return;
     }
@@ -353,9 +363,12 @@ class EngineSurfaceState extends State<EngineSurface> {
       return;
     }
 
+    final int requestedWidth = _surfaceWidth;
+    final int requestedHeight = _surfaceHeight;
+
     // Check if we need to resize
     if (_surfaceTextureId != null) {
-      if (_frameWidth == _surfaceWidth && _frameHeight == _surfaceHeight) {
+      if (_frameWidth == requestedWidth && _frameHeight == requestedHeight) {
         return; // Already at correct size
       }
       // Resize needed
@@ -363,18 +376,25 @@ class EngineSurfaceState extends State<EngineSurface> {
       try {
         final result = await widget.bridge.resizeSurfaceTexture(
           textureId: _surfaceTextureId!,
-          width: _surfaceWidth,
-          height: _surfaceHeight,
+          width: requestedWidth,
+          height: requestedHeight,
         );
         if (result != null && mounted) {
-          _frameWidth = _surfaceWidth;
-          _frameHeight = _surfaceHeight;
+          setState(() {
+            _frameWidth = requestedWidth;
+            _frameHeight = requestedHeight;
+          });
           widget.onLog?.call(
-            'SurfaceTexture resized: ${_surfaceWidth}x$_surfaceHeight',
+            'SurfaceTexture resized: ${requestedWidth}x$requestedHeight',
           );
         }
       } finally {
         _surfaceTextureInitInFlight = false;
+      }
+      if (mounted &&
+          widget.active &&
+          (_frameWidth != _surfaceWidth || _frameHeight != _surfaceHeight)) {
+        unawaited(_ensureSurfaceTexture());
       }
       return;
     }
@@ -596,16 +616,26 @@ class EngineSurfaceState extends State<EngineSurface> {
   }
 
   Widget _buildTextureView(int textureId) {
+    final bool zeroCopyActive =
+        _ioSurfaceTextureId != null || _surfaceTextureId != null;
     // Use physical pixel dimensions, but convert to logical pixels for layout.
     // The Texture widget renders at full physical resolution regardless of
     // the SizedBox logical size, so this only affects aspect ratio calculation.
     final double dpr = _devicePixelRatio > 0 ? _devicePixelRatio : 1.0;
-    final int physW = _frameWidth > 0
-        ? _frameWidth
-        : (_surfaceWidth > 0 ? _surfaceWidth : 1);
-    final int physH = _frameHeight > 0
-        ? _frameHeight
-        : (_surfaceHeight > 0 ? _surfaceHeight : 1);
+    final int physW = zeroCopyActive
+        ? (_surfaceWidth > 0
+              ? _surfaceWidth
+              : (_frameWidth > 0 ? _frameWidth : 1))
+        : (_frameWidth > 0
+              ? _frameWidth
+              : (_surfaceWidth > 0 ? _surfaceWidth : 1));
+    final int physH = zeroCopyActive
+        ? (_surfaceHeight > 0
+              ? _surfaceHeight
+              : (_frameHeight > 0 ? _frameHeight : 1))
+        : (_frameHeight > 0
+              ? _frameHeight
+              : (_surfaceHeight > 0 ? _surfaceHeight : 1));
     final double logicalW = physW / dpr;
     final double logicalH = physH / dpr;
     return FittedBox(
