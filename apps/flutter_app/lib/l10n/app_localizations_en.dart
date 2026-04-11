@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'KrKr2 Next';
+  String get appTitle => 'AetherKiri';
 
   @override
   String get settings => 'Settings';
@@ -281,6 +281,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeLight => 'Light';
+
+  @override
+  String get themeSystem => 'System';
 
   @override
   String get settingsAbout => 'About';

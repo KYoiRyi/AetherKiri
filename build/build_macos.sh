@@ -181,7 +181,7 @@ if [[ "$FLUTTER_BUILD_MODE" == "release" ]]; then
 else
     FLUTTER_BUILD_SUBDIR="Debug"
 fi
-APP_BUNDLE="$FLUTTER_APP_DIR/build/macos/Build/Products/$FLUTTER_BUILD_SUBDIR/KrKr2 Next.app"
+APP_BUNDLE="$FLUTTER_APP_DIR/build/macos/Build/Products/$FLUTTER_BUILD_SUBDIR/AetherKiri.app"
 
 if [[ ! -d "$APP_BUNDLE" ]]; then
     # Try alternate path patterns
@@ -235,5 +235,5 @@ log_info "To run the app:"
 echo "  open \"$APP_BUNDLE\""
 echo ""
 log_info "Or launch from terminal:"
-echo "  \"$APP_BUNDLE/Contents/MacOS/KrKr2 Next\""
+echo "  \"$APP_BUNDLE/Contents/MacOS/AetherKiri\""
 echo ""

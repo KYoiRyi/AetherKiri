@@ -103,7 +103,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'KrKr2 Next'**
+  /// **'AetherKiri'**
   String get appTitle;
 
   /// No description provided for @settings.
@@ -597,6 +597,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Light'**
   String get themeLight;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
 
   /// No description provided for @settingsAbout.
   ///

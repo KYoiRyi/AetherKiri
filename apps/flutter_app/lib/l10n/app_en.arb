@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
 
-"appTitle": "KrKr2 Next",
+"appTitle": "AetherKiri",
   "settings": "Settings",
   "addGame": "Add Game",
   "refresh": "Refresh",
@@ -120,6 +120,7 @@
   "themeMode": "Theme",
   "themeDark": "Dark",
   "themeLight": "Light",
+  "themeSystem": "System",
 
   "settingsAbout": "About",
   "version": "Version",

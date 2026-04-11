@@ -39,7 +39,7 @@ class _Krkr2AppState extends State<Krkr2App> {
   static const String _localeKey = 'krkr2_locale';
   static const String _themeModeKey = 'krkr2_theme_mode';
   Locale? _locale; // null = follow system
-  ThemeMode _themeMode = ThemeMode.dark; // default to dark
+  ThemeMode _themeMode = ThemeMode.system; // default to system
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _Krkr2AppState extends State<Krkr2App> {
           case 'dark':
             _themeMode = ThemeMode.dark;
           default:
-            _themeMode = ThemeMode.dark;
+            _themeMode = ThemeMode.system;
         }
       });
     }
@@ -84,7 +84,7 @@ class _Krkr2AppState extends State<Krkr2App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'KrKr2 Next',
+      title: 'AetherKiri',
       debugShowCheckedModeBanner: false,
       locale: _locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
