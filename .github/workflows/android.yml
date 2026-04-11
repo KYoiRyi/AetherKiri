@@ -49,6 +49,7 @@ jobs:
           flutter config --no-analytics
 
       - name: Restore vcpkg cache
+        id: restore-vcpkg
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -75,7 +76,7 @@ jobs:
           retention-days: 7
 
       - name: Save vcpkg cache
-        if: success()
+        if: success() && steps.restore-vcpkg.outputs.cache-matched-key == ''
         uses: actions/cache/save@v4
         with:
           path: |
@@ -97,12 +98,6 @@ jobs:
         run: |
           echo "Fetching list of caches..."
           gh api -H "Accept: application/vnd.github+json" "/repos/$GITHUB_REPOSITORY/actions/caches?ref=$GITHUB_REF" > caches.json || exit 0
-          
-          CURRENT_VCPKG_KEY="${{ runner.os }}-android-vcpkg-${{ hashFiles('vcpkg.json') }}"
-          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-android-vcpkg-\")) | select(.key != \"$CURRENT_VCPKG_KEY\") | .id" caches.json | while read id; do
-            echo "Deleting old vcpkg cache ID: $id"
-            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
-          done
           
           CURRENT_CCACHE_KEY="${{ runner.os }}-android-ccache-${{ github.run_id }}"
           jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-android-ccache-\")) | select(.key != \"$CURRENT_CCACHE_KEY\") | .id" caches.json | while read id; do
