@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build iOS App
     runs-on: macos-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
     steps:
       - name: Checkout Repository
@@ -17,14 +19,13 @@ jobs:
       - name: Install Build Systems
         run: |
           brew install cmake ninja pkg-config autoconf automake autoconf-archive libtool gettext coreutils bison
-          # gettext and bison are often keg-only, ensure their tools are in PATH
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
           echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}-ios-ccache
+          key: ${{ runner.os }}-ccache
           max-size: 1000M
 
       - name: Set up Flutter
@@ -36,34 +37,30 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: vcpkg cache
-        uses: actions/cache@v4
+      - name: Restore vcpkg cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-ios-${{ hashFiles('vcpkg.json') }}
-          save-always: 'true'
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-ios-
             ${{ runner.os }}-vcpkg-
 
       - name: Build iOS Release
         run: |
           chmod +x ./build.sh
-          # The script internally runs build_ios.sh which defaults to release configuration
-          # It generates the libengine_api.a via CMake, merges it with Vcpkg deps, and then builds Flutter
+          export CMAKE_C_COMPILER_LAUNCHER=ccache
+          export CMAKE_CXX_COMPILER_LAUNCHER=ccache
           ./build.sh ios release --jobs=4
 
       - name: Compress App Bundle
         run: |
-          # Package the Runner.app into an unsigned .ipa for easier deployment. 
-          # Note: This is an unsigned build. It will need to be re-signed locally (e.g. via AltStore/Sideloadly) or deployed via Xcode.
           cd apps/flutter_app/build/ios/iphoneos || exit 0
           if [ -d "Runner.app" ]; then
             mkdir -p Payload
             mv Runner.app Payload/
-            zip -r KrKr2-Next-iOS.ipa Payload
+            zip -r AetherKiri-iOS.ipa Payload
           else
             echo "Runner.app not found in expected directory"
           fi
@@ -72,8 +69,15 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: KrKr2-Next-iOS-Unsigned
-          path: apps/flutter_app/build/ios/iphoneos/KrKr2-Next-iOS.ipa
+          name: AetherKiri-iOS-Unsigned
+          path: apps/flutter_app/build/ios/iphoneos/AetherKiri-iOS.ipa
           retention-days: 7
 
-
+      - name: Save vcpkg cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}

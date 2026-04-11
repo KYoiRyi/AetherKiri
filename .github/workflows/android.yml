@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build Android App
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
     steps:
       - name: Checkout Repository
@@ -22,7 +24,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}-android-ccache
+          key: ${{ runner.os }}-ccache
           max-size: 1000M
 
       - name: Set up Java
@@ -40,34 +42,37 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: vcpkg cache
-        uses: actions/cache@v4
+      - name: Restore vcpkg cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-android-${{ hashFiles('vcpkg.json') }}
-          save-always: 'true'
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-android-
             ${{ runner.os }}-vcpkg-
 
       - name: Build Android Release
         run: |
           chmod +x ./build.sh
-          # Pass compiler launchers to speed up rebuilds using ccache
           export CMAKE_C_COMPILER_LAUNCHER=ccache
           export CMAKE_CXX_COMPILER_LAUNCHER=ccache
           export NDK_CCACHE=ccache
-          # The script internally runs build_android.sh which defaults to release configuration
           ./build.sh android release --jobs=4
 
       - name: Upload Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: KrKr2-Next-Android-APK
+          name: AetherKiri-Android-APK
           path: apps/flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
-
+      - name: Save vcpkg cache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
