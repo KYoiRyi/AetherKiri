@@ -28,12 +28,14 @@
 
 #include "Application.h"
 #include "TVPScreen.h"
+#include "FontImpl.h"
 // #include "CompatibleNativeFuncs.h"
 #include "DebugIntf.h"
 // #include "VersionFormUnit.h"
 #include "vkdefine.h"
 #include "ScriptMgnIntf.h"
 #include "tjsArray.h"
+#include "tjsDictionary.h"
 #include "Platform.h"
 
 // 和系统宏冲突了
@@ -47,6 +49,79 @@ static bool TVPAppTitleInit = false;
 //---------------------------------------------------------------------------
 
 bool TVPGetKeyMouseAsyncState(tjs_uint keycode, bool getcurrent);
+
+static tjs_error TVPAddFontCompat(tTJSVariant *result, tjs_int numparams,
+                                  tTJSVariant **param) {
+    auto has_font_suffix = [](const ttstr &value) {
+        const tjs_char *suffixes[] = {TJS_W(".ttf"), TJS_W(".ttc"),
+                                      TJS_W(".otf"), TJS_W(".woff"),
+                                      TJS_W(".woff2")};
+        for(const auto *suffix : suffixes) {
+            const tjs_int len = value.length();
+            const tjs_int suffix_len = TJS_strlen(suffix);
+            if(len >= suffix_len &&
+               !TJS_stricmp(value.c_str() + len - suffix_len, suffix)) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    if(numparams < 1)
+        return TJS_E_BADPARAMCOUNT;
+
+    ttstr filename;
+    for(tjs_int i = 0; i < numparams; ++i) {
+        if(param[i]->Type() != tvtString)
+            continue;
+
+        ttstr candidate = *param[i];
+        if(has_font_suffix(candidate)) {
+            filename = TVPGetPlacedPath(candidate);
+            if(filename.length())
+                break;
+        }
+    }
+
+    if(!filename.length()) {
+        for(tjs_int i = 0; i < numparams; ++i) {
+            if(param[i]->Type() != tvtString)
+                continue;
+            filename = TVPGetPlacedPath(*param[i]);
+            if(filename.length())
+                break;
+        }
+    }
+
+    if(filename.length()) {
+        int ret = TVPEnumFontsProc(filename);
+        if(result)
+            *result = static_cast<tjs_int>(ret);
+    }
+
+    return TJS_S_OK;
+}
+
+class tFontCompatFunctionLocal : public tTJSDispatch {
+public:
+    tjs_error FuncCall(tjs_uint32, const tjs_char *membername, tjs_uint32 *,
+                       tTJSVariant *result, tjs_int numparams,
+                       tTJSVariant **param, iTJSDispatch2 *) override {
+        if(membername)
+            return TJS_E_MEMBERNOTFOUND;
+        return TVPAddFontCompat(result, numparams, param);
+    }
+};
+
+static void TVPRegisterCompatFunction(iTJSDispatch2 *target,
+                                      const tjs_char *name) {
+    if(!target)
+        return;
+    iTJSDispatch2 *func = new tFontCompatFunctionLocal();
+    tTJSVariant val(func);
+    func->Release();
+    target->PropSet(TJS_MEMBERENSURE, name, nullptr, &val, target);
+}
 
 //---------------------------------------------------------------------------
 // TVPGetAsyncKeyState
@@ -780,6 +855,48 @@ public:
     }
 };
 
+static void TVPRegisterStartupCompatGlobals() {
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if(!global)
+        return;
+
+    auto set_bool = [global](const tjs_char *name, bool value) {
+        tTJSVariant val(static_cast<tjs_int>(value ? 1 : 0));
+        global->PropSet(TJS_MEMBERENSURE | TJS_IGNOREPROP, name, nullptr, &val,
+                        global);
+    };
+
+    auto set_string = [global](const tjs_char *name, const tjs_char *value) {
+        tTJSVariant val(value);
+        global->PropSet(TJS_MEMBERENSURE | TJS_IGNOREPROP, name, nullptr, &val,
+                        global);
+    };
+
+    // Older games often assign these as plain writable globals during
+    // initialize.tjs startup. Pre-create them to avoid access-denied failures
+    // against native/read-only properties on non-Windows platforms.
+    set_bool(TJS_W("debugWindowEnabled"), false);
+    set_bool(TJS_W("inXP3archivePacked"), true);
+    set_string(TJS_W("convertMode"), TJS_W(""));
+
+    TVPRegisterCompatFunction(global, TJS_W("addFont"));
+    TVPRegisterCompatFunction(global, TJS_W("AddFont"));
+    TVPRegisterCompatFunction(global, TJS_W("AddTrueTypeFont"));
+
+    iTJSDispatch2 *preRenderFontEx = TJSCreateDictionaryObject();
+    if(preRenderFontEx) {
+        TVPRegisterCompatFunction(preRenderFontEx, TJS_W("addFont"));
+        TVPRegisterCompatFunction(preRenderFontEx, TJS_W("AddFont"));
+        TVPRegisterCompatFunction(preRenderFontEx, TJS_W("AddTrueTypeFont"));
+        tTJSVariant val(preRenderFontEx);
+        global->PropSet(TJS_MEMBERENSURE, TJS_W("PreRenderFontEx"), nullptr,
+                        &val, global);
+        preRenderFontEx->Release();
+    }
+
+    global->Release();
+}
+
 //---------------------------------------------------------------------------
 // TVPCreateNativeClass_System
 //---------------------------------------------------------------------------
@@ -793,7 +910,9 @@ tTJSNativeClass *TVPCreateNativeClass_System() {
         global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, global);
         cls->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, cls);
         func->Release();
+        global->Release();
     }
+    TVPRegisterStartupCompatGlobals();
 
     // setup some platform-specific members
     //----------------------------------------------------------------------
@@ -958,6 +1077,27 @@ tTJSNativeClass *TVPCreateNativeClass_System() {
     TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(
         /*object to register*/ cls,
         /*func. name*/ getArgument)
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ addFont) {
+        return TVPAddFontCompat(result, numparams, param);
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(
+        /*object to register*/ cls,
+        /*func. name*/ addFont)
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ AddFont) {
+        return TVPAddFontCompat(result, numparams, param);
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(
+        /*object to register*/ cls,
+        /*func. name*/ AddFont)
+    //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ AddTrueTypeFont) {
+        return TVPAddFontCompat(result, numparams, param);
+    }
+    TJS_END_NATIVE_STATIC_METHOD_DECL_OUTER(
+        /*object to register*/ cls,
+        /*func. name*/ AddTrueTypeFont)
     //----------------------------------------------------------------------
     TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ setArgument) {
         if(numparams < 2)

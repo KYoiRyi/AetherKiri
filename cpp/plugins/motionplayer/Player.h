@@ -582,6 +582,22 @@ namespace motion {
             if(it != _variables.end()) return it->second;
             return tTJSVariant();
         }
+        iTJSDispatch2 *getVariableKeys() const {
+            iTJSDispatch2 *array = TJSCreateArrayObject();
+            if(!array)
+                return nullptr;
+
+            tjs_int index = 0;
+            for(const auto &[key, _] : _variables) {
+                tTJSVariant value(ttstr(key.c_str()));
+                if(TJS_FAILED(array->PropSetByNum(TJS_MEMBERENSURE, index++, &value,
+                                                  array))) {
+                    array->Release();
+                    return nullptr;
+                }
+            }
+            return array;
+        }
 
         void buildButtonBounds(const ttstr &storage) {
             _buttonBounds.clear();

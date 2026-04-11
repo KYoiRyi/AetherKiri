@@ -6,6 +6,12 @@
 #include "tjsObjectExtendable.h"
 
 namespace TJS {
+    static bool TJSIsStartupCompatWritableNameEx(const tjs_char *membername) {
+        return membername &&
+               (!TJS_strcmp(membername, TJS_W("debugWindowEnabled")) ||
+                !TJS_strcmp(membername, TJS_W("inXP3archivePacked")) ||
+                !TJS_strcmp(membername, TJS_W("convertMode")));
+    }
 
     tTJSExtendableObject::~tTJSExtendableObject() {
         if(SuperClass) {
@@ -85,6 +91,12 @@ namespace TJS {
                                             iTJSDispatch2 *objthis) {
         tjs_error hr =
             inherited::PropSet(flag, membername, hint, param, objthis);
+        if(hr == TJS_E_ACCESSDENYED && membername != nullptr &&
+           TJSIsStartupCompatWritableNameEx(membername)) {
+            hr = inherited::PropSet(
+                flag | TJS_MEMBERENSURE | TJS_IGNOREPROP, membername, hint,
+                param, objthis);
+        }
         if(hr == TJS_E_MEMBERNOTFOUND && SuperClass != nullptr &&
            membername != nullptr) {
             hr = SuperClass->PropSet(flag, membername, hint, param, objthis);
