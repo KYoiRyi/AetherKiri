@@ -61,6 +61,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 if(APPLE)
     # The static libarchive package on macOS requires libb2 for RAR5 checksum
     # support, but FindLibArchive does not propagate that dependency.
-    find_library(LIBB2_LIBRARY NAMES b2 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBB2_LIBRARY})
+    find_library(LIBB2_LIBRARY NAMES b2 libb2)
+    if(LIBB2_LIBRARY)
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${LIBB2_LIBRARY})
+    endif()
 endif()
