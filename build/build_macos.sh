@@ -139,10 +139,11 @@ log_step "Step 1/3: Building C++ engine"
 
 export VCPKG_ROOT
 
-# Always re-run configure so preset cache variables stay in sync with the
-# current macOS build expectations (for example BUILD_TOOLS=OFF).
-log_info "Running CMake configure..."
-cmake --preset "$CMAKE_CONFIG_PRESET"
+# Always run a fresh configure so cached package/library paths do not drift
+# out of sync with the preset's vcpkg mode (for example Debug builds with
+# release-only vcpkg dependencies).
+log_info "Running fresh CMake configure..."
+cmake --preset "$CMAKE_CONFIG_PRESET" --fresh
 
 # Build
 log_info "Building C++ engine with $PARALLEL_JOBS parallel jobs..."
