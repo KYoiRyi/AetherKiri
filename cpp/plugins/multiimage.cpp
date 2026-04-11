@@ -96,7 +96,7 @@ static void ExtractImageInfo(const tTJSVariant& imgVar, tTJSVariant& src, tTJSVa
 // LayerExMulti Class Definition
 class LayerExMulti {
 public:
-    static tjs_error TJS_INTF_METHOD multiAffineCopy(
+    static tjs_error multiAffineCopy(
         tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
 
         if(numparams < 10 || !objthis) return TJS_E_BADPARAMCOUNT;
@@ -155,7 +155,7 @@ public:
         return TJS_S_OK;
     }
 
-    static tjs_error TJS_INTF_METHOD operateMultiAffine(
+    static tjs_error operateMultiAffine(
         tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
         
         if(numparams < 9 || !objthis) return TJS_E_BADPARAMCOUNT;
