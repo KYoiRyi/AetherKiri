@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = KrKr2 Next
+PRODUCT_NAME = AetherKiri
 
 // The application's bundle identifier
 PRODUCT_BUNDLE_IDENTIFIER = org.github.krkr2.flutterApp
