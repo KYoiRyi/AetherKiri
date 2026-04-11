@@ -1,8 +1,6 @@
 name: Android Build
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -11,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
 
     steps:
       - name: Checkout Repository
@@ -19,13 +18,20 @@ jobs:
       - name: Install Build Systems
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build pkg-config autoconf automake libtool gettext bison flex curl unzip zip
+          sudo apt-get install -y cmake ninja-build pkg-config autoconf automake libtool gettext bison flex curl unzip zip ccache jq
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: Restore ccache
+        uses: actions/cache/restore@v4
         with:
-          key: ${{ runner.os }}-ccache
-          max-size: 1000M
+          path: .ccache
+          key: ${{ runner.os }}-android-ccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-android-ccache-
+
+      - name: Setup ccache config
+        run: |
+          ccache --max-size=1000M
+          ccache -z
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -48,9 +54,9 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-android-vcpkg-${{ hashFiles('vcpkg.json') }}
           restore-keys: |
-            ${{ runner.os }}-vcpkg-
+            ${{ runner.os }}-android-vcpkg-
 
       - name: Build Android Release
         run: |
@@ -69,10 +75,37 @@ jobs:
           retention-days: 7
 
       - name: Save vcpkg cache
-        if: always()
+        if: success()
         uses: actions/cache/save@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-android-vcpkg-${{ hashFiles('vcpkg.json') }}
+
+      - name: Save ccache
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: .ccache
+          key: ${{ runner.os }}-android-ccache-${{ github.run_id }}
+
+      - name: Clean up older caches
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching list of caches..."
+          gh api -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches > caches.json || exit 0
+          
+          CURRENT_VCPKG_KEY="${{ runner.os }}-android-vcpkg-${{ hashFiles('vcpkg.json') }}"
+          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-android-vcpkg-\")) | select(.key != \"$CURRENT_VCPKG_KEY\") | .id" caches.json | while read id; do
+            echo "Deleting old vcpkg cache ID: $id"
+            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
+          done
+          
+          CURRENT_CCACHE_KEY="${{ runner.os }}-android-ccache-${{ github.run_id }}"
+          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-android-ccache-\")) | select(.key != \"$CURRENT_CCACHE_KEY\") | .id" caches.json | while read id; do
+            echo "Deleting old ccache ID: $id"
+            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
+          done
