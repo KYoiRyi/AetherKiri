@@ -102,22 +102,38 @@ static tjs_error TVPAddFontCompat(tTJSVariant *result, tjs_int numparams,
     return TJS_S_OK;
 }
 
+static tjs_error TVPAddFontAliasCompat(tTJSVariant *result, tjs_int numparams,
+                                       tTJSVariant **param) {
+    // Compatibility stub for PreRenderFontEx.AddAlias used by older font
+    // alias scripts. We accept and report success so startup can continue.
+    if(result)
+        *result = tTJSVariant(static_cast<tjs_int>(1));
+    return TJS_S_OK;
+}
+
 class tFontCompatFunctionLocal : public tTJSDispatch {
+    bool add_alias_ = false;
 public:
+    explicit tFontCompatFunctionLocal(bool add_alias = false) :
+        add_alias_(add_alias) {}
+
     tjs_error FuncCall(tjs_uint32, const tjs_char *membername, tjs_uint32 *,
                        tTJSVariant *result, tjs_int numparams,
                        tTJSVariant **param, iTJSDispatch2 *) override {
         if(membername)
             return TJS_E_MEMBERNOTFOUND;
+        if(add_alias_)
+            return TVPAddFontAliasCompat(result, numparams, param);
         return TVPAddFontCompat(result, numparams, param);
     }
 };
 
 static void TVPRegisterCompatFunction(iTJSDispatch2 *target,
-                                      const tjs_char *name) {
+                                      const tjs_char *name,
+                                      bool add_alias = false) {
     if(!target)
         return;
-    iTJSDispatch2 *func = new tFontCompatFunctionLocal();
+    iTJSDispatch2 *func = new tFontCompatFunctionLocal(add_alias);
     tTJSVariant val(func);
     func->Release();
     target->PropSet(TJS_MEMBERENSURE, name, nullptr, &val, target);
@@ -882,12 +898,14 @@ static void TVPRegisterStartupCompatGlobals() {
     TVPRegisterCompatFunction(global, TJS_W("addFont"));
     TVPRegisterCompatFunction(global, TJS_W("AddFont"));
     TVPRegisterCompatFunction(global, TJS_W("AddTrueTypeFont"));
+    TVPRegisterCompatFunction(global, TJS_W("AddAlias"), true);
 
     iTJSDispatch2 *preRenderFontEx = TJSCreateDictionaryObject();
     if(preRenderFontEx) {
         TVPRegisterCompatFunction(preRenderFontEx, TJS_W("addFont"));
         TVPRegisterCompatFunction(preRenderFontEx, TJS_W("AddFont"));
         TVPRegisterCompatFunction(preRenderFontEx, TJS_W("AddTrueTypeFont"));
+        TVPRegisterCompatFunction(preRenderFontEx, TJS_W("AddAlias"), true);
         tTJSVariant val(preRenderFontEx);
         global->PropSet(TJS_MEMBERENSURE, TJS_W("PreRenderFontEx"), nullptr,
                         &val, global);

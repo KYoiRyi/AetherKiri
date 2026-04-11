@@ -393,7 +393,7 @@ static tjs_error Player_getVariableKeys(tTJSVariant *r, tjs_int, tTJSVariant **,
 
     iTJSDispatch2 *keys = player->getVariableKeys();
     if(keys) {
-        *r = tTJSVariant(keys);
+        *r = tTJSVariant(keys, keys);
         keys->Release();
     } else {
         *r = tTJSVariant();
