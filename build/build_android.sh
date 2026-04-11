@@ -247,9 +247,8 @@ for ABI in "${ABI_ARRAY[@]}"; do
 
     # Use manifest mode: vcpkg install from project root where vcpkg.json lives
     # Only build Release libraries to save time and cache space
-    (cd "$PROJECT_ROOT" && "$VCPKG_BIN" install \
+    (cd "$PROJECT_ROOT" && VCPKG_BUILD_TYPE=release "$VCPKG_BIN" install \
         --triplet "$TRIPLET" \
-        --x-build-type=release \
         --x-install-root="$VCPKG_ROOT/installed" \
         --x-manifest-root="$PROJECT_ROOT" \
         --overlay-ports="$OVERLAY_PORTS" \
