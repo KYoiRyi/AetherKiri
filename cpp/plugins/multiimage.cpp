@@ -1,6 +1,8 @@
 #include "ncbind.hpp"
 #include <vector>
 
+#define NCB_MODULE_NAME TJS_W("multiimage.dll")
+
 struct MultiImageEntry {
     tTJSVariant img;
     int x;
@@ -93,20 +95,29 @@ static void ExtractImageInfo(const tTJSVariant& imgVar, tTJSVariant& src, tTJSVa
 
 // LayerExMulti Class Definition
 class LayerExMulti {
-    iTJSDispatch2* layerObj;
 public:
-    LayerExMulti(iTJSDispatch2 *obj) : layerObj(obj) {}
-    ~LayerExMulti() {}
+    static tjs_error TJS_INTF_METHOD multiAffineCopy(
+        tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
 
-    tTJSVariant multiAffineCopy(tTJSVariant multiImg, double a, double b, double c, double d, double tx, double ty, int opa, int mode, int type) {
-        if (!layerObj || multiImg.Type() != tvtObject) return tTJSVariant();
+        if(numparams < 10 || !objthis) return TJS_E_BADPARAMCOUNT;
         
-        iTJSDispatch2* miDsp = multiImg.AsObjectNoAddRef();
-        if (!miDsp) return tTJSVariant();
+        tTJSVariant multiImg = *param[0];
+        double a = (double)*param[1];
+        double b = (double)*param[2];
+        double c = (double)*param[3];
+        double d = (double)*param[4];
+        double tx = (double)*param[5];
+        double ty = (double)*param[6];
+        int opa = (int)*param[7];
+        int mode = (int)*param[8];
+        int type = (int)*param[9];
 
-        // Extract the native MultiImage instance
+        if (multiImg.Type() != tvtObject) return TJS_S_OK;
+        iTJSDispatch2* miDsp = multiImg.AsObjectNoAddRef();
+        if (!miDsp) return TJS_S_OK;
+
         MultiImage* mi = ncbInstanceAdaptor<MultiImage>::GetNativeInstance(miDsp);
-        if (!mi) return tTJSVariant();
+        if (!mi) return TJS_S_OK;
 
         const auto& queue = mi->getQueue();
         for (const auto& entry : queue) {
@@ -138,20 +149,33 @@ public:
             args[14] = tTJSVariant((tjs_int)0); // clear
 
             tTJSVariant* args_ptr[15] = {&args[0], &args[1], &args[2], &args[3], &args[4], &args[5], &args[6], &args[7], &args[8], &args[9], &args[10], &args[11], &args[12], &args[13], &args[14]};
-            layerObj->FuncCall(0, TJS_W("affineCopy"), NULL, NULL, 15, args_ptr, layerObj);
+            objthis->FuncCall(0, TJS_W("affineCopy"), NULL, NULL, 15, args_ptr, objthis);
         }
 
-        return tTJSVariant();
+        return TJS_S_OK;
     }
 
-    tTJSVariant operateMultiAffine(tTJSVariant multiImg, double a, double b, double c, double d, double tx, double ty, int opa, bool mode) {
-        if (!layerObj || multiImg.Type() != tvtObject) return tTJSVariant();
+    static tjs_error TJS_INTF_METHOD operateMultiAffine(
+        tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
         
+        if(numparams < 9 || !objthis) return TJS_E_BADPARAMCOUNT;
+        
+        tTJSVariant multiImg = *param[0];
+        double a = (double)*param[1];
+        double b = (double)*param[2];
+        double c = (double)*param[3];
+        double d = (double)*param[4];
+        double tx = (double)*param[5];
+        double ty = (double)*param[6];
+        int opa = (int)*param[7];
+        int mode = (int)*param[8];
+
+        if (multiImg.Type() != tvtObject) return TJS_S_OK;
         iTJSDispatch2* miDsp = multiImg.AsObjectNoAddRef();
-        if (!miDsp) return tTJSVariant();
+        if (!miDsp) return TJS_S_OK;
 
         MultiImage* mi = ncbInstanceAdaptor<MultiImage>::GetNativeInstance(miDsp);
-        if (!mi) return tTJSVariant();
+        if (!mi) return TJS_S_OK;
 
         const auto& queue = mi->getQueue();
         for (const auto& entry : queue) {
@@ -178,20 +202,21 @@ public:
             args[9] = tTJSVariant(final_d);
             args[10] = tTJSVariant(final_tx);
             args[11] = tTJSVariant(final_ty);
-            args[12] = tTJSVariant((tjs_int)mode); // mode
+            args[12] = tTJSVariant(mode); // mode
             args[13] = tTJSVariant(opa);
             args[14] = tTJSVariant((tjs_int)0); // type (default 0 nearest)
 
             tTJSVariant* args_ptr[15] = {&args[0], &args[1], &args[2], &args[3], &args[4], &args[5], &args[6], &args[7], &args[8], &args[9], &args[10], &args[11], &args[12], &args[13], &args[14]};
-            layerObj->FuncCall(0, TJS_W("operateAffine"), NULL, NULL, 15, args_ptr, layerObj);
+            objthis->FuncCall(0, TJS_W("operateAffine"), NULL, NULL, 15, args_ptr, objthis);
         }
 
-        return tTJSVariant();
+        return TJS_S_OK;
     }
 };
 
 NCB_ATTACH_CLASS(LayerExMulti, Layer)
 {
-    NCB_METHOD(multiAffineCopy);
-    NCB_METHOD(operateMultiAffine);
+    RawCallback("multiAffineCopy", &LayerExMulti::multiAffineCopy, 0);
+    RawCallback("operateMultiAffine", &LayerExMulti::operateMultiAffine, 0);
 }
+
