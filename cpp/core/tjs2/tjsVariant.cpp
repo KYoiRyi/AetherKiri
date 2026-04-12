@@ -29,7 +29,13 @@ public:
     ~GenericMockObjectForVariant() override {}
 
     tjs_uint AddRef() override { return ++RefCount; }
-    tjs_uint Release() override { return RefCount; } // Never destroy singleton
+    tjs_uint Release() override {
+        if (--RefCount == 0) {
+            delete this;
+            return 0;
+        }
+        return RefCount;
+    }
 
     tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername, tjs_uint32 *hint, tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) override {
         if (result) {
@@ -91,19 +97,24 @@ public:
 // --- Mock Toggle (controlled via engine_set_option("mock_enabled")) ---
 static bool g_MockEnabled = true; // default ON — existing behavior
 static iTJSDispatch2 *g_CompatBoolObject = nullptr;
+static iTJSDispatch2 *g_GlobalMockObject = nullptr;
+static tTJSVariantClosure_S g_GlobalMockClosure = { nullptr, nullptr };
 
 bool TVPIsMockEnabled() { return g_MockEnabled; }
 void TVPSetMockEnabled(bool enabled) { g_MockEnabled = enabled; }
 
 iTJSDispatch2* TVPGetGlobalMockObject() {
     if (!g_MockEnabled) return nullptr;
-    static iTJSDispatch2* g_GlobalMockObject = new GenericMockObjectForVariant();
+    if (!g_GlobalMockObject)
+        g_GlobalMockObject = new GenericMockObjectForVariant();
     return g_GlobalMockObject;
 }
 
 tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
-    static tTJSVariantClosure_S clo = { TVPGetGlobalMockObject(), TVPGetGlobalMockObject() };
-    return clo;
+    iTJSDispatch2 *mock = TVPGetGlobalMockObject();
+    g_GlobalMockClosure.Object = mock;
+    g_GlobalMockClosure.ObjThis = mock;
+    return g_GlobalMockClosure;
 }
 
     //---------------------------------------------------------------------------
@@ -283,6 +294,12 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
     //---------------------------------------------------------------------------
 
     void TVPResetVariantStateForRestart() {
+        g_GlobalMockClosure.Object = nullptr;
+        g_GlobalMockClosure.ObjThis = nullptr;
+        if(g_GlobalMockObject) {
+            g_GlobalMockObject->Release();
+            g_GlobalMockObject = nullptr;
+        }
         if(g_CompatBoolObject) {
             g_CompatBoolObject->Release();
             g_CompatBoolObject = nullptr;

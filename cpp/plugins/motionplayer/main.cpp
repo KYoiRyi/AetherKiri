@@ -802,8 +802,9 @@ static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams
         bool is_set = (tjs_int)*param[0];
         if (!is_set) {
             iTJSDispatch2* prop = param[2]->AsObjectNoAddRef();
-            static iTJSDispatch2* dummy = new GenericMockObject();
+            iTJSDispatch2 *dummy = new GenericMockObject();
             tTJSVariant dummy_var(dummy, dummy);
+            dummy->Release();
             prop->PropSet(0, nullptr, nullptr, &dummy_var, prop);
         }
     }
@@ -812,10 +813,10 @@ static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams
 }
 
 static tjs_error Motion_getD3DAdaptor(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    static iTJSDispatch2* dummy = new GenericMockObject();
     if (r) {
-        dummy->AddRef();
+        iTJSDispatch2 *dummy = new GenericMockObject();
         *r = tTJSVariant(dummy, dummy);
+        dummy->Release();
     }
     return TJS_S_OK;
 }
@@ -846,9 +847,9 @@ public:
                        tjs_int numparams, tTJSVariant **param,
                        iTJSDispatch2 *objthis) override {
         if (result) {
-            static iTJSDispatch2* dummy = new GenericMockObject();
-            dummy->AddRef();
+            iTJSDispatch2 *dummy = new GenericMockObject();
             *result = tTJSVariant(dummy, dummy);
+            dummy->Release();
         }
         return TJS_S_OK;
     }

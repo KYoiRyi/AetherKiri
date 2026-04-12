@@ -871,9 +871,9 @@ public:
                        tjs_int numparams, tTJSVariant **param,
                        iTJSDispatch2 *objthis) override {
         if (result) {
-            static iTJSDispatch2* dummy = new GenericMockObjectLocal();
-            dummy->AddRef();
+            iTJSDispatch2 *dummy = new GenericMockObjectLocal();
             *result = tTJSVariant(dummy, dummy);
+            dummy->Release();
         }
         return TJS_S_OK;
     }
