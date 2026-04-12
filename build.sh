@@ -7,7 +7,7 @@
 #   ./build.sh                          # Interactive platform selection
 #
 # Platforms:
-#   android, ios, macos
+#   android, ios, macos, linux
 #
 # Options:
 #   debug|release       Build type (default: debug)
@@ -50,6 +50,7 @@ show_help() {
     echo "  android    Build Android APK (Flutter + native engine)"
     echo "  ios        Build iOS app (C++ static lib + Flutter)"
     echo "  macos      Build macOS app (C++ dylib + Flutter)"
+    echo "  linux      Build Linux x64 app (C++ .so + Flutter)"
     echo ""
     echo "Options:"
     echo "  debug|release       Build type (default: debug)"
@@ -87,7 +88,7 @@ for arg in "$@"; do
         --jobs=*)
             export JOBS="${arg#*=}"
             ;;
-        android|ios|macos)
+        android|ios|macos|linux)
             PLATFORM="$arg"
             ;;
         debug|release|Debug|Release)
@@ -117,12 +118,14 @@ if [[ -z "$PLATFORM" ]]; then
     echo "  1) android"
     echo "  2) ios"
     echo "  3) macos"
+    echo "  4) linux"
     echo ""
-    read -rp "Enter choice [1-3]: " choice
+    read -rp "Enter choice [1-4]: " choice
     case "$choice" in
         1|android)  PLATFORM="android" ;;
         2|ios)      PLATFORM="ios" ;;
         3|macos)    PLATFORM="macos" ;;
+        4|linux)    PLATFORM="linux" ;;
         *)
             echo -e "${RED}[ERROR]${NC} Invalid choice: $choice"
             exit 1
