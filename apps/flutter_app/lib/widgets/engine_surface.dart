@@ -34,6 +34,43 @@ enum EngineSurfaceMode {
 
 enum EngineSurfacePointerMode { directTouch, virtualCursor }
 
+const Size _virtualCursorOverlaySize = Size(48, 48);
+const Offset _virtualCursorHotspot = Offset(6, 6);
+
+class _VirtualCursorPainter extends CustomPainter {
+  const _VirtualCursorPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path arrow = Path()
+      ..moveTo(_virtualCursorHotspot.dx, _virtualCursorHotspot.dy)
+      ..lineTo(size.width * 0.72, size.height * 0.72)
+      ..lineTo(size.width * 0.52, size.height * 0.72)
+      ..lineTo(size.width * 0.63, size.height * 0.98)
+      ..lineTo(size.width * 0.46, size.height * 0.98)
+      ..lineTo(size.width * 0.36, size.height * 0.74)
+      ..lineTo(size.width * 0.16, size.height * 0.9)
+      ..close();
+
+    canvas.drawShadow(arrow, const Color(0xDD000000), 10, false);
+
+    final Paint outlinePaint = Paint()
+      ..color = const Color(0xFF111111)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeJoin = StrokeJoin.round;
+    final Paint fillPaint = Paint()
+      ..color = const Color(0xFFF8F8F8)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(arrow, fillPaint);
+    canvas.drawPath(arrow, outlinePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class EngineSurface extends StatefulWidget {
   const EngineSurface({
     super.key,
@@ -1042,28 +1079,13 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       return const SizedBox.shrink();
     }
     return Positioned(
-      left: _virtualCursorLogicalPosition.dx - 3,
-      top: _virtualCursorLogicalPosition.dy - 2,
+      left: _virtualCursorLogicalPosition.dx - _virtualCursorHotspot.dx,
+      top: _virtualCursorLogicalPosition.dy - _virtualCursorHotspot.dy,
       child: IgnorePointer(
-        child: Transform.rotate(
-          angle: -0.18,
-          alignment: Alignment.topLeft,
-          child: Icon(
-            Icons.navigation,
-            size: 28,
-            color: Colors.white.withValues(alpha: 0.98),
-            shadows: const [
-              Shadow(
-                color: Color(0xCC000000),
-                blurRadius: 10,
-                offset: Offset(2, 3),
-              ),
-              Shadow(
-                color: Color(0x66000000),
-                blurRadius: 2,
-                offset: Offset(0.5, 0.5),
-              ),
-            ],
+        child: RepaintBoundary(
+          child: CustomPaint(
+            size: _virtualCursorOverlaySize,
+            painter: const _VirtualCursorPainter(),
           ),
         ),
       ),
