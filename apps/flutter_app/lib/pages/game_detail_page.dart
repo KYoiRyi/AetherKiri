@@ -235,7 +235,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
     Navigator.of(context).pop(); // close loading dialog
     if (!mounted) return;
     final applied = await Navigator.of(context).push<bool>(
-      AppAnimations.fadeSlideRoute<bool>(
+      AppAnimations.spatialRoute<bool>(
         ScrapeSelectPage(
           candidates: candidates,
           game: game,
@@ -552,13 +552,19 @@ class _GameDetailPageState extends State<GameDetailPage> {
         width: _coverCardWidth,
         height: height,
         child: _hasCover
-            ? Image.file(
-                File(game.coverPath!),
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    _buildCoverPlaceholder(colorScheme, height),
+            ? Hero(
+                tag: 'cover_card_${game.path}',
+                child: Image.file(
+                  File(game.coverPath!),
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      _buildCoverPlaceholder(colorScheme, height),
+                ),
               )
-            : _buildCoverPlaceholder(colorScheme, height),
+            : Hero(
+                tag: 'cover_card_${game.path}',
+                child: _buildCoverPlaceholder(colorScheme, height),
+              ),
       ),
     );
   }

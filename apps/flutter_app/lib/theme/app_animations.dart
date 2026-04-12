@@ -17,34 +17,37 @@ class AppAnimations {
   /// Staggered grid entrance — delay between items.
   static const Duration staggerDelay = Duration(milliseconds: 50);
 
-  /// Warm ease-out curve — decelerates like settling into paper.
-  static const Curve warmEaseOut = Curves.easeOutCubic;
+  /// Warm ease-out curve — decelerates smoothly, slightly longer tail than cubic.
+  static const Curve warmEaseOut = Curves.easeOutQuart;
 
   /// Warm ease-in-out — for reversible transitions.
-  static const Curve warmEaseInOut = Curves.easeInOutCubic;
+  static const Curve warmEaseInOut = Curves.easeInOutQuart;
 
   /// Gentle spring for interactive elements.
-  static const Curve gentleSpring = Curves.elasticOut;
+  static const Curve gentleSpring = Curves.easeOutCirc;
 
   /// Cover card press scale factor.
   static const double cardPressScale = 0.96;
 
-  /// Fade + slide page route (forward: slide up + fade in; back: slide down + fade out).
-  static Route<T> fadeSlideRoute<T>(Widget page) {
+  /// Spatial page route (forward: slight scale up + slide up + fade in).
+  static Route<T> spatialRoute<T>(Widget page) {
     return PageRouteBuilder<T>(
       pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionDuration: standard,
-      reverseTransitionDuration: standard,
+      transitionDuration: const Duration(milliseconds: 400),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(parent: animation, curve: warmEaseOut);
         return SlideTransition(
           position: Tween<Offset>(
-            begin: const Offset(0, 0.04),
+            begin: const Offset(0, 0.02),
             end: Offset.zero,
           ).animate(curved),
-          child: FadeTransition(
-            opacity: curved,
-            child: child,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.96, end: 1.0).animate(curved),
+            child: FadeTransition(
+              opacity: curved,
+              child: child,
+            ),
           ),
         );
       },
