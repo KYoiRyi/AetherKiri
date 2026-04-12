@@ -52,6 +52,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     'flutter_engine_bridge',
   );
   static const String _exitTracePath = '/tmp/aetherkiri-exit-trace.log';
+  static const String _startupTracePath = '/tmp/aetherkiri-startup-trace.log';
   static Future<void> _engineTeardownBarrier = Future<void>.value();
 
   late EngineBridge _bridge;
@@ -115,6 +116,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     unawaited(_resetExitTrace());
+    unawaited(_resetStartupTrace());
     _playSessionId = _createPlaySessionId();
     if (widget.gameManager != null) {
       unawaited(_savePendingPlaySession());
@@ -452,9 +454,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   }
 
   Future<void> _autoStart() async {
+    await _appendStartupTrace(
+      'dart: _autoStart entered path=${widget.gamePath}',
+    );
     if (Platform.isAndroid) {
       final granted = await _ensureAndroidAllFilesAccess();
       if (!granted) {
+        await _appendStartupTrace('dart: android permission denied');
         _fail(
           'All files access is required on Android. '
           'Please grant permission and open the game again.',
@@ -465,9 +471,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
 
     await _engineTeardownBarrier.catchError((_) {});
     if (!mounted) return;
+    await _appendStartupTrace('dart: teardown barrier passed');
 
     setState(() => _phase = _EnginePhase.creating);
     _log('engine_create...');
+    await _appendStartupTrace('dart: engine_create start');
 
     // Yield to let the UI paint the current log state before the
     // synchronous FFI call blocks the main thread.
@@ -475,6 +483,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
 
     final int createResult = await _bridge.engineCreate();
     if (createResult != _engineResultOk) {
+      await _appendStartupTrace(
+        'dart: engine_create failed result=$createResult error=${_bridge.engineGetLastError()}',
+      );
       _fail(
         'engine_create failed: result=$createResult, '
         'error=${_bridge.engineGetLastError()}',
@@ -482,6 +493,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       return;
     }
     _log('engine_create => OK');
+    await _appendStartupTrace('dart: engine_create ok');
 
     // Set renderer pipeline (opengl / software) before opening the game
     final prefs = await SharedPreferences.getInstance();
@@ -534,11 +546,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     // On Android, auto-detect if the user selected the data/ folder
     // itself and step up to the real game root.
     normalizedGamePath = await _adjustGamePathForAndroid(normalizedGamePath);
+    await _appendStartupTrace('dart: normalized path=$normalizedGamePath');
     _log('engine_open_game($normalizedGamePath)...');
     _log('Starting application — this may take a moment...');
 
     final preflightError = await _preflightGamePath(normalizedGamePath);
     if (preflightError != null) {
+      await _appendStartupTrace('dart: preflight failed $preflightError');
       _fail(preflightError);
       return;
     }
@@ -550,12 +564,16 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       normalizedGamePath,
     );
     if (openResult != _engineResultOk) {
+      await _appendStartupTrace(
+        'dart: engine_open_game_async failed result=$openResult error=${_bridge.engineGetLastError()}',
+      );
       _fail(
         'engine_open_game_async failed: result=$openResult, '
         'error=${_bridge.engineGetLastError()}',
       );
       return;
     }
+    await _appendStartupTrace('dart: engine_open_game_async queued');
     _log('engine_open_game_async => queued');
     _startStartupPolling();
   }
@@ -585,6 +603,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   void _fail(String message) {
     _stopStartupPolling();
     _log('ERROR: $message');
+    unawaited(_appendStartupTrace('dart: fail $message'));
     if (!mounted) return;
     setState(() {
       _phase = _EnginePhase.error;
@@ -741,6 +760,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       try {
         await _drainStartupLogs();
         final state = await _bridge.engineGetStartupState();
+        await _appendStartupTrace('dart: startup state=$state');
         if (!mounted || state == null) {
           return;
         }
@@ -749,6 +769,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
           case EngineStartupState.running:
             return;
           case EngineStartupState.succeeded:
+            await _appendStartupTrace('dart: startup succeeded');
             _stopStartupPolling();
             _log('engine_open_game => OK');
             await _applyFpsLimit();
@@ -757,6 +778,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
             _startTickLoop();
             return;
           case EngineStartupState.failed:
+            await _appendStartupTrace(
+              'dart: startup failed error=${_bridge.engineGetLastError()}',
+            );
             _stopStartupPolling();
             _fail(
               'engine_open_game failed: error=${_bridge.engineGetLastError()}',
@@ -782,6 +806,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       if (raw.isEmpty) {
         break;
       }
+      await _appendStartupTrace(
+        'dart: startup logs ${raw.replaceAll('\n', ' | ')}',
+      );
       final lines = raw.split('\n');
       for (final line in lines) {
         final trimmed = line.trim();
@@ -1090,10 +1117,29 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     } catch (_) {}
   }
 
+  Future<void> _resetStartupTrace() async {
+    try {
+      final file = File(_startupTracePath);
+      await file.writeAsString('', flush: true);
+      await _appendStartupTrace('dart: startup trace reset');
+    } catch (_) {}
+  }
+
   Future<void> _appendExitTrace(String message) async {
     try {
       final timestamp = DateTime.now().toIso8601String();
       await File(_exitTracePath).writeAsString(
+        '$timestamp $message\n',
+        mode: FileMode.append,
+        flush: true,
+      );
+    } catch (_) {}
+  }
+
+  Future<void> _appendStartupTrace(String message) async {
+    try {
+      final timestamp = DateTime.now().toIso8601String();
+      await File(_startupTracePath).writeAsString(
         '$timestamp $message\n',
         mode: FileMode.append,
         flush: true,

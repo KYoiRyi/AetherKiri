@@ -190,6 +190,7 @@ std::shared_ptr<spdlog::logger> EnsureNamedLogger(const char* name) {
 
 constexpr const char* kCrashDumpPath = "/tmp/aetherkiri-crash-last.log";
 constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+constexpr const char* kStartupTracePath = "/tmp/aetherkiri-startup-trace.log";
 
 void WriteCrashDumpChunk(int fd, const char* text) {
   if (fd < 0 || text == nullptr) {
@@ -215,6 +216,11 @@ void ResetCrashDumpFile() {
         "AetherKiri crash log placeholder\n";
     (void)::write(fd, kHeader, sizeof(kHeader) - 1);
     (void)::close(fd);
+  }
+  const int startup_fd =
+      ::open(kStartupTracePath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (startup_fd >= 0) {
+    (void)::close(startup_fd);
   }
 }
 
@@ -267,6 +273,25 @@ void AppendExitTrace(const char* message) {
   }
 
   char buffer[512] = {0};
+  const int written =
+      std::snprintf(buffer, sizeof(buffer), "pid=%d %s\n",
+                    static_cast<int>(::getpid()), message);
+  if (written > 0) {
+    (void)::write(fd, buffer, static_cast<size_t>(written));
+    (void)::fsync(fd);
+  }
+  (void)::close(fd);
+}
+
+void AppendStartupTrace(const char* message) {
+  if (message == nullptr) {
+    return;
+  }
+  const int fd = ::open(kStartupTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+  if (fd < 0) {
+    return;
+  }
+  char buffer[1024] = {0};
   const int written =
       std::snprintf(buffer, sizeof(buffer), "pid=%d %s\n",
                     static_cast<int>(::getpid()), message);
@@ -997,17 +1022,21 @@ engine_result_t DispatchInputEventNow(engine_handle_s* impl,
 engine_result_t OpenGameCore(engine_handle_t handle,
                              engine_handle_s* impl,
                              const char* game_root_path_utf8) {
+  AppendStartupTrace("native: OpenGameCore entered");
   if (game_root_path_utf8 == nullptr || game_root_path_utf8[0] == '\0') {
+    AppendStartupTrace("native: OpenGameCore invalid argument");
     return ENGINE_RESULT_INVALID_ARGUMENT;
   }
 
   if (!EnsureEngineRuntimeInitialized(impl->frame.surface_width,
                                       impl->frame.surface_height,
                                       impl->render.angle_backend)) {
+    AppendStartupTrace("native: EnsureEngineRuntimeInitialized failed");
     std::lock_guard<std::recursive_mutex> guard(impl->mutex);
     SetHandleErrorLocked(impl, "failed to initialize engine runtime for host mode");
     return ENGINE_RESULT_INTERNAL_ERROR;
   }
+  AppendStartupTrace("native: runtime initialized");
 
   EnsureRuntimeLoggersInitialized();
   EnsureInternalPluginAnchorsLinked();
@@ -1042,6 +1071,10 @@ engine_result_t OpenGameCore(engine_handle_t handle,
   spdlog::info(
       "engine_open_game: runtime initialized, starting application with path: {} (normalized: {})",
       game_root_path_utf8, normalized_game_root_path);
+  {
+    std::string line = "native: StartApplication path=" + normalized_game_root_path;
+    AppendStartupTrace(line.c_str());
+  }
 #if defined(__ANDROID__)
   AndroidInfoLog("engine_open_game: input='%s' normalized='%s'",
                  game_root_path_utf8, normalized_game_root_path.c_str());
@@ -1085,6 +1118,7 @@ engine_result_t OpenGameCore(engine_handle_t handle,
 #endif
     spdlog::default_logger()->flush();
     Application->StartApplication(ttstr(normalized_game_root_path.c_str()));
+    AppendStartupTrace("native: StartApplication returned");
     spdlog::info("engine_open_game: StartApplication returned successfully");
 #if defined(__ANDROID__)
     AndroidInfoLog("engine_open_game: StartApplication returned successfully");
@@ -1103,6 +1137,7 @@ engine_result_t OpenGameCore(engine_handle_t handle,
   }
 
   if (TVPTerminated) {
+    AppendStartupTrace("native: startup saw TVPTerminated");
     std::lock_guard<std::recursive_mutex> guard(impl->mutex);
     SetHandleErrorLocked(impl, "runtime requested termination during startup");
     return ENGINE_RESULT_INVALID_STATE;
@@ -1146,12 +1181,14 @@ engine_result_t OpenGameCore(engine_handle_t handle,
   impl->input.pending_events.clear();
   impl->state = ToStateValue(EngineState::kOpened);
   ClearHandleErrorLocked(impl);
+  AppendStartupTrace("native: OpenGameCore success");
   return ENGINE_RESULT_OK;
 }
 
 void RunOpenGameAsync(engine_handle_t handle,
                       engine_handle_s* impl,
                       std::string game_root_path_utf8) {
+  AppendStartupTrace("native: RunOpenGameAsync worker start");
   PushStartupLog(impl, "engine_open_game_async: worker started");
   TVPTerminated = false;
   TVPTerminateCode = 0;
@@ -1171,9 +1208,15 @@ void RunOpenGameAsync(engine_handle_t handle,
   }
 
   if (open_result == ENGINE_RESULT_OK) {
+    AppendStartupTrace("native: RunOpenGameAsync success");
     PushStartupLog(impl, "engine_open_game => OK");
     SetStartupState(impl, ENGINE_STARTUP_STATE_SUCCEEDED);
   } else {
+    char buffer[256] = {0};
+    std::snprintf(buffer, sizeof(buffer),
+                  "native: RunOpenGameAsync failed result=%d",
+                  static_cast<int>(open_result));
+    AppendStartupTrace(buffer);
     std::string error_text;
     {
       std::lock_guard<std::recursive_mutex> guard(impl->mutex);
@@ -1211,6 +1254,7 @@ engine_result_t engine_get_runtime_api_version(uint32_t* out_api_version) {
 
 engine_result_t engine_create(const engine_create_desc_t* desc,
                               engine_handle_t* out_handle) {
+  AppendStartupTrace("native: engine_create entered");
   if (desc == nullptr || out_handle == nullptr) {
     return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
                                    "engine_create requires non-null desc and out_handle");
@@ -1250,6 +1294,7 @@ engine_result_t engine_create(const engine_create_desc_t* desc,
   }
 
   *out_handle = handle;
+  AppendStartupTrace("native: engine_create success");
   SetThreadError(nullptr);
   return ENGINE_RESULT_OK;
 }
@@ -1405,6 +1450,7 @@ engine_result_t engine_open_game(engine_handle_t handle,
 engine_result_t engine_open_game_async(engine_handle_t handle,
                                        const char* game_root_path_utf8,
                                        const char* startup_script_utf8) {
+  AppendStartupTrace("native: engine_open_game_async entered");
   (void)startup_script_utf8;
 
   if (game_root_path_utf8 == nullptr || game_root_path_utf8[0] == '\0') {
@@ -1437,18 +1483,21 @@ engine_result_t engine_open_game_async(engine_handle_t handle,
           impl, ENGINE_RESULT_INVALID_STATE, "engine startup is already running");
     }
     if (g_runtime_active && g_runtime_owner == handle) {
+      AppendStartupTrace("native: engine_open_game_async already active");
       SetStartupState(impl, ENGINE_STARTUP_STATE_SUCCEEDED);
       ClearHandleErrorLocked(impl);
       SetThreadError(nullptr);
       return ENGINE_RESULT_OK;
     }
     if (g_runtime_active && g_runtime_owner != handle) {
+      AppendStartupTrace("native: engine_open_game_async blocked by other handle");
       return SetHandleErrorAndReturnLocked(
           impl,
           ENGINE_RESULT_INVALID_STATE,
           "runtime is already active on another engine handle");
     }
     if (g_runtime_started_once) {
+      AppendStartupTrace("native: engine_open_game_async blocked by started_once");
       return SetHandleErrorAndReturnLocked(
           impl,
           ENGINE_RESULT_NOT_SUPPORTED,
@@ -1459,6 +1508,7 @@ engine_result_t engine_open_game_async(engine_handle_t handle,
     ResetStartupState(impl);
     SetStartupState(impl, ENGINE_STARTUP_STATE_RUNNING);
     PushStartupLog(impl, "engine_open_game_async: queued startup");
+    AppendStartupTrace("native: engine_open_game_async queued worker");
     MarkStartupWorkerRunning(impl, true);
     g_runtime_startup_active = true;
     g_runtime_startup_owner = handle;
