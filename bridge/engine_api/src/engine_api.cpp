@@ -57,6 +57,7 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "psbfile/PSBMedia.h"
 #include "engine_options.h"
 #include "PluginCallTracer.hpp"
+#include "PluginImpl.h"
 
 // Mock bypass toggle (defined in tjsVariant.cpp, namespace TJS)
 namespace TJS { void TVPSetMockEnabled(bool enabled); }
@@ -561,6 +562,8 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
   }
 
   if (!TVPSystemUninitCalled) {
+    AppendExitTrace("native: TVPResetPluginSystemForRestart");
+    TVPResetPluginSystemForRestart();
     AppendExitTrace("native: TVPSystemUninit");
     try {
       TVPSystemUninit();

@@ -653,6 +653,13 @@ void tvpLoadPlugins() {
 //---------------------------------------------------------------------------
 tjs_int TVPGetAutoLoadPluginCount() { return TVPAutoLoadPluginCount; }
 
+void TVPResetPluginSystemForRestart() {
+    ncbAutoRegister::AllUnregist();
+    ncbAutoRegister::ResetRegistrationState();
+    TVPRegisteredPlugins.clear();
+    TVPAutoLoadPluginCount = 0;
+}
+
 //---------------------------------------------------------------------------
 // some service functions for plugin
 //---------------------------------------------------------------------------
