@@ -1,12 +1,12 @@
-name: iOS Build
+name: Linux Build
 
 on:
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build iOS App
-    runs-on: macos-latest
+    name: Build Linux App
+    runs-on: ubuntu-24.04
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -17,16 +17,22 @@ jobs:
 
       - name: Install Build Systems
         run: |
-          brew install cmake ninja pkg-config autoconf automake autoconf-archive gettext coreutils bison ccache
-          echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
-          echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build pkg-config \
+            autoconf automake libtool \
+            gettext bison flex \
+            curl unzip zip ccache \
+            libgtk-3-dev libblkid-dev \
+            libglib2.0-dev liblzma-dev \
+            clang libstdc++-12-dev
 
       - name: Restore ccache
         id: restore-ccache
         uses: actions/cache/restore@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-ios-ccache
+          key: ${{ runner.os }}-linux-ccache
 
       - name: Setup ccache config
         run: |
@@ -38,9 +44,10 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Disable Analytics
+      - name: Enable Flutter Linux Desktop
         run: |
           flutter config --no-analytics
+          flutter config --enable-linux-desktop
 
       - name: Restore vcpkg cache
         id: restore-vcpkg
@@ -49,33 +56,21 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-ios-vcpkg
+          key: ${{ runner.os }}-linux-vcpkg
 
-      - name: Build iOS Release
+      - name: Build Linux Release
         run: |
           chmod +x ./build.sh
           export CMAKE_C_COMPILER_LAUNCHER=ccache
           export CMAKE_CXX_COMPILER_LAUNCHER=ccache
-          ./build.sh ios release --jobs=4
-
-      - name: Compress App Bundle
-        run: |
-          cd apps/flutter_app/build/ios/iphoneos || exit 0
-          if [ -d "AetherKiri.app" ]; then
-            mkdir -p Payload
-            mv AetherKiri.app Payload/
-            zip -r AetherKiri-iOS.ipa Payload
-          else
-            echo "AetherKiri.app not found in expected directory"
-            exit 1
-          fi
+          ./build.sh linux release --jobs=4
 
       - name: Upload Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: AetherKiri-iOS-Unsigned
-          path: apps/flutter_app/build/ios/iphoneos/AetherKiri-iOS.ipa
+          name: AetherKiri-Linux-x64
+          path: apps/flutter_app/build/linux/x64/release/bundle/
           retention-days: 7
 
       - name: Save vcpkg cache
@@ -85,11 +80,11 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-ios-vcpkg
+          key: ${{ runner.os }}-linux-vcpkg
 
       - name: Save ccache
         if: success() && steps.restore-ccache.outputs.cache-matched-key == ''
         uses: actions/cache/save@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-ios-ccache
+          key: ${{ runner.os }}-linux-ccache
