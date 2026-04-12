@@ -1516,6 +1516,8 @@ public:
     void Start();
 
     void CheckBufferSleep();
+
+    void ShutdownForSystemUninit();
 } static *TVPWaveSoundBufferThread = nullptr;
 
 //---------------------------------------------------------------------------
@@ -1542,11 +1544,28 @@ tTVPWaveSoundBufferThread::tTVPWaveSoundBufferThread() :
 //---------------------------------------------------------------------------
 tTVPWaveSoundBufferThread::~tTVPWaveSoundBufferThread() {
     SetPriority(ttpNormal);
+    EventQueue.Clear(TVP_EV_WAVE_SND_BUF_THREAD);
     Resume();
     Event.Set();
     WaitFor();
+    EventQueue.Clear(TVP_EV_WAVE_SND_BUF_THREAD);
     EventQueue.Deallocate();
     Terminate();
+}
+
+void tTVPWaveSoundBufferThread::ShutdownForSystemUninit() {
+    AppendExitTrace("native: wave thread shutdown begin");
+    PendingLabelEventExists = false;
+    WndProcToBeCalled = false;
+    SetPriority(ttpNormal);
+    EventQueue.Clear(TVP_EV_WAVE_SND_BUF_THREAD);
+    Terminate();
+    Resume();
+    Event.Set();
+    WaitFor();
+    EventQueue.Clear(TVP_EV_WAVE_SND_BUF_THREAD);
+    EventQueue.Deallocate();
+    AppendExitTrace("native: wave thread shutdown end");
 }
 
 //---------------------------------------------------------------------------
@@ -1723,8 +1742,20 @@ static void TVPReleaseSoundBuffers(bool disableevent = true) {
 static void TVPShutdownWaveSoundBuffers() {
     AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers begin");
     // clean up soundbuffers at exit
-    if(TVPWaveSoundBufferThread)
-        delete TVPWaveSoundBufferThread, TVPWaveSoundBufferThread = nullptr;
+    {
+        tTJSCriticalSectionHolder holder(TVPWaveSoundBufferVectorCS);
+        std::vector<tTJSNI_WaveSoundBuffer *>::iterator i;
+        for(i = TVPWaveSoundBufferVector.begin();
+            i != TVPWaveSoundBufferVector.end(); i++) {
+            (*i)->PrepareForSystemUninit();
+        }
+    }
+    AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers prepared buffers");
+    if(TVPWaveSoundBufferThread) {
+        TVPWaveSoundBufferThread->ShutdownForSystemUninit();
+        TVPWaveSoundBufferThread = nullptr;
+    }
+    AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers shutdown thread");
     TVPReleaseSoundBuffers();
     AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers end");
 }
@@ -2401,6 +2432,30 @@ void tTJSNI_WaveSoundBuffer::Clear() {
     ResetSamplePositions();
 
     SetStatus(ssUnload);
+}
+
+void tTJSNI_WaveSoundBuffer::PrepareForSystemUninit() {
+    CanDeliverEvents = false;
+    ThreadCallbackEnabled = false;
+    if(Thread)
+        Thread->Interrupt();
+    StopPlay();
+    LabelEventQueue.clear();
+}
+
+void tTJSNI_WaveSoundBuffer::FreeDirectSoundBuffer(bool disableevent) {
+    // called at exit ( system uninitialization )
+    bool b = CanDeliverEvents;
+    if(disableevent)
+        CanDeliverEvents = false; // temporarily disables event derivering
+    StopPlay();
+    ThreadCallbackEnabled = false;
+    TVPCheckSoundBufferAllSleep();
+    if(Thread)
+        Thread->Interrupt();
+    LabelEventQueue.clear();
+    DestroySoundBuffer();
+    CanDeliverEvents = b;
 }
 
 //---------------------------------------------------------------------------

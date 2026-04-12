@@ -121,15 +121,9 @@ private:
     tjs_uint8 *Level2Buffer;
 
 public:
-    void FreeDirectSoundBuffer(bool disableevent = true) {
-        // called at exit ( system uninitialization )
-        bool b = CanDeliverEvents;
-        if(disableevent)
-            CanDeliverEvents = false; // temporarily disables event derivering
-        Stop();
-        DestroySoundBuffer();
-        CanDeliverEvents = b;
-    }
+    void PrepareForSystemUninit();
+
+    void FreeDirectSoundBuffer(bool disableevent = true);
 
     //-- playing stuff
     //----------------------------------------------------
