@@ -13,6 +13,9 @@
 #include <deque>
 #include <algorithm>
 #include <ctime>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 #include "DebugIntf.h"
 #include "MsgIntf.h"
 #include "StorageIntf.h"
@@ -25,6 +28,23 @@
 
 #include "Application.h"
 #include "SystemControl.h"
+
+namespace {
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+void AppendExitTrace(const char *message) {
+    if(message == nullptr) return;
+    const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if(fd < 0) return;
+    char buffer[512] = {0};
+    const int written = std::snprintf(
+        buffer, sizeof(buffer), "pid=%d %s\n", static_cast<int>(::getpid()), message);
+    if(written > 0) {
+        (void)::write(fd, buffer, static_cast<size_t>(written));
+        (void)::fsync(fd);
+    }
+    (void)::close(fd);
+}
+}
 
 //---------------------------------------------------------------------------
 // global variables
@@ -104,6 +124,7 @@ static void TVPCleanupLoggingHandlerVector() {
 }
 
 static void TVPDestroyLoggingHandlerVector() {
+    AppendExitTrace("native: handler TVPDestroyLoggingHandlerVector begin");
     TVPSetOnLog(nullptr);
     std::vector<tTJSVariantClosure>::iterator i;
     for(i = TVPLoggingHandlerVector.begin(); i != TVPLoggingHandlerVector.end();
@@ -111,6 +132,7 @@ static void TVPDestroyLoggingHandlerVector() {
         i->Release();
     }
     TVPLoggingHandlerVector.clear();
+    AppendExitTrace("native: handler TVPDestroyLoggingHandlerVector end");
 }
 
 static tTVPAtExit

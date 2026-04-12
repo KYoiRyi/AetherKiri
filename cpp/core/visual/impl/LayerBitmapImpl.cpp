@@ -14,6 +14,9 @@
 #include <memory>
 #include <stdlib.h>
 #include <math.h>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "LayerBitmapIntf.h"
 #include "LayerBitmapImpl.h"
@@ -38,6 +41,23 @@ void TVPInitWindowOptions();
 #include "PrerenderedFont.h"
 #include "FontSystem.h"
 #include "FreeType.h"
+
+namespace {
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+void AppendExitTrace(const char *message) {
+    if(message == nullptr) return;
+    const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if(fd < 0) return;
+    char buffer[512] = {0};
+    const int written = std::snprintf(
+        buffer, sizeof(buffer), "pid=%d %s\n", static_cast<int>(::getpid()), message);
+    if(written > 0) {
+        (void)::write(fd, buffer, static_cast<size_t>(written));
+        (void)::fsync(fd);
+    }
+    (void)::close(fd);
+}
+}
 #include "FreeTypeFontRasterizer.h"
 // #include "GDIFontRasterizer.h"
 #include "BitmapBitsAlloc.h"
@@ -184,6 +204,7 @@ void TVPUnmapPrerenderedFont(const tTVPFont &font) {
 }
 //---------------------------------------------------------------------------
 static void TVPUnmapAllPrerenderedFonts() {
+    AppendExitTrace("native: handler TVPUnmapAllPrerenderedFonts begin");
     // unmap all prerendered fonts
     std::vector<tTVPPrerenderedFontMap>::iterator i;
     for(i = TVPPrerenderedFontMapVector.begin();
@@ -192,6 +213,7 @@ static void TVPUnmapAllPrerenderedFonts() {
     }
     TVPPrerenderedFontMapVector.clear();
     TVPGlobalFontStateMagic++; // increase magic number
+    AppendExitTrace("native: handler TVPUnmapAllPrerenderedFonts end");
 }
 //---------------------------------------------------------------------------
 static tTVPAtExit

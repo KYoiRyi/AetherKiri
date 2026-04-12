@@ -17,6 +17,9 @@
 
 #include <math.h>
 #include <algorithm>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 #include "SystemControl.h"
 #include "DebugIntf.h"
 #include "MsgIntf.h"
@@ -28,6 +31,23 @@
 #include "UtilStreams.h"
 #include "TickCount.h"
 #include "WaveMixer.h"
+
+namespace {
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+void AppendExitTrace(const char *message) {
+    if(message == nullptr) return;
+    const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if(fd < 0) return;
+    char buffer[512] = {0};
+    const int written = std::snprintf(
+        buffer, sizeof(buffer), "pid=%d %s\n", static_cast<int>(::getpid()), message);
+    if(written > 0) {
+        (void)::write(fd, buffer, static_cast<size_t>(written));
+        (void)::fsync(fd);
+    }
+    (void)::close(fd);
+}
+}
 
 #define DWORD uint32_t
 #ifdef TVP_SUPPORT_OLD_WAVEUNPACKER
@@ -1701,10 +1721,12 @@ static void TVPReleaseSoundBuffers(bool disableevent = true) {
 
 //---------------------------------------------------------------------------
 static void TVPShutdownWaveSoundBuffers() {
+    AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers begin");
     // clean up soundbuffers at exit
     if(TVPWaveSoundBufferThread)
         delete TVPWaveSoundBufferThread, TVPWaveSoundBufferThread = nullptr;
     TVPReleaseSoundBuffers();
+    AppendExitTrace("native: handler TVPShutdownWaveSoundBuffers end");
 }
 
 static tTVPAtExit

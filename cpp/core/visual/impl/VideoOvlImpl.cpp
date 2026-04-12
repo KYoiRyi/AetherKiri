@@ -12,6 +12,9 @@
 #include "tjsCommHead.h"
 
 #include <algorithm>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 #include "MsgIntf.h"
 #include "VideoOvlImpl.h"
 #include "DebugIntf.h"
@@ -26,6 +29,23 @@
 
 #include "Application.h"
 #include "combase.h"
+
+namespace {
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+void AppendExitTrace(const char *message) {
+    if(message == nullptr) return;
+    const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if(fd < 0) return;
+    char buffer[512] = {0};
+    const int written = std::snprintf(
+        buffer, sizeof(buffer), "pid=%d %s\n", static_cast<int>(::getpid()), message);
+    if(written > 0) {
+        (void)::write(fd, buffer, static_cast<size_t>(written));
+        (void)::fsync(fd);
+    }
+    (void)::close(fd);
+}
+}
 
 extern void GetVideoOverlayObject(tTJSNI_VideoOverlay *callbackwin,
                                   struct IStream *stream,
@@ -67,6 +87,7 @@ static void TVPRemoveVideoOverlay(tTJSNI_VideoOverlay *ovl) {
 }
 //---------------------------------------------------------------------------
 static void TVPShutdownVideoOverlay() {
+    AppendExitTrace("native: handler TVPShutdownVideoOverlay begin");
     // shutdown all overlay object and release krmovie.dll /
     // krflash.dll
     std::vector<tTJSNI_VideoOverlay *>::iterator i;
@@ -74,6 +95,7 @@ static void TVPShutdownVideoOverlay() {
         i++) {
         (*i)->Shutdown();
     }
+    AppendExitTrace("native: handler TVPShutdownVideoOverlay end");
 }
 static tTVPAtExit TVPShutdownVideoOverlayAtExit(TVP_ATEXIT_PRI_PREPARE,
                                                 TVPShutdownVideoOverlay);

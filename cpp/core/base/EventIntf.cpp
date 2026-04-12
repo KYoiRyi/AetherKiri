@@ -12,6 +12,9 @@
 #include "tjsCommHead.h"
 
 #include <algorithm>
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 #include "SysInitIntf.h"
 #include "SysInitImpl.h"
 #include "EventIntf.h"
@@ -22,6 +25,23 @@
 #include "TickCount.h"
 #include "SystemImpl.h"
 #include <spdlog/spdlog.h>
+
+namespace {
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+void AppendExitTrace(const char *message) {
+    if(message == nullptr) return;
+    const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if(fd < 0) return;
+    char buffer[512] = {0};
+    const int written = std::snprintf(
+        buffer, sizeof(buffer), "pid=%d %s\n", static_cast<int>(::getpid()), message);
+    if(written > 0) {
+        (void)::write(fd, buffer, static_cast<size_t>(written));
+        (void)::fsync(fd);
+    }
+    (void)::close(fd);
+}
+}
 
 //---------------------------------------------------------------------------
 // tTVPEvent  : script event class
@@ -168,6 +188,7 @@ tjs_uint64 TVPEventSequenceNumberToProcess = 0;
 // current event sequence which must be processed
 
 static void TVPDestroyEventQueue() {
+    AppendExitTrace("native: handler TVPDestroyEventQueue begin");
     // delete all event objects
     // deletion of event object may cause other deletion of event
     // objects.
@@ -190,6 +211,7 @@ static void TVPDestroyEventQueue() {
             delete ev;
         }
     }
+    AppendExitTrace("native: handler TVPDestroyEventQueue end");
 }
 
 static tTVPAtExit TVPDestroyEventQueueAtExit(TVP_ATEXIT_PRI_PREPARE,
@@ -763,12 +785,14 @@ static std::vector<tTJSVariantClosure> TVPContinuousHandlerVector;
 static bool TVPContinuousEventProcessing = false;
 
 static void TVPDestroyContinuousHandlerVector() {
+    AppendExitTrace("native: handler TVPDestroyContinuousHandlerVector begin");
     std::vector<tTJSVariantClosure>::iterator i;
     for(i = TVPContinuousHandlerVector.begin();
         i != TVPContinuousHandlerVector.end(); i++) {
         i->Release();
     }
     TVPContinuousHandlerVector.clear();
+    AppendExitTrace("native: handler TVPDestroyContinuousHandlerVector end");
 }
 
 static tTVPAtExit
