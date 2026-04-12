@@ -16,26 +16,23 @@ NCB_PRE_REGIST_CALLBACK(menu_dll_stub);
 // ----------------------------------------------------------------------------
 class MenuItemExt {
 public:
-    static tjs_error textToKeycode(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-        if (result) *result = 0;
-        return TJS_S_OK;
+    static tjs_int textToKeycode(const tjs_char* text) {
+        return 0;
     }
 
-    static tjs_error keycodeToText(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-        if (result) *result = TJS_W("");
-        return TJS_S_OK;
+    static const tjs_char* keycodeToText(tjs_int keycode) {
+        return TJS_W("");
     }
 
-    static tjs_error getHMENU(tTJSVariant *result, iTJSDispatch2 *objthis) {
-        if (result) *result = 0;
-        return TJS_S_OK;
+    static tjs_int getHMENU() {
+        return 0;
     }
 };
 
 NCB_ATTACH_CLASS(MenuItemExt, MenuItem) {
-    NCB_METHOD_RAW_CALLBACK(textToKeycode, textToKeycode, 0);
-    NCB_METHOD_RAW_CALLBACK(keycodeToText, keycodeToText, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(HMENU, getHMENU, 0);
+    NCB_METHOD(textToKeycode);
+    NCB_METHOD(keycodeToText);
+    NCB_PROPERTY_RO(HMENU, getHMENU);
 }
 
 // ----------------------------------------------------------------------------
