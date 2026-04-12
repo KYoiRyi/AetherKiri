@@ -15,6 +15,7 @@ import '../theme/app_theme.dart';
 import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
 import '../widgets/app_dynamic_widgets.dart';
+import '../widgets/app_3d_tilt_card.dart';
 import 'game_detail_page.dart';
 import 'game_page.dart';
 import 'settings_page.dart';
@@ -911,10 +912,11 @@ class _HomePageState extends State<HomePage> {
           children: [
             AppLoopingFloat(
               offsetAmount: 6.0,
+              pulseOpacity: true,
               child: Icon(
                 Icons.videogame_asset_off,
                 size: 72,
-                color: colorScheme.primary.withValues(alpha: 0.3),
+                color: colorScheme.primary.withValues(alpha: 0.8),
               ),
             ),
             const SizedBox(height: 32),
@@ -1006,8 +1008,6 @@ class _CoverCard extends StatefulWidget {
 }
 
 class _CoverCardState extends State<_CoverCard> {
-  double _scale = 1.0;
-
   GameInfo get game => widget.game;
   AppLocalizations get l10n => widget.l10n;
   bool get _isXp3 => game.path.toLowerCase().endsWith('.xp3');
@@ -1069,10 +1069,10 @@ class _CoverCardState extends State<_CoverCard> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return AnimatedScale(
-      scale: _scale,
-      duration: AppAnimations.quick,
-      curve: AppAnimations.warmEaseOut,
+    return App3DTiltHover(
+      onTap: widget.onTap,
+      onLongPress: () => _showContextMenu(context),
+      onSecondaryTap: () => _showContextMenu(context),
       child: Hero(
         tag: 'cover_card_${game.path}',
         child: Card(
@@ -1091,17 +1091,6 @@ class _CoverCardState extends State<_CoverCard> {
               _buildBackground(colorScheme),
               _buildGradientOverlay(),
               _buildTitleOverlay(game),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.onTap,
-                  onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
-                  onTapUp: (_) => setState(() => _scale = 1.0),
-                  onTapCancel: () => setState(() => _scale = 1.0),
-                  onLongPress: () => _showContextMenu(context),
-                  onSecondaryTap: () => _showContextMenu(context),
-                ),
-              ),
             ],
           ),
         ),

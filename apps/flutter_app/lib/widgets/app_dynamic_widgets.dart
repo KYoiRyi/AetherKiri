@@ -6,12 +6,14 @@ class AppLoopingFloat extends StatefulWidget {
   final Widget child;
   final double offsetAmount;
   final Duration duration;
+  final bool pulseOpacity;
 
   const AppLoopingFloat({
     super.key,
     required this.child,
     this.offsetAmount = 8.0,
     this.duration = const Duration(seconds: 2),
+    this.pulseOpacity = false,
   });
 
   @override
@@ -46,10 +48,17 @@ class _AppLoopingFloatState extends State<AppLoopingFloat>
           parent: _controller,
           curve: Curves.easeInOutSine,
         ).value;
-        return Transform.translate(
+        Widget current = Transform.translate(
           offset: Offset(0, -widget.offsetAmount * val),
           child: child,
         );
+        if (widget.pulseOpacity) {
+          current = Opacity(
+            opacity: 0.5 + 0.5 * val,
+            child: current,
+          );
+        }
+        return current;
       },
       child: widget.child,
     );

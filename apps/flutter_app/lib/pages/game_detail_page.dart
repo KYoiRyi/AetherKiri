@@ -542,26 +542,30 @@ class _GameDetailPageState extends State<GameDetailPage> {
   /// 顶部居中卡片：仅封面
   Widget _buildTopCoverCard(ColorScheme colorScheme) {
     final height = _coverCardWidth / _coverCardAspectRatio;
-    return Hero(
-      tag: 'cover_card_${game.path}',
-      child: Card(
-        elevation: 4,
-        shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: SizedBox(
-          width: _coverCardWidth,
-          height: height,
-          child: _hasCover
-              ? Image.file(
-                  File(game.coverPath!),
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      _buildCoverPlaceholder(colorScheme, height),
-                )
-              : _buildCoverPlaceholder(colorScheme, height),
+    return AppLoopingFloat(
+      offsetAmount: 4.0,
+      duration: const Duration(seconds: 3),
+      child: Hero(
+        tag: 'cover_card_${game.path}',
+        child: Card(
+          elevation: 4,
+          shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: SizedBox(
+            width: _coverCardWidth,
+            height: height,
+            child: _hasCover
+                ? Image.file(
+                    File(game.coverPath!),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        _buildCoverPlaceholder(colorScheme, height),
+                  )
+                : _buildCoverPlaceholder(colorScheme, height),
+          ),
         ),
       ),
     );
