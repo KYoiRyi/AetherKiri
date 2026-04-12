@@ -257,17 +257,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ],
         ),
-        body: TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: AppAnimations.gentle,
-          curve: AppAnimations.warmEaseOut,
-          builder: (_, value, child) => Opacity(
-            opacity: value,
-            child: child,
-          ),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            children: [
+        body: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          children: <Widget>[
             // ── Engine section (desktop only) ──
             // On Android/iOS the engine is always bundled; no switching needed.
             if (!Platform.isAndroid && !Platform.isIOS) ...[
@@ -705,8 +697,10 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             const SizedBox(height: 32),
-          ],
-        ),
+          ].asMap().entries.map((e) => AppAnimations.staggeredEntrance(
+                index: e.key,
+                child: e.value,
+              )).toList(),
         ),
       ),
     );

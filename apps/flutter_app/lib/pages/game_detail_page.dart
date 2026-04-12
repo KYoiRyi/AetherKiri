@@ -602,13 +602,16 @@ class _GameDetailPageState extends State<GameDetailPage> {
         ],
       ),
       child: Column(
-        children: [
+        children: <Widget>[
           _buildInfoSection(l10n, textTheme, colorScheme),
           _buildLaunchButton(l10n),
           _buildManageSection(l10n, colorScheme),
           _buildDangerSection(l10n, colorScheme),
           const SizedBox(height: 32),
-        ],
+        ].asMap().entries.map((e) => AppAnimations.staggeredEntrance(
+              index: e.key,
+              child: e.value,
+            )).toList(),
       ),
     );
   }
