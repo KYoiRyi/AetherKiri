@@ -270,3 +270,10 @@ static tTVPAtExit
     TVPTimerThreadUninitAtExit(TVP_ATEXIT_PRI_SHUTDOWN,
                                TVPReleaseContinuousHandlerCallLimitThread);
 //---------------------------------------------------------------------------
+
+void TVPResetEventImplStateForRestart() {
+    TVPEventInvoked = false;
+    TVPBreathing = false;
+    TVPReleaseContinuousHandlerCallLimitThread();
+}
+//---------------------------------------------------------------------------

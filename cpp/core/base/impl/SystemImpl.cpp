@@ -46,6 +46,7 @@
 //---------------------------------------------------------------------------
 static ttstr TVPAppTitle;
 static bool TVPAppTitleInit = false;
+static bool TVPRegisterDataInited = false;
 //---------------------------------------------------------------------------
 
 bool TVPGetKeyMouseAsyncState(tjs_uint keycode, bool getcurrent);
@@ -206,13 +207,20 @@ void TVPExecuteStorage(const ttstr &name, tTJSVariant *result,
                        bool isexpression, const tjs_char *modestr);
 
 static void InitRegisterData() {
-    static bool dataInited = false;
-    if(!dataInited) {
+    if(!TVPRegisterDataInited) {
         ttstr regfile = TVPGetAppDataPath() + TJS_W("RegisterData.tjs");
         if(TVPIsExistentStorageNoSearch(regfile)) {
             TVPExecuteStorage(regfile, &RegisterData, true, TJS_W(""));
         }
+        TVPRegisterDataInited = true;
     }
+}
+
+void TVPResetSystemImplStateForRestart() {
+    TVPAppTitle.Clear();
+    TVPAppTitleInit = false;
+    RegisterData.Clear();
+    TVPRegisterDataInited = false;
 }
 
 //---------------------------------------------------------------------------

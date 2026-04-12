@@ -1031,6 +1031,27 @@ void TVPDeliverCompactEvent(tjs_int level) {
 }
 //---------------------------------------------------------------------------
 
+extern void TVPResetEventImplStateForRestart();
+
+void TVPResetEventStateForRestart() {
+    TVPDestroyEventQueue();
+    TVPDestroyContinuousHandlerVector();
+
+    TVPWinUpdateEventQueue.clear();
+    TVPExclusiveEventPosted = false;
+    TVPEventSequenceNumber = 0;
+    TVPEventSequenceNumberToProcess = 0;
+    TVPEventDisabled = false;
+    TVPProcessContinuousHandlerEventFlag = false;
+    TVPContinuousEventVector.clear();
+    TVPContinuousEventProcessing = false;
+    TVPCompactEventVector.clear();
+    TVPEnableGlobalHeapCompaction = false;
+
+    TVPResetEventImplStateForRestart();
+}
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 // AsyncTrigger related
 //---------------------------------------------------------------------------

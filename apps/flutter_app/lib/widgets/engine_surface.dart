@@ -153,6 +153,7 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
   Timer? _virtualCursorLongPressTimer;
   bool _virtualCursorDragActive = false;
   bool _virtualCursorMovedDuringGesture = false;
+  Future<void>? _shutdownFuture;
 
   @override
   void initState() {
@@ -187,6 +188,25 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
     unawaited(_disposeAllTextures());
     _focusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> prepareForTeardown() {
+    final existing = _shutdownFuture;
+    if (existing != null) {
+      return existing;
+    }
+
+    final future = () async {
+      _vsyncScheduled = false;
+      _cancelVirtualCursorLongPress();
+      _hideSoftKeyboard();
+      final ui.Image? previousImage = _frameImage;
+      _frameImage = null;
+      previousImage?.dispose();
+      await _disposeAllTextures();
+    }();
+    _shutdownFuture = future;
+    return future;
   }
 
   bool get isVirtualCursorEnabled =>

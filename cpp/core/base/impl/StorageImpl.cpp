@@ -1483,6 +1483,10 @@ bool TVPSaveStreamToFile(tTJSBinaryStream *st, tjs_uint64 offset,
 //---------------------------------------------------------------------------
 static std::vector<ttstr> TVPAutoMountedPaths;
 
+void TVPResetStorageImplStateForRestart() {
+    TVPAutoMountedPaths.clear();
+}
+
 void TVPAutoMountSiblingXP3Archives() {
     if(TVPProjectDir.GetLastChar() != TJS_W('/'))
         return;

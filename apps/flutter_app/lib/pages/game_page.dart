@@ -115,8 +115,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    unawaited(_resetExitTrace());
-    unawaited(_resetStartupTrace());
+    unawaited(_markTraceSessionStart());
     _playSessionId = _createPlaySessionId();
     if (widget.gameManager != null) {
       unawaited(_savePendingPlaySession());
@@ -233,6 +232,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
 
     final future = _engineTeardownBarrier.catchError((_) {}).then((_) async {
       await _appendExitTrace('dart: queueTeardown begin');
+      await _surfaceKey.currentState?.prepareForTeardown();
+      await _appendExitTrace('dart: surface teardown prepared');
       await _waitForTickLoopToSettle();
       await _appendExitTrace('dart: tick settled');
       await _finalizePlaySession();
@@ -1109,27 +1110,37 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     Navigator.of(context).pop();
   }
 
-  Future<void> _resetExitTrace() async {
+  Future<void> _markTraceSessionStart() async {
+    final String timestamp = DateTime.now().toIso8601String();
+    final String divider =
+        '\n===== GamePage session start $timestamp path=${widget.gamePath} =====\n';
     try {
-      final file = File(_exitTracePath);
-      await file.writeAsString('', flush: true);
-      await _appendExitTrace('dart: trace reset');
-    } catch (_) {}
-  }
-
-  Future<void> _resetStartupTrace() async {
-    try {
-      final file = File(_startupTracePath);
-      await file.writeAsString('', flush: true);
-      await _appendStartupTrace('dart: startup trace reset');
+      await File(_exitTracePath).writeAsString(
+        divider,
+        mode: FileMode.append,
+        flush: true,
+      );
+      await File(_startupTracePath).writeAsString(
+        divider,
+        mode: FileMode.append,
+        flush: true,
+      );
+      await _appendStartupTrace('dart: startup trace session marker written');
+      await _appendExitTrace('dart: exit trace session marker written');
     } catch (_) {}
   }
 
   Future<void> _appendExitTrace(String message) async {
     try {
       final timestamp = DateTime.now().toIso8601String();
+      final String line = '$timestamp $message\n';
       await File(_exitTracePath).writeAsString(
-        '$timestamp $message\n',
+        line,
+        mode: FileMode.append,
+        flush: true,
+      );
+      await File(_startupTracePath).writeAsString(
+        '$timestamp [exit-trace] $message\n',
         mode: FileMode.append,
         flush: true,
       );

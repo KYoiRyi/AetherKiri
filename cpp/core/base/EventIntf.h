@@ -22,6 +22,7 @@
 extern void TVPDeliverAllEvents(); // called from (indirectly) the OS
 
 extern bool TVPEventDisabled; // do not write to this variable directly
+extern void TVPResetEventStateForRestart();
 
 extern void TVPInvokeEvents();
 

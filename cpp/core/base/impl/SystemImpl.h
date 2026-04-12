@@ -26,5 +26,6 @@ extern void TVPPostApplicationDeactivateEvent();
 extern bool TVPShellExecute(const TJS::ttstr &target, const TJS::ttstr &param);
 
 extern void TVPDoSaveSystemVariables();
+extern void TVPResetSystemImplStateForRestart();
 //---------------------------------------------------------------------------
 #endif
