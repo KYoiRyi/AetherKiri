@@ -25,7 +25,6 @@ namespace TJS {
     TJS_EXP_FUNC_DEF(tjs_int32, TJSFindNativeClassID, (const tjs_char *name));
 
     TJS_EXP_FUNC_DEF(const tjs_char *, TJSFindNativeClassName, (tjs_int32 id));
-    TJS_EXP_FUNC_DEF(void, TJSResetNativeClassRegistry, ());
 
     // Global mock fallback
     extern iTJSDispatch2* TVPGetGlobalMockObject();

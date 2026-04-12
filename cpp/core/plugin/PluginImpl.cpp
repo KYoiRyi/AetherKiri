@@ -668,8 +668,6 @@ void TVPResetPluginSystemForRestart() {
     spdlog::info("PLUGIN-RESET AllUnregist done");
     ncbAutoRegister::ResetRegistrationState();
     spdlog::info("PLUGIN-RESET ResetRegistrationState done");
-    TJS::TJSResetNativeClassRegistry();
-    spdlog::info("PLUGIN-RESET NativeClassRegistry reset");
     TVPResetPluginRegistrationCache();
     spdlog::info("PLUGIN-RESET TVPResetPluginSystemForRestart end");
 }
