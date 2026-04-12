@@ -589,6 +589,7 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
   TVPResetDirectSoundForRestart();
 #endif
   TVPResetEventStateForRestart();
+  TVPResetVariantStateForRestart();
   TVPResetScriptEngineStateForRestart();
   TVPResetSystemInitStateForRestart();
   TVPResetSystemImplStateForRestart();

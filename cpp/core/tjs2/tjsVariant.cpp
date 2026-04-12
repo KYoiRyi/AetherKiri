@@ -90,6 +90,7 @@ public:
 
 // --- Mock Toggle (controlled via engine_set_option("mock_enabled")) ---
 static bool g_MockEnabled = true; // default ON — existing behavior
+static iTJSDispatch2 *g_CompatBoolObject = nullptr;
 
 bool TVPIsMockEnabled() { return g_MockEnabled; }
 void TVPSetMockEnabled(bool enabled) { g_MockEnabled = enabled; }
@@ -273,12 +274,19 @@ tTJSVariantClosure_S& TVPGetGlobalMockClosure_S() {
 
     //---------------------------------------------------------------------------
     iTJSDispatch2 *TJSGetCompatBoolObject(bool add_ref) {
-        static iTJSDispatch2 *compat_bool_object = nullptr;
-        if(!compat_bool_object)
-            compat_bool_object = TJSCreateDictionaryObject();
-        if(compat_bool_object && add_ref)
-            compat_bool_object->AddRef();
-        return compat_bool_object;
+        if(!g_CompatBoolObject)
+            g_CompatBoolObject = TJSCreateDictionaryObject();
+        if(g_CompatBoolObject && add_ref)
+            g_CompatBoolObject->AddRef();
+        return g_CompatBoolObject;
+    }
+    //---------------------------------------------------------------------------
+
+    void TVPResetVariantStateForRestart() {
+        if(g_CompatBoolObject) {
+            g_CompatBoolObject->Release();
+            g_CompatBoolObject = nullptr;
+        }
     }
     //---------------------------------------------------------------------------
 
