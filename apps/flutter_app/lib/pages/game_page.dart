@@ -51,6 +51,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   static const MethodChannel _platformChannel = MethodChannel(
     'flutter_engine_bridge',
   );
+  static const String _exitTracePath = '/tmp/aetherkiri-exit-trace.log';
   static Future<void> _engineTeardownBarrier = Future<void>.value();
 
   late EngineBridge _bridge;
@@ -113,6 +114,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    unawaited(_resetExitTrace());
     _playSessionId = _createPlaySessionId();
     if (widget.gameManager != null) {
       unawaited(_savePendingPlaySession());
@@ -212,7 +214,11 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
 
     final bridge = _bridge;
-    final future = bridge.engineDestroy().then((_) {});
+    final future = () async {
+      await _appendExitTrace('dart: engineDestroy start');
+      await bridge.engineDestroy();
+      await _appendExitTrace('dart: engineDestroy done');
+    }();
     _engineDestroyFuture = future;
     return future;
   }
@@ -224,9 +230,13 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
 
     final future = _engineTeardownBarrier.catchError((_) {}).then((_) async {
+      await _appendExitTrace('dart: queueTeardown begin');
       await _waitForTickLoopToSettle();
+      await _appendExitTrace('dart: tick settled');
       await _finalizePlaySession();
+      await _appendExitTrace('dart: play session finalized');
       await _destroyEngine();
+      await _appendExitTrace('dart: queueTeardown end');
     });
     _engineShutdownFuture = future;
     _engineTeardownBarrier = future.catchError((_) {});
@@ -1057,16 +1067,38 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   Future<void> _exitGame() async {
     if (_isExitingPage) return;
     _isExitingPage = true;
+    await _appendExitTrace('dart: _exitGame entered');
 
     _restoreOrientation();
     _stopStartupPolling();
     _stopMemoryStatsPolling();
     _stopTickLoop(notify: false);
+    await _appendExitTrace('dart: _exitGame loops stopped');
 
     unawaited(_queueEngineTeardown());
 
     if (!mounted) return;
+    await _appendExitTrace('dart: _exitGame navigator pop');
     Navigator.of(context).pop();
+  }
+
+  Future<void> _resetExitTrace() async {
+    try {
+      final file = File(_exitTracePath);
+      await file.writeAsString('', flush: true);
+      await _appendExitTrace('dart: trace reset');
+    } catch (_) {}
+  }
+
+  Future<void> _appendExitTrace(String message) async {
+    try {
+      final timestamp = DateTime.now().toIso8601String();
+      await File(_exitTracePath).writeAsString(
+        '$timestamp $message\n',
+        mode: FileMode.append,
+        flush: true,
+      );
+    } catch (_) {}
   }
 
   @override

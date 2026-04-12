@@ -19,6 +19,8 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <fcntl.h>
+#include <unistd.h>
 #if defined(__ANDROID__)
 #include <android/log.h>
 #include <android/native_window.h>
@@ -44,6 +46,7 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "base/ScriptMgnIntf.h"
 #include "base/SysInitIntf.h"
 #include "base/impl/SysInitImpl.h"
+#include "utils/DebugIntf.h"
 #include "visual/GraphicsLoaderIntf.h"
 #include "visual/WindowIntf.h"
 #include "visual/ogl/ogl_common.h"
@@ -67,6 +70,7 @@ int TVPDrawSceneOnce(int interval);
 
 extern "C" void TVPRegisterKrkrGLESPluginAnchor();
 extern "C" void TVPRegisterKrkrLive2DPluginAnchor();
+extern std::string TVPEngineApi_GetGlobalException();
 extern void TVPResetArchiveHandleCacheForRestart();
 #if defined(_WIN32)
 extern void TVPResetDirectSoundForRestart();
@@ -184,18 +188,117 @@ std::shared_ptr<spdlog::logger> EnsureNamedLogger(const char* name) {
   return spdlog::stdout_color_mt(name);
 }
 
+constexpr const char* kCrashDumpPath = "/tmp/aetherkiri-crash-last.log";
+constexpr const char* kExitTracePath = "/tmp/aetherkiri-exit-trace.log";
+
+void WriteCrashDumpChunk(int fd, const char* text) {
+  if (fd < 0 || text == nullptr) {
+    return;
+  }
+  const size_t len = std::strlen(text);
+  if (len == 0) {
+    return;
+  }
+  (void)::write(fd, text, len);
+}
+
+void WriteCrashDumpNumber(int fd, const char* label, int value) {
+  char buffer[128] = {0};
+  std::snprintf(buffer, sizeof(buffer), "%s%d\n", label, value);
+  WriteCrashDumpChunk(fd, buffer);
+}
+
+void ResetCrashDumpFile() {
+  const int fd = ::open(kCrashDumpPath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (fd >= 0) {
+    static constexpr char kHeader[] =
+        "AetherKiri crash log placeholder\n";
+    (void)::write(fd, kHeader, sizeof(kHeader) - 1);
+    (void)::close(fd);
+  }
+}
+
+void WriteCrashDumpToTmp(int sig, char** symbols, int symbol_count) {
+  const int fd = ::open(kCrashDumpPath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (fd < 0) {
+    return;
+  }
+
+  WriteCrashDumpChunk(fd, "AetherKiri crash dump\n");
+  WriteCrashDumpNumber(fd, "signal=", sig);
+  WriteCrashDumpNumber(fd, "pid=", static_cast<int>(::getpid()));
+  WriteCrashDumpChunk(fd, "\n");
+
+  const std::string global_exception = TVPEngineApi_GetGlobalException();
+  if (!global_exception.empty()) {
+    WriteCrashDumpChunk(fd, "[global_exception]\n");
+    WriteCrashDumpChunk(fd, global_exception.c_str());
+    WriteCrashDumpChunk(fd, "\n\n");
+  }
+
+  const std::string recent_logs = TVPGetLastLog(200).AsStdString();
+  if (!recent_logs.empty()) {
+    WriteCrashDumpChunk(fd, "[recent_logs]\n");
+    WriteCrashDumpChunk(fd, recent_logs.c_str());
+    WriteCrashDumpChunk(fd, "\n\n");
+  }
+
+  WriteCrashDumpChunk(fd, "[backtrace]\n");
+  if (symbols != nullptr && symbol_count > 0) {
+    for (int i = 0; i < symbol_count; ++i) {
+      WriteCrashDumpChunk(fd, symbols[i]);
+      WriteCrashDumpChunk(fd, "\n");
+    }
+  } else {
+    WriteCrashDumpChunk(fd, "(unavailable)\n");
+  }
+
+  (void)::fsync(fd);
+  (void)::close(fd);
+}
+
+void AppendExitTrace(const char* message) {
+  if (message == nullptr) {
+    return;
+  }
+  const int fd = ::open(kExitTracePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+  if (fd < 0) {
+    return;
+  }
+
+  char buffer[512] = {0};
+  const int written =
+      std::snprintf(buffer, sizeof(buffer), "pid=%d %s\n",
+                    static_cast<int>(::getpid()), message);
+  if (written > 0) {
+    (void)::write(fd, buffer, static_cast<size_t>(written));
+    (void)::fsync(fd);
+  }
+  (void)::close(fd);
+}
+
 void CrashSignalHandler(int sig) {
+  AppendExitTrace("native: CrashSignalHandler entered");
   spdlog::critical("FATAL SIGNAL {} received!", sig);
 
+  char** symbols = nullptr;
+  int count = 0;
   // Print a mini backtrace (not available on Android)
 #if !defined(__ANDROID__)
   void* frames[32];
-  int count = backtrace(frames, 32);
-  char** symbols = backtrace_symbols(frames, count);
+  count = backtrace(frames, 32);
+  symbols = backtrace_symbols(frames, count);
   if (symbols) {
     for (int i = 0; i < count; ++i) {
       spdlog::critical("  [{}] {}", i, symbols[i]);
     }
+  }
+#endif
+
+  WriteCrashDumpToTmp(sig, symbols, count);
+
+#if !defined(__ANDROID__)
+  if (symbols) {
     free(symbols);
   }
 #endif
@@ -220,6 +323,7 @@ void EnsureInternalPluginAnchorsLinked() {
 
 void EnsureRuntimeLoggersInitialized() {
   std::call_once(g_loggers_init_once, []() {
+    ResetCrashDumpFile();
     spdlog::set_level(spdlog::level::debug);
     // Flush every log message so crash logs are never lost
     spdlog::flush_on(spdlog::level::debug);
@@ -402,15 +506,18 @@ void ResetEmbeddedRuntimeGlobals() {
 }
 
 void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
+  AppendExitTrace("native: TeardownEmbeddedRuntime begin");
   {
     std::lock_guard<std::recursive_mutex> registry_guard(g_registry_mutex);
     ClearRuntimeOwnershipLocked(handle, impl);
   }
 
+  AppendExitTrace("native: OnDeactivate");
   try {
     Application->OnDeactivate();
   } catch (...) {
   }
+  AppendExitTrace("native: FilterUserMessage clear");
   Application->FilterUserMessage(
       [](std::vector<std::tuple<void*, int, tTVPApplication::tMsg>>& queue) {
         queue.clear();
@@ -429,17 +536,20 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
   }
 
   if (!TVPSystemUninitCalled) {
+    AppendExitTrace("native: TVPSystemUninit");
     try {
       TVPSystemUninit();
     } catch (...) {
     }
   }
 
+  AppendExitTrace("native: Application->OnExit");
   try {
     Application->OnExit();
   } catch (...) {
   }
 
+  AppendExitTrace("native: reset singletons");
   TVPResetWindowListForRestart();
   TVPMainScene::DestroyInstance();
   EngineLoop::DestroyInstance();
@@ -459,6 +569,7 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
   TVPHostSuppressProcessExit = true;
 
   ResetEmbeddedRuntimeGlobals();
+  AppendExitTrace("native: TeardownEmbeddedRuntime end");
 }
 
 bool EnsureEngineRuntimeInitialized(uint32_t width, uint32_t height,
@@ -1143,7 +1254,9 @@ engine_result_t engine_create(const engine_create_desc_t* desc,
 }
 
 engine_result_t engine_destroy(engine_handle_t handle) {
+  AppendExitTrace("native: engine_destroy entered");
   if (handle == nullptr) {
+    AppendExitTrace("native: engine_destroy null handle");
     SetThreadError(nullptr);
     return ENGINE_RESULT_OK;
   }
@@ -1176,6 +1289,7 @@ engine_result_t engine_destroy(engine_handle_t handle) {
   }
 
   if (startup_worker.joinable()) {
+    AppendExitTrace("native: engine_destroy join startup worker");
     startup_worker.join();
   }
 
@@ -1188,10 +1302,13 @@ engine_result_t engine_destroy(engine_handle_t handle) {
   }
 
   if (should_teardown_runtime) {
+    AppendExitTrace("native: engine_destroy teardown runtime");
     TeardownEmbeddedRuntime(handle, impl);
   }
 
+  AppendExitTrace("native: engine_destroy delete impl");
   delete impl;
+  AppendExitTrace("native: engine_destroy return ok");
   SetThreadError(nullptr);
   return ENGINE_RESULT_OK;
 }
