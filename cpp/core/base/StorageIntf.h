@@ -278,6 +278,7 @@ TJS_EXP_FUNC_DEF(bool, TVPIsExistentStorage, (const ttstr &name));
 // this searches auto search path.
 
 TJS_EXP_FUNC_DEF(void, TVPClearStorageCaches, ());
+void TVPResetStorageStateForRestart();
 
 // clear all internal storage related caches.
 void TVPRemoveFromStorageCache(const ttstr &name);

@@ -554,6 +554,7 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
   TVPMainScene::DestroyInstance();
   EngineLoop::DestroyInstance();
   TVPEngineBootstrap::Shutdown();
+  TVPResetStorageStateForRestart();
   TVPResetArchiveHandleCacheForRestart();
 #if defined(_WIN32)
   TVPResetDirectSoundForRestart();

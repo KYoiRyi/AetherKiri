@@ -1288,6 +1288,20 @@ void TVPClearStorageCaches() {
 }
 //---------------------------------------------------------------------------
 
+void TVPResetStorageStateForRestart() {
+    tTJSCriticalSectionHolder cs_holder(TVPCreateStreamCS);
+    TVPClearArchiveCache();
+    TVPClearXP3SegmentCache();
+    TVPAutoPathCache.Clear();
+    TVPAutoPathTable.Clear();
+    TVPAutoPathList.clear();
+    AutoPathTableInit = false;
+    TVPClearAutoPathCacheCallbackInit = false;
+    TVPCurrentMedia = TJS_W("file");
+    TVPArchiveDelimiter = '>';
+}
+//---------------------------------------------------------------------------
+
 void TVPSetAutoPathCacheMaxCount(tjs_uint max_count) {
     if(max_count < 1)
         max_count = 1;
