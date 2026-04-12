@@ -173,11 +173,17 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
         _pointerMode = enabled
             ? EngineSurfacePointerMode.virtualCursor
             : EngineSurfacePointerMode.directTouch;
+        if (enabled) {
+          _placeVirtualCursorAtSurfaceCenter();
+        }
       });
     } else {
       _pointerMode = enabled
           ? EngineSurfacePointerMode.virtualCursor
           : EngineSurfacePointerMode.directTouch;
+      if (enabled) {
+        _placeVirtualCursorAtSurfaceCenter();
+      }
     }
     widget.onVirtualCursorModeChanged?.call(enabled);
     _focusNode.requestFocus();
@@ -858,6 +864,17 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
     );
   }
 
+  void _placeVirtualCursorAtSurfaceCenter() {
+    final Size size = _surfaceLogicalSize;
+    if (size.width <= 0 || size.height <= 0) {
+      _virtualCursorLogicalPosition = Offset.zero;
+      _virtualCursorPositionInitialized = false;
+      return;
+    }
+    _virtualCursorLogicalPosition = Offset(size.width / 2, size.height / 2);
+    _virtualCursorPositionInitialized = true;
+  }
+
   bool _useVirtualCursorForEvent(PointerEvent event) {
     return _pointerMode == EngineSurfacePointerMode.virtualCursor &&
         (Platform.isAndroid || Platform.isIOS) &&
@@ -960,7 +977,7 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       _virtualCursorLogicalPosition + event.delta,
     );
     final Offset appliedDelta = nextPosition - _virtualCursorLogicalPosition;
-    if (appliedDelta == Offset.zero && !_virtualCursorDragActive) {
+    if (appliedDelta == Offset.zero) {
       return;
     }
 
@@ -978,18 +995,16 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       _virtualCursorPossibleRightClick = false;
     }
 
-    if (_virtualCursorDragActive) {
-      unawaited(
-        _sendInputEvent(
-          _buildVirtualCursorEvent(
-            type: EngineInputEventType.pointerMove,
-            button: 0,
-            delta: appliedDelta,
-            leftButtonDown: true,
-          ),
+    unawaited(
+      _sendInputEvent(
+        _buildVirtualCursorEvent(
+          type: EngineInputEventType.pointerMove,
+          button: 0,
+          delta: appliedDelta,
+          leftButtonDown: _virtualCursorDragActive,
         ),
-      );
-    }
+      ),
+    );
   }
 
   void _handleVirtualCursorPointerUp(PointerUpEvent event) {
@@ -1027,14 +1042,29 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       return const SizedBox.shrink();
     }
     return Positioned(
-      left: _virtualCursorLogicalPosition.dx - 10,
-      top: _virtualCursorLogicalPosition.dy - 10,
+      left: _virtualCursorLogicalPosition.dx - 3,
+      top: _virtualCursorLogicalPosition.dy - 2,
       child: IgnorePointer(
-        child: Icon(
-          Icons.navigation,
-          size: 22,
-          color: Colors.white.withValues(alpha: 0.95),
-          shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
+        child: Transform.rotate(
+          angle: -0.18,
+          alignment: Alignment.topLeft,
+          child: Icon(
+            Icons.navigation,
+            size: 28,
+            color: Colors.white.withValues(alpha: 0.98),
+            shadows: const [
+              Shadow(
+                color: Color(0xCC000000),
+                blurRadius: 10,
+                offset: Offset(2, 3),
+              ),
+              Shadow(
+                color: Color(0x66000000),
+                blurRadius: 2,
+                offset: Offset(0.5, 0.5),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1304,6 +1334,9 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = Size(constraints.maxWidth, constraints.maxHeight);
         _surfaceLogicalSize = size;
+        if (isVirtualCursorEnabled && !_virtualCursorPositionInitialized) {
+          _placeVirtualCursorAtSurfaceCenter();
+        }
         final double dpr = MediaQuery.of(context).devicePixelRatio;
         _ensureSurfaceSizeIfNeeded(size, dpr);
 
