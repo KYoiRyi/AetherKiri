@@ -15,6 +15,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     addFont.cpp
     wutcwf.cpp
     windowEx.cpp
+    menuExt.cpp
     getSample.cpp
     layerExPerspective.cpp
     fftgraph.cpp
@@ -35,6 +36,7 @@ target_sources(${PROJECT_NAME} PUBLIC
     wfBasicEffectCompat.cpp
     wfTypicalDSPCompat.cpp
     packinone.cpp
+    dummy_plugin_stubs.cpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC
