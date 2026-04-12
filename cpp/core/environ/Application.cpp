@@ -542,6 +542,8 @@ void tTVPApplication::Run() {
         }
         //	TVPBreathe();
         ProcessMessages();
+        if(TVPTerminated)
+            return;
         if(TVPSystemControl)
             TVPSystemControl->SystemWatchTimerTimer();
         //		TVPDeliverWindowUpdateEvents(); // from

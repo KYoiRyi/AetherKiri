@@ -480,6 +480,8 @@ bool tTVPSystemControl::ApplicationIdle() {
 }
 
 void tTVPSystemControl::DeliverEvents() {
+    if(TVPTerminated)
+        return;
     if(ContinuousEventCalling)
         TVPProcessContinuousHandlerEventFlag = true; // set flag
 
@@ -498,6 +500,7 @@ void tTVPSystemControl::SystemWatchTimerTimer() {
         Application->Terminate();
         //		Application->PostMessageToMainWindow(
         // TVP_EV_DELIVER_EVENTS_DUMMY, 0, 0 );
+        return;
     }
 
     // call events
@@ -533,6 +536,8 @@ void tTVPSystemControl::SystemWatchTimerTimer() {
 #endif
     // check status and deliver events
     DeliverEvents();
+    if(TVPTerminated)
+        return;
 
     // call TickBeat
     tjs_int count = TVPGetWindowCount();

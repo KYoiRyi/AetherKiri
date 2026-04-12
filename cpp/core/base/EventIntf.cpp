@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include "SysInitIntf.h"
+#include "SysInitImpl.h"
 #include "EventIntf.h"
 #include "WindowIntf.h"
 #include "tjsDictionary.h"
@@ -396,6 +397,8 @@ void TVPDiscardAllDiscardableEvents() {
 //---------------------------------------------------------------------------
 static void _TVPDeliverEventByPrio(tjs_uint prio) {
     while(true) {
+        if(TVPTerminated)
+            break;
         tTVPEvent *e;
 
         // retrieve item to deliver
@@ -421,6 +424,8 @@ static void _TVPDeliverEventByPrio(tjs_uint prio) {
             throw;
         }
         delete e;
+        if(TVPTerminated)
+            break;
     }
 }
 
@@ -436,6 +441,8 @@ static bool _TVPDeliverAllEvents2() {
 
     // process input event queue
     while(true) {
+        if(TVPTerminated)
+            return true;
         tTVPBaseInputEvent *e;
 
         // retrieve item to deliver
@@ -456,7 +463,7 @@ static bool _TVPDeliverAllEvents2() {
         delete e;
 
         // check exclusive events
-        if(TVPExclusiveEventPosted)
+        if(TVPExclusiveEventPosted || TVPTerminated)
             return true;
     }
 
@@ -514,6 +521,8 @@ void TVPDeliverAllEvents() {
     }
 
     if(!TVPExclusiveEventPosted && !TVPEventInterrupting) {
+        if(TVPTerminated)
+            return;
         try {
             try {
                 // process idle event queue
@@ -534,6 +543,8 @@ void TVPDeliverAllEvents() {
 
             TVPDeliverContinuousEvent();
         }
+        if(TVPTerminated)
+            return;
         try {
             try {
                 // for window content updating
@@ -612,6 +623,8 @@ void TVPRemoveWindowUpdate(tTJSNI_BaseWindow *window) {
 // TVPDeliverWindowUpdateEvents
 //---------------------------------------------------------------------------
 void TVPDeliverWindowUpdateEvents() {
+    if(TVPTerminated)
+        return;
     if(TVPWindowUpdateEventsDelivering)
         return; // does not allow re-entering
     TVPWindowUpdateEventsDelivering = true;

@@ -616,7 +616,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
           _stopPlaySessionRun();
           final error = _bridge.engineGetLastError();
           _log('Tick ended: result=$result, error=$error');
-          if (error == 'runtime has been terminated') {
+          if (error == 'runtime has been terminated' ||
+              error == 'runtime requested termination') {
             unawaited(_exitGame());
             return;
           }
