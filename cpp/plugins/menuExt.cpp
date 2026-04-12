@@ -1,4 +1,4 @@
-﻿#include "ncbind.hpp"
+#include "ncbind.hpp"
 #include <string>
 
 // ----------------------------------------------------------------------------
@@ -9,7 +9,6 @@ static void menu_dll_stub() {}
 
 #define NCB_MODULE_NAME TJS_W("menu.dll")
 NCB_PRE_REGIST_CALLBACK(menu_dll_stub);
-#undef NCB_MODULE_NAME
 
 // ----------------------------------------------------------------------------
 // MenuItem Additions
@@ -25,18 +24,15 @@ public:
         return ttstr(TJS_W(""));
     }
 
-    static tjs_error TJS_INTF_METHOD getHMENU(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-        if (result) {
-            *result = (tjs_int)0;
-        }
-        return TJS_S_OK;
+    tjs_int getHMENU() const {
+        return 0;
     }
 };
 
-NCB_ATTACH_CLASS_WITH_HOOK(MenuItemExt, MenuItem) {
+NCB_ATTACH_CLASS(MenuItemExt, MenuItem) {
     NCB_METHOD(textToKeycode);
     NCB_METHOD(keycodeToText);
-    NCB_PROPERTY_RAW_CALLBACK_RO(HMENU, getHMENU, 0);
+    NCB_PROPERTY_RO(HMENU, getHMENU);
 }
 
 // ----------------------------------------------------------------------------
