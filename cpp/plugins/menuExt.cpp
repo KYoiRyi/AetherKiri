@@ -16,12 +16,12 @@ NCB_PRE_REGIST_CALLBACK(menu_dll_stub);
 // ----------------------------------------------------------------------------
 class MenuItemExt {
 public:
-    static tjs_int textToKeycode(ttstr text) {
+    static tjs_int textToKeycode(const tjs_char* text) {
         return 0;
     }
 
-    static ttstr keycodeToText(tjs_int keycode) {
-        return ttstr(TJS_W(""));
+    static tTJSVariant keycodeToText(tjs_int keycode) {
+        return tTJSVariant(TJS_W(""));
     }
 
     tjs_int getHMENU() const {
