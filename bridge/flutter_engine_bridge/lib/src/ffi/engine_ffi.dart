@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -252,7 +253,7 @@ class EngineFfiBridge {
       if (length == 0) {
         return '';
       }
-      return String.fromCharCodes(buffer.asTypedList(length));
+      return utf8.decode(buffer.asTypedList(length), allowMalformed: true);
     } finally {
       calloc.free(outBytesWritten);
       calloc.free(buffer);
@@ -419,7 +420,7 @@ class EngineFfiBridge {
         return null;
       }
       final length = outBytesWritten.value;
-      return String.fromCharCodes(buffer.asTypedList(length));
+      return utf8.decode(buffer.asTypedList(length), allowMalformed: true);
     } finally {
       calloc.free(outBytesWritten);
       calloc.free(buffer);

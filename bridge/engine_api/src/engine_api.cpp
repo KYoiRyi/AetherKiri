@@ -463,48 +463,56 @@ bool IsFinitePointerValue(double value) {
   return std::isfinite(value);
 }
 
-void AppendEscapedJsonString(std::string& out, const ttstr& value) {
-  tTJSNarrowStringHolder utf8(value.c_str());
-  const char* raw = utf8.operator const char*();
+void AppendEscapedJsonString(std::string& out, const std::string& value) {
   out.push_back('"');
-  if (raw != nullptr) {
-    for (const unsigned char c : std::string(raw)) {
-      switch (c) {
-        case '"':
-          out += "\\\"";
-          break;
-        case '\\':
-          out += "\\\\";
-          break;
-        case '\b':
-          out += "\\b";
-          break;
-        case '\f':
-          out += "\\f";
-          break;
-        case '\n':
-          out += "\\n";
-          break;
-        case '\r':
-          out += "\\r";
-          break;
-        case '\t':
-          out += "\\t";
-          break;
-        default:
-          if (c < 0x20u) {
-            char escaped[7];
-            std::snprintf(escaped, sizeof(escaped), "\\u%04x",
-                          static_cast<unsigned int>(c));
-            out += escaped;
-          } else {
-            out.push_back(static_cast<char>(c));
-          }
-          break;
-      }
+  for (const unsigned char c : value) {
+    switch (c) {
+      case '"':
+        out += "\\\"";
+        break;
+      case '\\':
+        out += "\\\\";
+        break;
+      case '\b':
+        out += "\\b";
+        break;
+      case '\f':
+        out += "\\f";
+        break;
+      case '\n':
+        out += "\\n";
+        break;
+      case '\r':
+        out += "\\r";
+        break;
+      case '\t':
+        out += "\\t";
+        break;
+      default:
+        if (c < 0x20u) {
+          char escaped[7];
+          std::snprintf(escaped, sizeof(escaped), "\\u%04x",
+                        static_cast<unsigned int>(c));
+          out += escaped;
+        } else {
+          out.push_back(static_cast<char>(c));
+        }
+        break;
     }
   }
   out.push_back('"');
+}
+
+void AppendEscapedJsonString(std::string& out, const ttstr& value) {
+  AppendEscapedJsonString(out, value.AsStdString());
+}
+
+void AppendEscapedJsonString(std::string& out, const char* value) {
+  if (value == nullptr) {
+    AppendEscapedJsonString(out, std::string());
+    return;
+  }
+  AppendEscapedJsonString(out, std::string(value));
 }
 
 bool TryGetProperty(iTJSDispatch2* object, const tjs_char* name,
@@ -563,7 +571,7 @@ bool TryGetMainMenuObject(tTJSVariant* out_menu_variant) {
 void AppendMenuJsonNode(iTJSDispatch2* item, const std::string& path,
                         std::string& out) {
   out += "{\"path\":";
-  AppendEscapedJsonString(out, ttstr(path.c_str()));
+  AppendEscapedJsonString(out, path);
   out += ",\"caption\":";
   AppendEscapedJsonString(out, GetStringProperty(item, TJS_W("caption")));
   out += ",\"enabled\":";

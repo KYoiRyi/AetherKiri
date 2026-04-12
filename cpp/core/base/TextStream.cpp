@@ -2,6 +2,8 @@
 #include <uchardet.h>
 #include <zlib.h>
 #include <optional>
+#include <algorithm>
+#include <cctype>
 
 #include "TextStream.h"
 
@@ -15,6 +17,54 @@
 #include "BinaryStream.h"
 
 static std::string G_DefaultReadEncoding = "UTF-8";
+
+static std::string toUpperAscii(std::string value) {
+    std::transform(value.begin(), value.end(), value.begin(),
+                   [](unsigned char c) {
+                       return static_cast<char>(std::toupper(c));
+                   });
+    return value;
+}
+
+static std::string normalizeTextEncoding(std::string encoding) {
+    const std::string upper = toUpperAscii(encoding);
+    if(upper.empty())
+        return encoding;
+
+    if(upper == "SHIFT_JIS" || upper == "SHIFT-JIS" || upper == "SHIFTJIS" ||
+       upper == "SJIS" || upper == "CP932" || upper == "MS932" ||
+       upper == "WINDOWS-31J") {
+        return "cp932";
+    }
+    if(upper == "WINDOWS-1252") {
+        return "ASCII";
+    }
+    if(upper == "GBK" || upper == "CP936" || upper == "MS936" ||
+       upper == "WINDOWS-936" || upper == "GB2312") {
+        return "GBK";
+    }
+    if(upper == "GB18030") {
+        return "GB18030";
+    }
+    if(upper == "BIG5" || upper == "CP950" || upper == "BIG-5" ||
+       upper == "BIG5-HKSCS") {
+        return "Big5";
+    }
+    if(upper == "UTF8") {
+        return "UTF-8";
+    }
+    if(upper.rfind("MAC", 0) == 0) {
+        return "cp932";
+    }
+
+    return encoding;
+}
+
+static bool isKnownNonUtf8GameEncoding(const std::string &encoding) {
+    return encoding == "cp932" || encoding == "EUC-JP" ||
+           encoding == "ISO-2022-JP" || encoding == "GBK" ||
+           encoding == "GB18030" || encoding == "Big5";
+}
 
 static bool hasNonAsciiBytes(const unsigned char *raw, size_t size) {
     for(size_t i = 0; i < size; i++) {
@@ -84,23 +134,16 @@ std::string checkTextEncoding(const void *buf, size_t size,
         uchardet_data_end(ud);
         encoding = uchardet_get_charset(ud);
         uchardet_delete(ud);
-        if(encoding == "SHIFT_JIS") {
-            encoding = "cp932";
-        } else if(encoding == "WINDOWS-1252") {
-            encoding = "ASCII";
-        } else if(encoding.find("MAC") != std::string::npos) {
-            encoding = "cp932";
-        }
+        encoding = normalizeTextEncoding(std::move(encoding));
 
         if(hasNonAsciiBytes(raw, size)) {
-            if(encoding.empty() || encoding == "ASCII") {
-                encoding = "cp932";
+            if(encoding == "ASCII") {
+                encoding.clear();
             } else if(encoding == "UTF-8") {
                 if(!isValidUTF8(raw, size))
-                    encoding = "cp932";
-            } else if(encoding != "cp932" && encoding != "EUC-JP" &&
-                       encoding != "ISO-2022-JP") {
-                encoding = "cp932";
+                    encoding.clear();
+            } else if(!encoding.empty() && !isKnownNonUtf8GameEncoding(encoding)) {
+                encoding.clear();
             }
         }
     }
@@ -477,8 +520,17 @@ void TVPSetDefaultReadEncoding(const ttstr &encoding) {
         G_DefaultReadEncoding = "cp932";
     } else if(codestr == TJS_W("utf8") || codestr == TJS_W("utf-8")) {
         G_DefaultReadEncoding = "UTF-8";
+    } else if(codestr == TJS_W("gbk") || codestr == TJS_W("cp936") ||
+              codestr == TJS_W("gb2312")) {
+        G_DefaultReadEncoding = "GBK";
+    } else if(codestr == TJS_W("gb18030")) {
+        G_DefaultReadEncoding = "GB18030";
+    } else if(codestr == TJS_W("big5") || codestr == TJS_W("cp950") ||
+              codestr == TJS_W("big-5")) {
+        G_DefaultReadEncoding = "Big5";
     } else {
-        G_DefaultReadEncoding = encoding.AsStdString();
+        G_DefaultReadEncoding =
+            normalizeTextEncoding(encoding.AsStdString());
     }
 }
 
