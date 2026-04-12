@@ -2226,7 +2226,7 @@ protected:
 		if (!ClassInfoT::Set(_className, TJSFindNativeClassID(_className), val.AsObjectNoAddRef()))
 			TVPThrowExceptionMessage(TJS_W("Already registerd class."));
 	}
-	void Unregist() const override {}
+	void Unregist() const override { ClassInfoT::Clear(); }
 private:
 	NameT const _className;
 	NameT const _expName;
