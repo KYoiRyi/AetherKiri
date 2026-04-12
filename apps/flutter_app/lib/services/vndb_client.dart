@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/game_metadata_candidate.dart';
@@ -29,7 +30,10 @@ class VndbClient {
           .post(uri, body: body, headers: {'Content-Type': 'application/json'})
           .timeout(const Duration(seconds: 15));
 
-      if (response.statusCode != 200) return [];
+      if (response.statusCode != 200) {
+        debugPrint('VNDB search failed: HTTP ${response.statusCode}');
+        return [];
+      }
 
       final data = jsonDecode(response.body) as Map<String, dynamic>?;
       if (data == null) return [];
@@ -72,17 +76,21 @@ class VndbClient {
           }
         }
 
-        list.add(GameMetadataCandidate(
-          title: title,
-          coverImageUrl: coverUrl,
-          thumbnailUrl: thumbnailUrl,
-          developer: developer,
-          sourceId: id,
-          sourceLabel: 'VNDB',
-        ));
+        list.add(
+          GameMetadataCandidate(
+            title: title,
+            coverImageUrl: coverUrl,
+            thumbnailUrl: thumbnailUrl,
+            developer: developer,
+            sourceId: id,
+            sourceLabel: 'VNDB',
+          ),
+        );
       }
       return list;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('VNDB search failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
       return [];
     }
   }

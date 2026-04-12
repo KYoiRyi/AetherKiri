@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
@@ -18,7 +19,7 @@ class CoverDownloader {
     'Referer': 'https://vndb.org/',
   };
 
-  /// Download cover for [candidate] to covers/<source>_<sourceId>.<ext>.
+  /// Download cover for [candidate] to `covers/<source>_<sourceId>.<ext>`.
   /// Prefers thumbnail (faster, avoids R18 full-size 403); falls back to full image.
   /// Returns the local path, or null if download fails.
   Future<String?> downloadCover(GameMetadataCandidate candidate) async {
@@ -34,7 +35,10 @@ class CoverDownloader {
     return null;
   }
 
-  Future<String?> _downloadToCovers(String imageUrl, GameMetadataCandidate candidate) async {
+  Future<String?> _downloadToCovers(
+    String imageUrl,
+    GameMetadataCandidate candidate,
+  ) async {
     final uri = Uri.tryParse(imageUrl);
     if (uri == null || !uri.hasScheme) return null;
 
@@ -44,6 +48,9 @@ class CoverDownloader {
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+        debugPrint(
+          'Cover download failed for $imageUrl: HTTP ${response.statusCode}',
+        );
         return null;
       }
 
@@ -57,8 +64,10 @@ class CoverDownloader {
           .toLowerCase()
           .replaceAll(RegExp(r'[^a-z0-9]'), '');
       final sourceId = candidate.sourceId ?? '${candidate.title.hashCode}';
-      final ext = _extensionFromUri(uri) ?? _extensionFromContentType(
-          response.headers['content-type']) ?? 'jpg';
+      final ext =
+          _extensionFromUri(uri) ??
+          _extensionFromContentType(response.headers['content-type']) ??
+          'jpg';
       final safeId = sourceId.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
       final fileName = '${source}_$safeId.$ext';
       final filePath = '${coversDir.path}/$fileName';
@@ -66,7 +75,9 @@ class CoverDownloader {
       final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
       return filePath;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Cover download failed for $imageUrl: $error');
+      debugPrintStack(stackTrace: stackTrace);
       return null;
     }
   }
