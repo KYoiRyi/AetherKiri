@@ -16,14 +16,12 @@ NCB_PRE_REGIST_CALLBACK(menu_dll_stub);
 // ----------------------------------------------------------------------------
 class MenuItemExt {
 public:
-    static tjs_error textToKeycode(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-        if (result) *result = 0;
-        return TJS_S_OK;
+    tjs_int textToKeycode(const tjs_char* text) {
+        return 0;
     }
 
-    static tjs_error keycodeToText(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-        if (result) *result = TJS_W("");
-        return TJS_S_OK;
+    const tjs_char* keycodeToText(tjs_int keycode) {
+        return TJS_W("");
     }
 
     tjs_int getHMENU() const {
@@ -31,9 +29,21 @@ public:
     }
 };
 
-NCB_ATTACH_CLASS(MenuItemExt, MenuItem) {
-    NCB_METHOD_RAW_CALLBACK(textToKeycode, MenuItemExt::textToKeycode, 0);
-    NCB_METHOD_RAW_CALLBACK(keycodeToText, MenuItemExt::keycodeToText, 0);
+NCB_GET_INSTANCE_HOOK(MenuItemExt) {
+    NCB_GET_INSTANCE_HOOK_CLASS(){}
+    ~NCB_GET_INSTANCE_HOOK_CLASS(){}
+    NCB_INSTANCE_GETTER(objthis) { 
+        ClassT *obj = GetNativeInstance(objthis);
+        if(!obj) {
+            SetNativeInstance(objthis, (obj = new ClassT()));
+        }
+        return obj;
+    }
+};
+
+NCB_ATTACH_CLASS_WITH_HOOK(MenuItemExt, MenuItem) {
+    NCB_METHOD(textToKeycode);
+    NCB_METHOD(keycodeToText);
     NCB_PROPERTY_RO(HMENU, getHMENU);
 }
 
