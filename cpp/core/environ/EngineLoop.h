@@ -73,6 +73,7 @@ public:
 
     /** Create the singleton instance (idempotent). */
     static EngineLoop* CreateInstance();
+    static void DestroyInstance();
 
     /**
      * Start the engine from the given game path (standalone mode).

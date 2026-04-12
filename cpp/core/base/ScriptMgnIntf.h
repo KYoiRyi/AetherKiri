@@ -24,6 +24,7 @@ extern ttstr TVPStartupScriptName;
 extern void TVPInitScriptEngine();
 
 extern void TVPUninitScriptEngine();
+extern void TVPResetScriptEngineStateForRestart();
 
 extern void TVPRestartScriptEngine();
 

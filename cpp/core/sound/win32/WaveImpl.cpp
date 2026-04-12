@@ -1067,6 +1067,13 @@ static void TVPUninitDirectSoundAtExitProc()
 static tTVPAtExit TVPUninitDirectSoundAtExit
     (TVP_ATEXIT_PRI_RELEASE, TVPUninitDirectSoundAtExitProc);
 //---------------------------------------------------------------------------
+
+void TVPResetDirectSoundForRestart() {
+    TVPDirectSoundShutdown = false;
+    TVPPrimaryBufferPlayingByProgram = false;
+    TVPDeferedSettingAvailable = false;
+}
+//---------------------------------------------------------------------------
 IDirectSound * TVPGetDirectSound()
 {
     try

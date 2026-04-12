@@ -14,6 +14,7 @@
 #include <set>
 #include <sstream>
 #include "SysInitIntf.h"
+#include "SysInitImpl.h"
 #include "ConfigManager/LocaleConfigManager.h"
 #include "Platform.h"
 #include <EGL/egl.h>
@@ -1005,6 +1006,11 @@ void TVPExitApplication(int code) {
             iTVPTexture2D::RecycleProcess();
     } catch(...) {
         // Ignore – we are shutting down anyway.
+    }
+    TVPTerminated = true;
+    TVPTerminateCode = code;
+    if(TVPHostSuppressProcessExit) {
+        return;
     }
     JniMethodInfo t;
     if(JniHelper::getStaticMethodInfo(t, "org/tvp/kirikiri2/KR2Activity",

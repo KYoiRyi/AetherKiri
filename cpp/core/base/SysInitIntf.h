@@ -23,6 +23,7 @@ extern ttstr TVPDataPath; // data directory
 extern void TVPSystemInit();
 
 extern void TVPSystemUninit();
+extern void TVPResetSystemInitStateForRestart();
 
 //-- implement in each platform
 extern void TVPBeforeSystemInit(); // this must set TVPProjectDir

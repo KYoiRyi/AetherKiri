@@ -821,10 +821,35 @@ void tTVPApplication::OnDeactivate() {
 void tTVPApplication::OnExit() {
     TVPUninitScriptEngine();
 
+    if(image_load_thread_) {
+        delete image_load_thread_;
+        image_load_thread_ = nullptr;
+    }
+
     delete TVPSystemControl;
     TVPSystemControl = nullptr;
 
     CloseConsole();
+    ResetHostStateForRestart();
+}
+
+void tTVPApplication::ResetHostStateForRestart() {
+    tarminate_ = false;
+    application_activating_ = true;
+    has_map_report_process_ = false;
+    is_attach_console_ = false;
+    title_.Clear();
+    console_title_.Clear();
+    ArgC = 0;
+    ArgV = nullptr;
+    _project_startup = false;
+    TVPEngineApi_SetGlobalException("");
+
+    {
+        std::lock_guard<std::mutex> guard(m_msgQueueLock);
+        m_lstUserMsg.clear();
+    }
+    m_activeEvents.clear();
 }
 
 void tTVPApplication::OnLowMemory() {

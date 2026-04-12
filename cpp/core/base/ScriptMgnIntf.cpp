@@ -565,12 +565,21 @@ void TVPUninitScriptEngine() {
         return;
     TVPScriptEngineUninit = true;
 
-    // TVPScriptEngine->Shutdown();
-    TVPScriptEngine->Release();
+    if(TVPScriptEngine) {
+        // TVPScriptEngine->Shutdown();
+        TVPScriptEngine->Release();
+    }
     /*
         Objects, theirs lives are contolled by reference counter, may
        not be all freed here in some occations.
     */
+    TVPScriptEngine = nullptr;
+}
+//---------------------------------------------------------------------------
+
+void TVPResetScriptEngineStateForRestart() {
+    TVPScriptEngineInit = false;
+    TVPScriptEngineUninit = false;
     TVPScriptEngine = nullptr;
 }
 //---------------------------------------------------------------------------

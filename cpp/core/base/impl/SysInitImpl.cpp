@@ -684,6 +684,14 @@ bool TVPCheckAbout() { return false; }
 
 static void TVPExecuteAsync(const std::wstring &progname) {}
 
+void TVPResetProgramArgumentsForRestart() {
+    TVPProgramArguments.clear();
+    TVPEarlySetOptions.clear();
+    TVPProgramArgumentsInit = false;
+    TVPCommandLineArgumentGeneration = 0;
+    TVPDataPathDirectoryEnsured = false;
+}
+
 static bool TVPWaitWritePermit(const std::wstring &fn) { return false; }
 
 bool TVPExecuteUserConfig() { return false; }

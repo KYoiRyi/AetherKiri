@@ -43,6 +43,14 @@ TVPMainScene* TVPMainScene::CreateInstance() {
     return _instance;
 }
 
+void TVPMainScene::DestroyInstance() {
+    if (!_instance) {
+        return;
+    }
+    delete _instance;
+    _instance = nullptr;
+}
+
 void TVPMainScene::scheduleUpdate() {
     _updateScheduled = true;
     if (auto* loop = EngineLoop::GetInstance()) {

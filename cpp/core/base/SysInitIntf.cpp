@@ -118,6 +118,10 @@ void TVPAddAtExitHandler(tjs_int pri, void (*handler)()) {
 
     if(!TVPAtExitInfos)
         TVPAtExitInfos = new std::vector<tTVPAtExitInfo>();
+    for(const auto &info : *TVPAtExitInfos) {
+        if(info.Priority == pri && info.Handler == handler)
+            return;
+    }
     TVPAtExitInfos->emplace_back(pri, handler);
 }
 
@@ -127,13 +131,22 @@ static void TVPCauseAtExit() {
         return;
     TVPAtExitShutdown = true;
 
+    if(!TVPAtExitInfos)
+        return;
+
     std::sort(TVPAtExitInfos->begin(),
               TVPAtExitInfos->end()); // descending sort
 
     for(auto i = TVPAtExitInfos->begin(); i != TVPAtExitInfos->end(); ++i) {
         i->Handler();
     }
+}
+//---------------------------------------------------------------------------
 
-    delete TVPAtExitInfos;
+void TVPResetSystemInitStateForRestart() {
+    TVPSystemUninitCalled = false;
+    TVPAtExitShutdown = false;
+    TVPProjectDir.Clear();
+    TVPDataPath.Clear();
 }
 //---------------------------------------------------------------------------

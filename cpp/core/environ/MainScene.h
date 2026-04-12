@@ -23,6 +23,7 @@ public:
 
     static TVPMainScene *GetInstance();
     static TVPMainScene *CreateInstance();
+    static void DestroyInstance();
 
     /**
      * Start the engine from the given game path.

@@ -22,6 +22,7 @@ extern ttstr TVPNativeDataPath;
 extern bool TVPProjectDirSelected;
 
 extern void TVPEnsureDataPathDirectory();
+extern void TVPResetProgramArgumentsForRestart();
 
 extern bool TVPExecuteUserConfig();
 

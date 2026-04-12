@@ -51,6 +51,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   static const MethodChannel _platformChannel = MethodChannel(
     'flutter_engine_bridge',
   );
+  static Future<void> _engineTeardownBarrier = Future<void>.value();
 
   late EngineBridge _bridge;
   final GlobalKey<EngineSurfaceState> _surfaceKey =
@@ -92,6 +93,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   final List<String> _logs = [];
   static const int _maxLogs = 2000;
   Future<void>? _engineDestroyFuture;
+  Future<void>? _engineShutdownFuture;
   bool _isExitingPage = false;
   bool _appExitRequested = false;
 
@@ -215,13 +217,27 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     return future;
   }
 
+  Future<void> _queueEngineTeardown() {
+    final existing = _engineShutdownFuture;
+    if (existing != null) {
+      return existing;
+    }
+
+    final future = _engineTeardownBarrier.catchError((_) {}).then((_) async {
+      await _waitForTickLoopToSettle();
+      await _finalizePlaySession();
+      await _destroyEngine();
+    });
+    _engineShutdownFuture = future;
+    _engineTeardownBarrier = future.catchError((_) {});
+    return future;
+  }
+
   Future<void> _shutdownForExit() async {
     _stopStartupPolling();
     _stopMemoryStatsPolling();
     _stopTickLoop(notify: false);
-    await _waitForTickLoopToSettle();
-    await _finalizePlaySession();
-    await _destroyEngine();
+    await _queueEngineTeardown();
   }
 
   Future<void> _prepareForAppExit() async {
@@ -256,10 +272,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       super.dispose();
       return;
     }
-    if (widget.gameManager != null) {
-      unawaited(_finalizePlaySession());
-    }
-    unawaited(_destroyEngine());
+    unawaited(_queueEngineTeardown());
     unawaited(_restoreSystemUiOverlays());
     _restoreOrientation();
     super.dispose();
@@ -439,6 +452,9 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
         return;
       }
     }
+
+    await _engineTeardownBarrier.catchError((_) {});
+    if (!mounted) return;
 
     setState(() => _phase = _EnginePhase.creating);
     _log('engine_create...');
@@ -1046,11 +1062,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     _stopMemoryStatsPolling();
     _stopTickLoop(notify: false);
 
-    unawaited(() async {
-      await _waitForTickLoopToSettle();
-      await _finalizePlaySession();
-      await _destroyEngine();
-    }());
+    unawaited(_queueEngineTeardown());
 
     if (!mounted) return;
     Navigator.of(context).pop();

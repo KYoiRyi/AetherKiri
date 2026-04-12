@@ -7,6 +7,7 @@
 #include <codecvt>
 #include "StorageImpl.h"
 #include "SysInitIntf.h"
+#include "SysInitImpl.h"
 #include <sys/stat.h>
 #include "EventIntf.h"
 #include <shellapi.h>
@@ -360,6 +361,12 @@ void TVPExitApplication(int code) {
             iTVPTexture2D::RecycleProcess();
     } catch(...) {
         // Ignore – we are shutting down anyway.
+    }
+
+    TVPTerminated = true;
+    TVPTerminateCode = code;
+    if(TVPHostSuppressProcessExit) {
+        return;
     }
 
     // 	if (TVPScriptEngine) TVPScriptEngine->Cleanup();

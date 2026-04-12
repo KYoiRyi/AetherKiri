@@ -26,6 +26,7 @@
 // Window List Management
 //---------------------------------------------------------------------------
 extern void TVPClearAllWindowInputEvents();
+extern void TVPResetWindowListForRestart();
 // extern bool TVPIsWaitVSync();
 //---------------------------------------------------------------------------
 

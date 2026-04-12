@@ -200,6 +200,14 @@ static tTVPAtExit TVPShutdownArchiveCacheAtExit(TVP_ATEXIT_PRI_CLEANUP,
                                                 TVPShutdownArchiveHandleCache);
 //---------------------------------------------------------------------------
 
+void TVPResetArchiveHandleCacheForRestart() {
+    TVPArchiveHandleCachePool = nullptr;
+    TVPArchiveHandleCacheInit = false;
+    TVPArchiveHandleCacheShutdown = false;
+    TVPArchiveHandleCacheAge = 0;
+}
+//---------------------------------------------------------------------------
+
 //---------------------------------------------------------------------------
 // tTVPXP3Archive
 //---------------------------------------------------------------------------

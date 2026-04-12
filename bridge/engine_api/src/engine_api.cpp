@@ -41,9 +41,11 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "environ/EngineLoop.h"
 #include "environ/MainScene.h"
 #include "base/StorageIntf.h"
+#include "base/ScriptMgnIntf.h"
 #include "base/SysInitIntf.h"
 #include "base/impl/SysInitImpl.h"
 #include "visual/GraphicsLoaderIntf.h"
+#include "visual/WindowIntf.h"
 #include "visual/ogl/ogl_common.h"
 #include "visual/ogl/krkr_egl_context.h"
 #include "visual/ogl/angle_backend.h"
@@ -65,6 +67,10 @@ int TVPDrawSceneOnce(int interval);
 
 extern "C" void TVPRegisterKrkrGLESPluginAnchor();
 extern "C" void TVPRegisterKrkrLive2DPluginAnchor();
+extern void TVPResetArchiveHandleCacheForRestart();
+#if defined(_WIN32)
+extern void TVPResetDirectSoundForRestart();
+#endif
 
 struct engine_handle_s {
   std::recursive_mutex mutex;
@@ -368,6 +374,91 @@ std::thread DetachStartupWorker(engine_handle_s* impl) {
     return std::thread();
   }
   return std::move(impl->startup.worker);
+}
+
+bool HandleOwnsRuntimeSessionLocked(engine_handle_t handle,
+                                    engine_handle_s* impl) {
+  return impl->runtime_owner || g_runtime_owner == handle ||
+         g_runtime_startup_owner == handle ||
+         GetStartupState(impl) != ENGINE_STARTUP_STATE_IDLE;
+}
+
+void ClearRuntimeOwnershipLocked(engine_handle_t handle,
+                                 engine_handle_s* impl) {
+  if (g_runtime_owner == handle) {
+    g_runtime_owner = nullptr;
+  }
+  if (g_runtime_startup_owner == handle) {
+    g_runtime_startup_owner = nullptr;
+  }
+  g_runtime_active = false;
+  g_runtime_startup_active = false;
+  impl->runtime_owner = false;
+}
+
+void ResetEmbeddedRuntimeGlobals() {
+  g_runtime_started_once = false;
+  g_engine_bootstrapped = false;
+}
+
+void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
+  {
+    std::lock_guard<std::recursive_mutex> registry_guard(g_registry_mutex);
+    ClearRuntimeOwnershipLocked(handle, impl);
+  }
+
+  try {
+    Application->OnDeactivate();
+  } catch (...) {
+  }
+  Application->FilterUserMessage(
+      [](std::vector<std::tuple<void*, int, tTVPApplication::tMsg>>& queue) {
+        queue.clear();
+      });
+
+  {
+    std::lock_guard<std::recursive_mutex> guard(impl->mutex);
+    impl->input.active_pointer_ids.clear();
+    impl->input.pending_events.clear();
+    impl->frame.rgba.clear();
+    impl->frame.ready = false;
+    impl->frame.rendered_this_tick = false;
+    impl->frame.width = 0;
+    impl->frame.height = 0;
+    impl->frame.stride_bytes = 0;
+  }
+
+  if (!TVPSystemUninitCalled) {
+    try {
+      TVPSystemUninit();
+    } catch (...) {
+    }
+  }
+
+  try {
+    Application->OnExit();
+  } catch (...) {
+  }
+
+  TVPResetWindowListForRestart();
+  TVPMainScene::DestroyInstance();
+  EngineLoop::DestroyInstance();
+  TVPEngineBootstrap::Shutdown();
+  TVPResetArchiveHandleCacheForRestart();
+#if defined(_WIN32)
+  TVPResetDirectSoundForRestart();
+#endif
+  TVPResetScriptEngineStateForRestart();
+  TVPResetSystemInitStateForRestart();
+  TVPResetProgramArgumentsForRestart();
+
+  TVPTerminated = false;
+  TVPTerminateCode = 0;
+  TVPTerminateOnWindowClose = false;
+  TVPTerminateOnNoWindowStartup = false;
+  TVPHostSuppressProcessExit = true;
+
+  ResetEmbeddedRuntimeGlobals();
 }
 
 bool EnsureEngineRuntimeInitialized(uint32_t width, uint32_t height,
@@ -1058,7 +1149,7 @@ engine_result_t engine_destroy(engine_handle_t handle) {
   }
 
   engine_handle_s* impl = nullptr;
-  bool owned_runtime = false;
+  bool should_teardown_runtime = false;
   std::thread startup_worker;
 
   {
@@ -1074,16 +1165,8 @@ engine_result_t engine_destroy(engine_handle_t handle) {
       return result;
     }
 
-    owned_runtime = (g_runtime_active && g_runtime_owner == handle);
-    if (owned_runtime) {
-      g_runtime_active = false;
-      g_runtime_owner = nullptr;
-      impl->runtime_owner = false;
-    }
-    if (g_runtime_startup_active && g_runtime_startup_owner == handle) {
-      g_runtime_startup_active = false;
-      g_runtime_startup_owner = nullptr;
-    }
+    should_teardown_runtime = HandleOwnsRuntimeSessionLocked(handle, impl);
+    ClearRuntimeOwnershipLocked(handle, impl);
     startup_worker = DetachStartupWorker(impl);
     SetStartupState(impl, ENGINE_STARTUP_STATE_IDLE);
 
@@ -1096,19 +1179,16 @@ engine_result_t engine_destroy(engine_handle_t handle) {
     startup_worker.join();
   }
 
-  if (owned_runtime) {
-    try {
-      Application->OnDeactivate();
-    } catch (...) {
-    }
-    Application->FilterUserMessage(
-        [](std::vector<std::tuple<void*, int, tTVPApplication::tMsg>>& queue) {
-          queue.clear();
-        });
+  {
+    std::lock_guard<std::recursive_mutex> registry_guard(g_registry_mutex);
+    std::lock_guard<std::recursive_mutex> guard(impl->mutex);
+    should_teardown_runtime =
+        should_teardown_runtime || HandleOwnsRuntimeSessionLocked(handle, impl);
+    ClearRuntimeOwnershipLocked(handle, impl);
+  }
 
-    // Avoid triggering platform exit() path in the host process.
-    TVPTerminated = false;
-    TVPTerminateCode = 0;
+  if (should_teardown_runtime) {
+    TeardownEmbeddedRuntime(handle, impl);
   }
 
   delete impl;

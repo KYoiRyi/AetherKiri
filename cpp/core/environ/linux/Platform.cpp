@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include "EventIntf.h"
 #include "Platform.h"
+#include "SysInitImpl.h"
 
 void TVPGetMemoryInfo(TVPMemoryInfo &m) {
     /* to read /proc/meminfo */
@@ -279,6 +280,11 @@ tjs_uint32 TVPGetRoughTickCount32() {
 void TVPExitApplication(int code) {
     // clear some static data for memory leak detect
     TVPDeliverCompactEvent(TVP_COMPACT_LEVEL_MAX);
+    TVPTerminated = true;
+    TVPTerminateCode = code;
+    if(TVPHostSuppressProcessExit) {
+        return;
+    }
     exit(code);
 }
 
