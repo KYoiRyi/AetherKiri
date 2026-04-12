@@ -14,6 +14,7 @@ import '../services/game_manager.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
+import '../widgets/app_dynamic_widgets.dart';
 import 'game_detail_page.dart';
 import 'game_page.dart';
 import 'settings_page.dart';
@@ -908,10 +909,13 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.videogame_asset_off,
-              size: 72,
-              color: colorScheme.primary.withValues(alpha: 0.3),
+            AppLoopingFloat(
+              offsetAmount: 6.0,
+              child: Icon(
+                Icons.videogame_asset_off,
+                size: 72,
+                color: colorScheme.primary.withValues(alpha: 0.3),
+              ),
             ),
             const SizedBox(height: 32),
             Text(
