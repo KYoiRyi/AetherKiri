@@ -83,11 +83,15 @@ class AppAnimations {
         curve: warmEaseOut,
       ),
       builder: (context, value, child) {
-        return Opacity(
-          opacity: value.clamp(0.0, 1.0),
-          child: Transform.translate(
-            offset: Offset(0, 12 * (1 - value)),
-            child: child,
+        const translation = Offset(0, 12);
+        return Transform.translate(
+          offset: translation * (1 - value),
+          child: Transform.scale(
+            scale: 0.98 + 0.02 * value,
+            child: Opacity(
+              opacity: (value * 1.5).clamp(0.0, 1.0),
+              child: child,
+            ),
           ),
         );
       },
