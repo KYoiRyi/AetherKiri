@@ -34,6 +34,43 @@ enum EngineSurfaceMode {
 
 enum EngineSurfacePointerMode { directTouch, virtualCursor }
 
+const Size _virtualCursorOverlaySize = Size(48, 48);
+const Offset _virtualCursorHotspot = Offset(6, 6);
+
+class _VirtualCursorPainter extends CustomPainter {
+  const _VirtualCursorPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path arrow = Path()
+      ..moveTo(_virtualCursorHotspot.dx, _virtualCursorHotspot.dy)
+      ..lineTo(size.width * 0.72, size.height * 0.72)
+      ..lineTo(size.width * 0.52, size.height * 0.72)
+      ..lineTo(size.width * 0.63, size.height * 0.98)
+      ..lineTo(size.width * 0.46, size.height * 0.98)
+      ..lineTo(size.width * 0.36, size.height * 0.74)
+      ..lineTo(size.width * 0.16, size.height * 0.9)
+      ..close();
+
+    canvas.drawShadow(arrow, const Color(0xDD000000), 10, false);
+
+    final Paint outlinePaint = Paint()
+      ..color = const Color(0xFF111111)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeJoin = StrokeJoin.round;
+    final Paint fillPaint = Paint()
+      ..color = const Color(0xFFF8F8F8)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(arrow, fillPaint);
+    canvas.drawPath(arrow, outlinePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class EngineSurface extends StatefulWidget {
   const EngineSurface({
     super.key,
@@ -173,11 +210,17 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
         _pointerMode = enabled
             ? EngineSurfacePointerMode.virtualCursor
             : EngineSurfacePointerMode.directTouch;
+        if (enabled) {
+          _placeVirtualCursorAtSurfaceCenter();
+        }
       });
     } else {
       _pointerMode = enabled
           ? EngineSurfacePointerMode.virtualCursor
           : EngineSurfacePointerMode.directTouch;
+      if (enabled) {
+        _placeVirtualCursorAtSurfaceCenter();
+      }
     }
     widget.onVirtualCursorModeChanged?.call(enabled);
     _focusNode.requestFocus();
@@ -858,6 +901,17 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
     );
   }
 
+  void _placeVirtualCursorAtSurfaceCenter() {
+    final Size size = _surfaceLogicalSize;
+    if (size.width <= 0 || size.height <= 0) {
+      _virtualCursorLogicalPosition = Offset.zero;
+      _virtualCursorPositionInitialized = false;
+      return;
+    }
+    _virtualCursorLogicalPosition = Offset(size.width / 2, size.height / 2);
+    _virtualCursorPositionInitialized = true;
+  }
+
   bool _useVirtualCursorForEvent(PointerEvent event) {
     return _pointerMode == EngineSurfacePointerMode.virtualCursor &&
         (Platform.isAndroid || Platform.isIOS) &&
@@ -960,7 +1014,7 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       _virtualCursorLogicalPosition + event.delta,
     );
     final Offset appliedDelta = nextPosition - _virtualCursorLogicalPosition;
-    if (appliedDelta == Offset.zero && !_virtualCursorDragActive) {
+    if (appliedDelta == Offset.zero) {
       return;
     }
 
@@ -978,18 +1032,16 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       _virtualCursorPossibleRightClick = false;
     }
 
-    if (_virtualCursorDragActive) {
-      unawaited(
-        _sendInputEvent(
-          _buildVirtualCursorEvent(
-            type: EngineInputEventType.pointerMove,
-            button: 0,
-            delta: appliedDelta,
-            leftButtonDown: true,
-          ),
+    unawaited(
+      _sendInputEvent(
+        _buildVirtualCursorEvent(
+          type: EngineInputEventType.pointerMove,
+          button: 0,
+          delta: appliedDelta,
+          leftButtonDown: _virtualCursorDragActive,
         ),
-      );
-    }
+      ),
+    );
   }
 
   void _handleVirtualCursorPointerUp(PointerUpEvent event) {
@@ -1027,14 +1079,14 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       return const SizedBox.shrink();
     }
     return Positioned(
-      left: _virtualCursorLogicalPosition.dx - 10,
-      top: _virtualCursorLogicalPosition.dy - 10,
+      left: _virtualCursorLogicalPosition.dx - _virtualCursorHotspot.dx,
+      top: _virtualCursorLogicalPosition.dy - _virtualCursorHotspot.dy,
       child: IgnorePointer(
-        child: Icon(
-          Icons.navigation,
-          size: 22,
-          color: Colors.white.withValues(alpha: 0.95),
-          shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
+        child: RepaintBoundary(
+          child: CustomPaint(
+            size: _virtualCursorOverlaySize,
+            painter: const _VirtualCursorPainter(),
+          ),
         ),
       ),
     );
@@ -1304,6 +1356,9 @@ class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = Size(constraints.maxWidth, constraints.maxHeight);
         _surfaceLogicalSize = size;
+        if (isVirtualCursorEnabled && !_virtualCursorPositionInitialized) {
+          _placeVirtualCursorAtSurfaceCenter();
+        }
         final double dpr = MediaQuery.of(context).devicePixelRatio;
         _ensureSurfaceSizeIfNeeded(size, dpr);
 
