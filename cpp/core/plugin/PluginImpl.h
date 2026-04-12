@@ -92,6 +92,7 @@ inline TJS_EXP_FUNC_DEF(void *, TVP_malloc, (size_t size)) {
 inline TJS_EXP_FUNC_DEF(void, TVP_free, (void *pp)) { return free(pp); }
 
 TJS_EXP_FUNC_DEF(tjs_int, TVPGetAutoLoadPluginCount, ());
+void TVPResetPluginRegistrationCache();
 void TVPResetPluginSystemForRestart();
 //---------------------------------------------------------------------------
 

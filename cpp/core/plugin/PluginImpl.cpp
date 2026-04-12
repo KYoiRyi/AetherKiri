@@ -560,6 +560,7 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin> &list,
 }
 
 void TVPLoadInternalPlugins() {
+    TVPResetPluginRegistrationCache();
     PluginCallTracer::Instance().LogRegistrationStart();
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadAllModules();
@@ -653,11 +654,22 @@ void tvpLoadPlugins() {
 //---------------------------------------------------------------------------
 tjs_int TVPGetAutoLoadPluginCount() { return TVPAutoLoadPluginCount; }
 
-void TVPResetPluginSystemForRestart() {
-    ncbAutoRegister::AllUnregist();
-    ncbAutoRegister::ResetRegistrationState();
+void TVPResetPluginRegistrationCache() {
+    spdlog::info("PLUGIN-RESET TVPResetPluginRegistrationCache registered={}",
+                 static_cast<int>(TVPRegisteredPlugins.size()));
     TVPRegisteredPlugins.clear();
     TVPAutoLoadPluginCount = 0;
+}
+
+void TVPResetPluginSystemForRestart() {
+    spdlog::info("PLUGIN-RESET TVPResetPluginSystemForRestart begin registered={}",
+                 static_cast<int>(TVPRegisteredPlugins.size()));
+    ncbAutoRegister::AllUnregist();
+    spdlog::info("PLUGIN-RESET AllUnregist done");
+    ncbAutoRegister::ResetRegistrationState();
+    spdlog::info("PLUGIN-RESET ResetRegistrationState done");
+    TVPResetPluginRegistrationCache();
+    spdlog::info("PLUGIN-RESET TVPResetPluginSystemForRestart end");
 }
 
 //---------------------------------------------------------------------------

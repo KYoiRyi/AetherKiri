@@ -3,6 +3,13 @@
 #include <set>
 #include <spdlog/spdlog.h>
 
+namespace {
+void LogPluginResetTrace(const char* message) {
+    if(message == nullptr) return;
+    spdlog::info("PLUGIN-RESET {}", message);
+}
+}
+
 // static変数の実体
 
 // auto register 先頭ポインタ
@@ -15,6 +22,8 @@ bool ncbAutoRegister::LoadModule(const ttstr &_name)
 {
 	ttstr name = _name.AsLowerCase();
 	if (TVPRegisteredPlugins.find(name) != TVPRegisteredPlugins.end()) {
+        LogPluginResetTrace((std::string("LoadModule already registered: ") +
+                             name.AsStdString()).c_str());
         spdlog::trace("ncbAutoRegister::LoadModule('{}'): already registered",
                       name.AsStdString());
 		return true;
@@ -62,12 +71,16 @@ bool ncbAutoRegister::HasModule(const ttstr &_name)
 
 void ncbAutoRegister::LoadAllModules()
 {
+    LogPluginResetTrace("LoadAllModules begin");
     spdlog::trace("ncbAutoRegister::LoadAllModules: begin ({} modules in map)",
                   static_cast<int>(_internal_plugins.size()));
 	for (auto &kv : _internal_plugins) {
 		const ttstr &name = kv.first;
-		if (TVPRegisteredPlugins.find(name) != TVPRegisteredPlugins.end())
+		if (TVPRegisteredPlugins.find(name) != TVPRegisteredPlugins.end()) {
+            LogPluginResetTrace((std::string("LoadAllModules skip already registered: ") +
+                                 name.AsStdString()).c_str());
 			continue;
+        }
         PluginCallTracer::Instance().LogModuleStart(name.AsStdString());
         spdlog::trace("ncbAutoRegister::LoadAllModules: register '{}'",
                       name.AsStdString());
@@ -94,11 +107,13 @@ void ncbAutoRegister::LoadAllModules()
 		TVPRegisteredPlugins.insert(name);
         spdlog::trace("ncbAutoRegister::LoadAllModules: module '{}' done",
                       name.AsStdString());
-	}
+    }
+    LogPluginResetTrace("LoadAllModules end");
     spdlog::trace("ncbAutoRegister::LoadAllModules: end");
 }
 
 void ncbAutoRegister::ResetRegistrationState()
 {
+    LogPluginResetTrace("ResetRegistrationState clear internal plugins");
     _internal_plugins.clear();
 }

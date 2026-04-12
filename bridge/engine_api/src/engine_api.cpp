@@ -1278,6 +1278,8 @@ engine_result_t engine_create(const engine_create_desc_t* desc,
   EnsureRuntimeLoggersInitialized();
   EnsureInternalPluginAnchorsLinked();
   TVPHostSuppressProcessExit = true;
+  TVPResetPluginRegistrationCache();
+  AppendStartupTrace("native: engine_create reset plugin registration cache");
 
   auto* impl = new (std::nothrow) engine_handle_s();
   if (impl == nullptr) {
