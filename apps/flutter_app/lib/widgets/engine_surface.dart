@@ -32,6 +32,8 @@ enum EngineSurfaceMode {
   software,
 }
 
+enum EngineSurfacePointerMode { directTouch, virtualCursor }
+
 class EngineSurface extends StatefulWidget {
   const EngineSurface({
     super.key,
@@ -41,6 +43,8 @@ class EngineSurface extends StatefulWidget {
     this.externalTickDriven = false,
     this.onLog,
     this.onError,
+    this.onVirtualCursorModeChanged,
+    this.onSoftKeyboardVisibilityChanged,
   });
 
   final EngineBridge bridge;
@@ -53,15 +57,23 @@ class EngineSurface extends StatefulWidget {
   final bool externalTickDriven;
   final ValueChanged<String>? onLog;
   final ValueChanged<String>? onError;
+  final ValueChanged<bool>? onVirtualCursorModeChanged;
+  final ValueChanged<bool>? onSoftKeyboardVisibilityChanged;
 
   @override
   EngineSurfaceState createState() => EngineSurfaceState();
 }
 
-class EngineSurfaceState extends State<EngineSurface> {
+class EngineSurfaceState extends State<EngineSurface> with TextInputClient {
   static const MethodChannel _platformChannel = MethodChannel(
     'flutter_engine_bridge',
   );
+  static const int _modifierShift = 1 << 0;
+  static const int _modifierAlt = 1 << 1;
+  static const int _modifierCtrl = 1 << 2;
+  static const int _modifierLeft = 1 << 3;
+  static const int _modifierRight = 1 << 4;
+  static const int _modifierMiddle = 1 << 5;
   final FocusNode _focusNode = FocusNode(debugLabel: 'engine-surface-focus');
   bool _vsyncScheduled = false;
   bool _frameInFlight = false;
@@ -90,6 +102,20 @@ class EngineSurfaceState extends State<EngineSurface> {
   double _lastRequestedDpr = 1.0;
   EngineInputEventData? _pendingPointerMoveEvent;
   bool _pointerMoveFlushScheduled = false;
+  TextInputConnection? _textInputConnection;
+  TextEditingValue _textEditingValue = TextEditingValue.empty;
+  bool _softKeyboardVisible = false;
+  EngineSurfacePointerMode _pointerMode = EngineSurfacePointerMode.directTouch;
+  Size _surfaceLogicalSize = Size.zero;
+  Offset _virtualCursorLogicalPosition = Offset.zero;
+  bool _virtualCursorPositionInitialized = false;
+  final Set<int> _virtualCursorActivePointers = <int>{};
+  int? _virtualCursorPrimaryPointer;
+  Offset? _virtualCursorPrimaryPointerStart;
+  bool _virtualCursorPossibleRightClick = false;
+  Timer? _virtualCursorLongPressTimer;
+  bool _virtualCursorDragActive = false;
+  bool _virtualCursorMovedDuringGesture = false;
 
   @override
   void initState() {
@@ -118,10 +144,110 @@ class EngineSurfaceState extends State<EngineSurface> {
   void dispose() {
     // _vsyncScheduled will simply be ignored once disposed.
     _vsyncScheduled = false;
+    _cancelVirtualCursorLongPress();
+    _hideSoftKeyboard();
     _frameImage?.dispose();
     unawaited(_disposeAllTextures());
     _focusNode.dispose();
     super.dispose();
+  }
+
+  bool get isVirtualCursorEnabled =>
+      _pointerMode == EngineSurfacePointerMode.virtualCursor;
+
+  bool get isSoftKeyboardVisible => _softKeyboardVisible;
+
+  Future<bool> toggleVirtualCursorMode() async {
+    final bool enabled = _pointerMode != EngineSurfacePointerMode.virtualCursor;
+    _cancelVirtualCursorLongPress();
+    _virtualCursorActivePointers.clear();
+    _virtualCursorPrimaryPointer = null;
+    _virtualCursorPrimaryPointerStart = null;
+    _virtualCursorPossibleRightClick = false;
+    if (_virtualCursorDragActive) {
+      _virtualCursorDragActive = false;
+      unawaited(_sendVirtualCursorButtonEvent(isDown: false, button: 0));
+    }
+    if (mounted) {
+      setState(() {
+        _pointerMode = enabled
+            ? EngineSurfacePointerMode.virtualCursor
+            : EngineSurfacePointerMode.directTouch;
+      });
+    } else {
+      _pointerMode = enabled
+          ? EngineSurfacePointerMode.virtualCursor
+          : EngineSurfacePointerMode.directTouch;
+    }
+    widget.onVirtualCursorModeChanged?.call(enabled);
+    _focusNode.requestFocus();
+    return enabled;
+  }
+
+  Future<bool> toggleSoftKeyboard() async {
+    if (!_supportsSoftKeyboard) {
+      return false;
+    }
+    if (_softKeyboardVisible) {
+      _hideSoftKeyboard();
+    } else {
+      _showSoftKeyboard();
+    }
+    return _softKeyboardVisible;
+  }
+
+  bool get _supportsSoftKeyboard => Platform.isAndroid || Platform.isIOS;
+
+  void _showSoftKeyboard() {
+    if (!_supportsSoftKeyboard) {
+      return;
+    }
+    _focusNode.requestFocus();
+    _ensureTextInputConnection();
+    _textInputConnection?.show();
+    _setSoftKeyboardVisible(true);
+  }
+
+  void _hideSoftKeyboard() {
+    _textInputConnection?.close();
+    _textInputConnection = null;
+    _textEditingValue = TextEditingValue.empty;
+    _setSoftKeyboardVisible(false);
+  }
+
+  void _ensureTextInputConnection() {
+    if (!_supportsSoftKeyboard) {
+      return;
+    }
+    if (_textInputConnection?.attached ?? false) {
+      return;
+    }
+    _textInputConnection = TextInput.attach(
+      this,
+      const TextInputConfiguration(
+        inputType: TextInputType.text,
+        inputAction: TextInputAction.done,
+        autocorrect: false,
+        enableSuggestions: false,
+        enableDeltaModel: false,
+      ),
+    );
+    _textInputConnection?.setEditingState(_textEditingValue);
+  }
+
+  void _setSoftKeyboardVisible(bool visible) {
+    if (_softKeyboardVisible == visible) {
+      return;
+    }
+    _softKeyboardVisible = visible;
+    widget.onSoftKeyboardVisibilityChanged?.call(visible);
+  }
+
+  void _syncTextEditingValue(TextEditingValue value) {
+    _textEditingValue = value;
+    if (_textInputConnection?.attached ?? false) {
+      _textInputConnection?.setEditingState(value);
+    }
   }
 
   Future<void> _disposeAllTextures() async {
@@ -648,6 +774,272 @@ class EngineSurfaceState extends State<EngineSurface> {
     );
   }
 
+  int _currentModifierFlags({int buttons = 0}) {
+    int modifiers = 0;
+    final keyboard = HardwareKeyboard.instance;
+    if (keyboard.isShiftPressed) modifiers |= _modifierShift;
+    if (keyboard.isAltPressed) modifiers |= _modifierAlt;
+    if (keyboard.isControlPressed) modifiers |= _modifierCtrl;
+    if (buttons & kPrimaryButton != 0) modifiers |= _modifierLeft;
+    if (buttons & kSecondaryButton != 0) modifiers |= _modifierRight;
+    if (buttons & kMiddleMouseButton != 0) modifiers |= _modifierMiddle;
+    return modifiers;
+  }
+
+  void _sendPrintableText(String text, {int? timestampMicros}) {
+    for (final int rune in text.runes) {
+      if (rune <= 0 || rune > 0xFFFF) {
+        continue;
+      }
+      if (rune < 0x20 && rune != 0x09) {
+        continue;
+      }
+      unawaited(
+        _sendInputEvent(
+          EngineInputEventData(
+            type: EngineInputEventType.textInput,
+            timestampMicros:
+                timestampMicros ?? DateTime.now().microsecondsSinceEpoch,
+            unicodeCodepoint: rune,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _sendSyntheticKeyTap(int keyCode) {
+    final int timestampMicros = DateTime.now().microsecondsSinceEpoch;
+    unawaited(
+      _sendInputEvent(
+        EngineInputEventData(
+          type: EngineInputEventType.keyDown,
+          timestampMicros: timestampMicros,
+          keyCode: keyCode,
+          modifiers: _currentModifierFlags(),
+        ),
+      ),
+    );
+    unawaited(
+      _sendInputEvent(
+        EngineInputEventData(
+          type: EngineInputEventType.keyUp,
+          timestampMicros: timestampMicros,
+          keyCode: keyCode,
+          modifiers: _currentModifierFlags(),
+        ),
+      ),
+    );
+  }
+
+  void _initializeVirtualCursorPosition(Offset fallbackPosition) {
+    if (_virtualCursorPositionInitialized) {
+      return;
+    }
+    final Size size = _surfaceLogicalSize;
+    if (size.width <= 0 || size.height <= 0) {
+      _virtualCursorLogicalPosition = fallbackPosition;
+    } else {
+      _virtualCursorLogicalPosition = Offset(
+        fallbackPosition.dx.clamp(0.0, size.width),
+        fallbackPosition.dy.clamp(0.0, size.height),
+      );
+    }
+    _virtualCursorPositionInitialized = true;
+  }
+
+  Offset _clampVirtualCursorPosition(Offset position) {
+    final Size size = _surfaceLogicalSize;
+    if (size.width <= 0 || size.height <= 0) {
+      return position;
+    }
+    return Offset(
+      position.dx.clamp(0.0, size.width),
+      position.dy.clamp(0.0, size.height),
+    );
+  }
+
+  bool _useVirtualCursorForEvent(PointerEvent event) {
+    return _pointerMode == EngineSurfacePointerMode.virtualCursor &&
+        (Platform.isAndroid || Platform.isIOS) &&
+        event.kind == PointerDeviceKind.touch;
+  }
+
+  EngineInputEventData _buildVirtualCursorEvent({
+    required int type,
+    required int button,
+    Offset? delta,
+    bool leftButtonDown = false,
+  }) {
+    final double dpr = _devicePixelRatio > 0 ? _devicePixelRatio : 1.0;
+    return EngineInputEventData(
+      type: type,
+      timestampMicros: DateTime.now().microsecondsSinceEpoch,
+      x: _virtualCursorLogicalPosition.dx * dpr,
+      y: _virtualCursorLogicalPosition.dy * dpr,
+      deltaX: (delta?.dx ?? 0) * dpr,
+      deltaY: (delta?.dy ?? 0) * dpr,
+      button: button,
+      modifiers: _currentModifierFlags(
+        buttons: leftButtonDown ? kPrimaryButton : 0,
+      ),
+    );
+  }
+
+  Future<void> _sendVirtualCursorButtonEvent({
+    required bool isDown,
+    required int button,
+  }) {
+    return _sendInputEvent(
+      _buildVirtualCursorEvent(
+        type: isDown
+            ? EngineInputEventType.pointerDown
+            : EngineInputEventType.pointerUp,
+        button: button,
+        leftButtonDown: isDown && button == 0,
+      ),
+    );
+  }
+
+  Future<void> _sendVirtualCursorClick({required int button}) async {
+    await _sendVirtualCursorButtonEvent(isDown: true, button: button);
+    await _sendVirtualCursorButtonEvent(isDown: false, button: button);
+  }
+
+  void _cancelVirtualCursorLongPress() {
+    _virtualCursorLongPressTimer?.cancel();
+    _virtualCursorLongPressTimer = null;
+  }
+
+  void _scheduleVirtualCursorLongPress() {
+    _cancelVirtualCursorLongPress();
+    _virtualCursorLongPressTimer = Timer(const Duration(milliseconds: 280), () {
+      if (!_virtualCursorActivePointers.contains(
+            _virtualCursorPrimaryPointer,
+          ) ||
+          _virtualCursorPossibleRightClick ||
+          _virtualCursorDragActive) {
+        return;
+      }
+      _virtualCursorDragActive = true;
+      unawaited(_sendVirtualCursorButtonEvent(isDown: true, button: 0));
+    });
+  }
+
+  void _handleVirtualCursorPointerDown(PointerDownEvent event) {
+    _focusNode.requestFocus();
+    _initializeVirtualCursorPosition(event.localPosition);
+    _virtualCursorActivePointers.add(event.pointer);
+    if (_virtualCursorActivePointers.length == 1) {
+      _virtualCursorPrimaryPointer = event.pointer;
+      _virtualCursorPrimaryPointerStart = event.localPosition;
+      _virtualCursorPossibleRightClick = false;
+      _virtualCursorDragActive = false;
+      _virtualCursorMovedDuringGesture = false;
+      if (mounted) {
+        setState(() {});
+      }
+      _scheduleVirtualCursorLongPress();
+      return;
+    }
+    if (_virtualCursorActivePointers.length == 2) {
+      _cancelVirtualCursorLongPress();
+      _virtualCursorPossibleRightClick = true;
+    }
+  }
+
+  void _handleVirtualCursorPointerMove(PointerMoveEvent event) {
+    if (_virtualCursorPrimaryPointer != event.pointer) {
+      if (_virtualCursorActivePointers.length >= 2 &&
+          event.delta.distanceSquared > 36) {
+        _virtualCursorPossibleRightClick = false;
+      }
+      return;
+    }
+
+    final Offset nextPosition = _clampVirtualCursorPosition(
+      _virtualCursorLogicalPosition + event.delta,
+    );
+    final Offset appliedDelta = nextPosition - _virtualCursorLogicalPosition;
+    if (appliedDelta == Offset.zero && !_virtualCursorDragActive) {
+      return;
+    }
+
+    _virtualCursorLogicalPosition = nextPosition;
+    _virtualCursorMovedDuringGesture = true;
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (!_virtualCursorDragActive &&
+        _virtualCursorPrimaryPointerStart != null &&
+        (event.localPosition - _virtualCursorPrimaryPointerStart!).distance >
+            10) {
+      _cancelVirtualCursorLongPress();
+      _virtualCursorPossibleRightClick = false;
+    }
+
+    if (_virtualCursorDragActive) {
+      unawaited(
+        _sendInputEvent(
+          _buildVirtualCursorEvent(
+            type: EngineInputEventType.pointerMove,
+            button: 0,
+            delta: appliedDelta,
+            leftButtonDown: true,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _handleVirtualCursorPointerUp(PointerUpEvent event) {
+    _virtualCursorActivePointers.remove(event.pointer);
+    if (_virtualCursorPossibleRightClick &&
+        _virtualCursorActivePointers.isEmpty &&
+        !_virtualCursorDragActive) {
+      _virtualCursorPossibleRightClick = false;
+      _virtualCursorPrimaryPointer = null;
+      _virtualCursorPrimaryPointerStart = null;
+      unawaited(_sendVirtualCursorClick(button: 1));
+      return;
+    }
+
+    if (_virtualCursorPrimaryPointer == event.pointer) {
+      _cancelVirtualCursorLongPress();
+      if (_virtualCursorDragActive) {
+        _virtualCursorDragActive = false;
+        unawaited(_sendVirtualCursorButtonEvent(isDown: false, button: 0));
+      } else if (_virtualCursorActivePointers.isEmpty &&
+          !_virtualCursorMovedDuringGesture) {
+        unawaited(_sendVirtualCursorClick(button: 0));
+      }
+      _virtualCursorPrimaryPointer = null;
+      _virtualCursorPrimaryPointerStart = null;
+    }
+
+    if (_virtualCursorActivePointers.isEmpty) {
+      _virtualCursorPossibleRightClick = false;
+    }
+  }
+
+  Widget _buildVirtualCursorOverlay() {
+    if (!isVirtualCursorEnabled || !_virtualCursorPositionInitialized) {
+      return const SizedBox.shrink();
+    }
+    return Positioned(
+      left: _virtualCursorLogicalPosition.dx - 10,
+      top: _virtualCursorLogicalPosition.dy - 10,
+      child: IgnorePointer(
+        child: Icon(
+          Icons.navigation,
+          size: 22,
+          color: Colors.white.withValues(alpha: 0.95),
+          shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
+        ),
+      ),
+    );
+  }
+
   /// Convert Flutter's button bitmask to engine button index.
   /// Flutter: kPrimaryButton=1, kSecondaryButton=2, kMiddleMouseButton=4
   /// Engine:  0=left, 1=right, 2=middle
@@ -682,6 +1074,7 @@ class EngineSurfaceState extends State<EngineSurface> {
       deltaY: (deltaY ?? event.delta.dy) * dpr,
       pointerId: event.pointer,
       button: _flutterButtonsToEngineButton(event.buttons),
+      modifiers: _currentModifierFlags(buttons: event.buttons),
     );
   }
 
@@ -756,6 +1149,76 @@ class EngineSurfaceState extends State<EngineSurface> {
     }
   }
 
+  @override
+  TextEditingValue get currentTextEditingValue => _textEditingValue;
+
+  @override
+  AutofillScope? get currentAutofillScope => null;
+
+  @override
+  void updateEditingValue(TextEditingValue value) {
+    final TextEditingValue previousValue = _textEditingValue;
+    _textEditingValue = value;
+
+    if (value.composing.isValid && !value.composing.isCollapsed) {
+      return;
+    }
+
+    final String oldText = previousValue.text;
+    final String newText = value.text;
+    int prefixLength = 0;
+    final int maxPrefix = oldText.length < newText.length
+        ? oldText.length
+        : newText.length;
+    while (prefixLength < maxPrefix &&
+        oldText.codeUnitAt(prefixLength) == newText.codeUnitAt(prefixLength)) {
+      prefixLength++;
+    }
+
+    int oldSuffixLength = oldText.length;
+    int newSuffixLength = newText.length;
+    while (oldSuffixLength > prefixLength &&
+        newSuffixLength > prefixLength &&
+        oldText.codeUnitAt(oldSuffixLength - 1) ==
+            newText.codeUnitAt(newSuffixLength - 1)) {
+      oldSuffixLength--;
+      newSuffixLength--;
+    }
+
+    final int removedCount = oldSuffixLength - prefixLength;
+    final String insertedText = newText.substring(
+      prefixLength,
+      newSuffixLength,
+    );
+    for (int i = 0; i < removedCount; i++) {
+      _sendSyntheticKeyTap(0x08);
+    }
+    if (insertedText.isNotEmpty) {
+      _sendPrintableText(insertedText);
+    }
+  }
+
+  @override
+  void performAction(TextInputAction action) {
+    _sendSyntheticKeyTap(0x0D);
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic> data) {}
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {}
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {}
+
+  @override
+  void connectionClosed() {
+    _textInputConnection = null;
+    _syncTextEditingValue(TextEditingValue.empty);
+    _setSoftKeyboardVisible(false);
+  }
+
   KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
     if (!widget.active) {
       return KeyEventResult.ignored;
@@ -783,15 +1246,28 @@ class EngineSurfaceState extends State<EngineSurface> {
         ? EngineInputEventType.keyDown
         : EngineInputEventType.keyUp;
     final int keyCode = event.logicalKey.keyId & 0xFFFFFFFF;
+    final int modifiers = _currentModifierFlags();
     unawaited(
       _sendInputEvent(
         EngineInputEventData(
           type: type,
           timestampMicros: event.timeStamp.inMicroseconds,
           keyCode: keyCode,
+          modifiers: modifiers,
         ),
       ),
     );
+
+    final String? character = event.character;
+    if (isDown &&
+        character != null &&
+        character.isNotEmpty &&
+        !_isControlCharacter(character)) {
+      _sendPrintableText(
+        character,
+        timestampMicros: event.timeStamp.inMicroseconds,
+      );
+    }
 
     if (isDown &&
         (event.logicalKey == LogicalKeyboardKey.escape ||
@@ -802,12 +1278,21 @@ class EngineSurfaceState extends State<EngineSurface> {
             type: EngineInputEventType.back,
             timestampMicros: event.timeStamp.inMicroseconds,
             keyCode: keyCode,
+            modifiers: modifiers,
           ),
         ),
       );
     }
 
     return KeyEventResult.handled;
+  }
+
+  bool _isControlCharacter(String character) {
+    if (character.isEmpty) {
+      return true;
+    }
+    final int codePoint = character.runes.first;
+    return codePoint < 0x20 || codePoint == 0x7F;
   }
 
   @override
@@ -818,6 +1303,7 @@ class EngineSurfaceState extends State<EngineSurface> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final Size size = Size(constraints.maxWidth, constraints.maxHeight);
+        _surfaceLogicalSize = size;
         final double dpr = MediaQuery.of(context).devicePixelRatio;
         _ensureSurfaceSizeIfNeeded(size, dpr);
 
@@ -829,15 +1315,27 @@ class EngineSurfaceState extends State<EngineSurface> {
             behavior: HitTestBehavior.opaque,
             onPointerDown: (event) {
               _focusNode.requestFocus();
+              if (_useVirtualCursorForEvent(event)) {
+                _handleVirtualCursorPointerDown(event);
+                return;
+              }
               _sendPointer(
                 type: EngineInputEventType.pointerDown,
                 event: event,
               );
             },
             onPointerMove: (event) {
+              if (_useVirtualCursorForEvent(event)) {
+                _handleVirtualCursorPointerMove(event);
+                return;
+              }
               _sendCoalescedPointerMove(event);
             },
             onPointerUp: (event) {
+              if (_useVirtualCursorForEvent(event)) {
+                _handleVirtualCursorPointerUp(event);
+                return;
+              }
               _sendPointer(type: EngineInputEventType.pointerUp, event: event);
             },
             onPointerHover: (event) {
@@ -868,6 +1366,7 @@ class EngineSurfaceState extends State<EngineSurface> {
                       fit: BoxFit.contain,
                       filterQuality: FilterQuality.none,
                     ),
+                  _buildVirtualCursorOverlay(),
                 ],
               ),
             ),

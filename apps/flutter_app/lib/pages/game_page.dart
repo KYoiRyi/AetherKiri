@@ -86,6 +86,8 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   String? _errorMessage;
   bool _showOverlay = false;
   bool _showDebug = false;
+  bool _virtualCursorEnabled = false;
+  bool _softKeyboardVisible = false;
   int _tickCount = 0;
   final List<String> _logs = [];
   static const int _maxLogs = 2000;
@@ -945,6 +947,73 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     setState(() => _showDebug = !_showDebug);
   }
 
+  bool get _showMobileRuntimeActions => Platform.isAndroid || Platform.isIOS;
+
+  Future<void> _openGameMenu() async {
+    final String? rawJson = await _bridge.engineGetMainMenuJson();
+    if (!mounted) return;
+    if (rawJson == null) {
+      _log('Game menu unavailable: ${_bridge.engineGetLastError()}');
+      return;
+    }
+
+    List<dynamic> decoded;
+    try {
+      decoded = jsonDecode(rawJson) as List<dynamic>;
+    } catch (error) {
+      _log('Failed to decode game menu JSON: $error');
+      return;
+    }
+
+    final List<_GameMenuEntry> entries = decoded
+        .whereType<Map<String, dynamic>>()
+        .map(_GameMenuEntry.fromJson)
+        .where((entry) => entry.visible)
+        .toList(growable: false);
+    if (entries.isEmpty) {
+      _log('Game menu is empty');
+      return;
+    }
+
+    setState(() => _showOverlay = false);
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return _GameMenuDialog(
+          entries: entries,
+          onActivate: (entry) async {
+            final int result = await _bridge.engineActivateMenuItem(entry.path);
+            if (result != _engineResultOk) {
+              _log(
+                'Game menu action failed: result=$result, error=${_bridge.engineGetLastError()}',
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _toggleVirtualCursorMode() async {
+    final bool enabled =
+        await _surfaceKey.currentState?.toggleVirtualCursorMode() ?? false;
+    if (!mounted) return;
+    setState(() {
+      _virtualCursorEnabled = enabled;
+      _showOverlay = false;
+    });
+  }
+
+  Future<void> _toggleSoftKeyboard() async {
+    final bool visible =
+        await _surfaceKey.currentState?.toggleSoftKeyboard() ?? false;
+    if (!mounted) return;
+    setState(() {
+      _softKeyboardVisible = visible;
+      _showOverlay = false;
+    });
+  }
+
   Future<void> _exitGame() async {
     if (_isExitingPage) return;
     _isExitingPage = true;
@@ -986,6 +1055,14 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                     externalTickDriven: _isTicking,
                     onLog: (msg) => _log('surface: $msg'),
                     onError: (msg) => _log('surface error: $msg'),
+                    onVirtualCursorModeChanged: (enabled) {
+                      if (!mounted) return;
+                      setState(() => _virtualCursorEnabled = enabled);
+                    },
+                    onSoftKeyboardVisibilityChanged: (visible) {
+                      if (!mounted) return;
+                      setState(() => _softKeyboardVisible = visible);
+                    },
                   )
                 : _buildBootLogView(),
           ),
@@ -1327,6 +1404,30 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _overlayItem(
+                  icon: Icons.menu_book,
+                  label: 'Game Menu',
+                  onTap: () => unawaited(_openGameMenu()),
+                ),
+                if (_showMobileRuntimeActions)
+                  _overlayItem(
+                    icon: _virtualCursorEnabled ? Icons.touch_app : Icons.mouse,
+                    label: _virtualCursorEnabled
+                        ? 'Disable Mouse Cursor'
+                        : 'Enable Mouse Cursor',
+                    onTap: () => unawaited(_toggleVirtualCursorMode()),
+                  ),
+                if (_showMobileRuntimeActions)
+                  _overlayItem(
+                    icon: _softKeyboardVisible
+                        ? Icons.keyboard_hide
+                        : Icons.keyboard,
+                    label: _softKeyboardVisible
+                        ? 'Hide Keyboard'
+                        : 'Show Keyboard',
+                    onTap: () => unawaited(_toggleSoftKeyboard()),
+                  ),
+                const Divider(color: Colors.white24, height: 1),
+                _overlayItem(
                   icon: Icons.bug_report,
                   label: _showDebug ? 'Hide Debug' : 'Show Debug',
                   onTap: _toggleDebug,
@@ -1454,6 +1555,176 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GameMenuEntry {
+  const _GameMenuEntry({
+    required this.path,
+    required this.caption,
+    required this.enabled,
+    required this.visible,
+    required this.checked,
+    required this.radio,
+    required this.children,
+  });
+
+  factory _GameMenuEntry.fromJson(Map<String, dynamic> json) {
+    return _GameMenuEntry(
+      path: json['path'] as String? ?? '',
+      caption: json['caption'] as String? ?? '',
+      enabled: json['enabled'] as bool? ?? true,
+      visible: json['visible'] as bool? ?? true,
+      checked: json['checked'] as bool? ?? false,
+      radio: json['radio'] as bool? ?? false,
+      children: (json['children'] as List<dynamic>? ?? const <dynamic>[])
+          .whereType<Map<String, dynamic>>()
+          .map(_GameMenuEntry.fromJson)
+          .where((entry) => entry.visible)
+          .toList(growable: false),
+    );
+  }
+
+  final String path;
+  final String caption;
+  final bool enabled;
+  final bool visible;
+  final bool checked;
+  final bool radio;
+  final List<_GameMenuEntry> children;
+
+  bool get isSeparator => caption.trim().isEmpty && children.isEmpty;
+}
+
+class _GameMenuDialog extends StatefulWidget {
+  const _GameMenuDialog({required this.entries, required this.onActivate});
+
+  final List<_GameMenuEntry> entries;
+  final Future<void> Function(_GameMenuEntry entry) onActivate;
+
+  @override
+  State<_GameMenuDialog> createState() => _GameMenuDialogState();
+}
+
+class _GameMenuDialogState extends State<_GameMenuDialog> {
+  final List<_GameMenuEntry> _stack = <_GameMenuEntry>[];
+  bool _actionInFlight = false;
+
+  List<_GameMenuEntry> get _currentEntries =>
+      _stack.isEmpty ? widget.entries : _stack.last.children;
+
+  String get _title => _stack.isEmpty ? 'Game Menu' : _stack.last.caption;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      backgroundColor: AppColors.deepDark,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420, maxHeight: 520),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.white24)),
+              ),
+              child: Row(
+                children: [
+                  if (_stack.isNotEmpty)
+                    IconButton(
+                      onPressed: _actionInFlight
+                          ? null
+                          : () => setState(() => _stack.removeLast()),
+                      icon: const Icon(Icons.arrow_back),
+                      color: Colors.white70,
+                    )
+                  else
+                    const SizedBox(width: 40),
+                  Expanded(
+                    child: Text(
+                      _title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _actionInFlight
+                        ? null
+                        : () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                    color: Colors.white70,
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: _currentEntries.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(color: Colors.white12, height: 1),
+                itemBuilder: (context, index) {
+                  final entry = _currentEntries[index];
+                  if (entry.isSeparator) {
+                    return const Divider(color: Colors.white24, height: 1);
+                  }
+                  final Widget? leading = entry.checked
+                      ? Icon(
+                          entry.radio
+                              ? Icons.radio_button_checked
+                              : Icons.check,
+                          color: Colors.white70,
+                          size: 18,
+                        )
+                      : null;
+                  final bool hasChildren = entry.children.isNotEmpty;
+                  final Color textColor = entry.enabled
+                      ? Colors.white
+                      : Colors.white38;
+                  return ListTile(
+                    dense: true,
+                    enabled: entry.enabled && !_actionInFlight,
+                    leading: leading,
+                    title: Text(
+                      entry.caption.isEmpty ? '(Unnamed)' : entry.caption,
+                      style: TextStyle(color: textColor),
+                    ),
+                    trailing: hasChildren
+                        ? const Icon(Icons.chevron_right, color: Colors.white54)
+                        : null,
+                    onTap: !entry.enabled || _actionInFlight
+                        ? null
+                        : () async {
+                            if (hasChildren) {
+                              setState(() => _stack.add(entry));
+                              return;
+                            }
+                            setState(() => _actionInFlight = true);
+                            try {
+                              await widget.onActivate(entry);
+                              if (mounted) {
+                                Navigator.of(context).pop();
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() => _actionInFlight = false);
+                              }
+                            }
+                          },
+                  );
+                },
+              ),
             ),
           ],
         ),

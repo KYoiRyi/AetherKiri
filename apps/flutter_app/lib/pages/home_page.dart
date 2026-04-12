@@ -572,7 +572,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _openGameDetail(GameInfo game) async {
     final result = await Navigator.of(context).push<GameDetailResult>(
-      AppAnimations.fadeSlideRoute<GameDetailResult>(
+      AppAnimations.spatialRoute<GameDetailResult>(
         GameDetailPage(
           game: game,
           gameManager: _gameManager,
@@ -609,7 +609,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (shouldScrape != true || !mounted) return;
     final result = await Navigator.of(context).push<GameDetailResult>(
-      AppAnimations.fadeSlideRoute<GameDetailResult>(
+      AppAnimations.spatialRoute<GameDetailResult>(
         GameDetailPage(
           game: game,
           gameManager: _gameManager,
@@ -1104,13 +1104,19 @@ class _CoverCardState extends State<_CoverCard> {
 
   Widget _buildBackground(ColorScheme colorScheme) {
     if (_hasCover) {
-      return Image.file(
-        File(game.coverPath!),
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
+      return Hero(
+        tag: 'cover_card_${game.path}',
+        child: Image.file(
+          File(game.coverPath!),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
+        ),
       );
     }
-    return _buildPlaceholder(colorScheme);
+    return Hero(
+      tag: 'cover_card_${game.path}',
+      child: _buildPlaceholder(colorScheme),
+    );
   }
 
   Widget _buildPlaceholder(ColorScheme colorScheme) {

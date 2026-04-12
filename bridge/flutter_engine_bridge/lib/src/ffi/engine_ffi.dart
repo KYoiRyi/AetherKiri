@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ffi';
 import 'dart:typed_data';
 
@@ -252,7 +253,7 @@ class EngineFfiBridge {
       if (length == 0) {
         return '';
       }
-      return String.fromCharCodes(buffer.asTypedList(length));
+      return utf8.decode(buffer.asTypedList(length), allowMalformed: true);
     } finally {
       calloc.free(outBytesWritten);
       calloc.free(buffer);
@@ -401,6 +402,37 @@ class EngineFfiBridge {
       return _bindings.engineSendInput(_handle, nativeEvent);
     } finally {
       calloc.free(nativeEvent);
+    }
+  }
+
+  String? getMainMenuJson() {
+    const int bufferSize = 262144;
+    final buffer = calloc<Uint8>(bufferSize);
+    final outBytesWritten = calloc<Uint32>();
+    try {
+      final result = _bindings.engineGetMainMenuJson(
+        _handle,
+        buffer.cast<Utf8>(),
+        bufferSize,
+        outBytesWritten,
+      );
+      if (result != kEngineResultOk) {
+        return null;
+      }
+      final length = outBytesWritten.value;
+      return utf8.decode(buffer.asTypedList(length), allowMalformed: true);
+    } finally {
+      calloc.free(outBytesWritten);
+      calloc.free(buffer);
+    }
+  }
+
+  int activateMenuItem(String path) {
+    final pathPtr = path.toNativeUtf8();
+    try {
+      return _bindings.engineActivateMenuItem(_handle, pathPtr);
+    } finally {
+      calloc.free(pathPtr);
     }
   }
 

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <csignal>
+#include <cstdio>
 #include <cstdlib>
 #if defined(__ANDROID__)
 #include <android/log.h>
@@ -460,6 +461,297 @@ bool ReadCurrentFrameRgba(const FrameReadbackLayout& layout, void* out_pixels) {
 
 bool IsFinitePointerValue(double value) {
   return std::isfinite(value);
+}
+
+void AppendEscapedJsonString(std::string& out, const std::string& value) {
+  out.push_back('"');
+  for (const unsigned char c : value) {
+    switch (c) {
+      case '"':
+        out += "\\\"";
+        break;
+      case '\\':
+        out += "\\\\";
+        break;
+      case '\b':
+        out += "\\b";
+        break;
+      case '\f':
+        out += "\\f";
+        break;
+      case '\n':
+        out += "\\n";
+        break;
+      case '\r':
+        out += "\\r";
+        break;
+      case '\t':
+        out += "\\t";
+        break;
+      default:
+        if (c < 0x20u) {
+          char escaped[7];
+          std::snprintf(escaped, sizeof(escaped), "\\u%04x",
+                        static_cast<unsigned int>(c));
+          out += escaped;
+        } else {
+          out.push_back(static_cast<char>(c));
+        }
+        break;
+    }
+  }
+  out.push_back('"');
+}
+
+void AppendEscapedJsonString(std::string& out, const ttstr& value) {
+  AppendEscapedJsonString(out, value.AsStdString());
+}
+
+void AppendEscapedJsonString(std::string& out, const char* value) {
+  if (value == nullptr) {
+    AppendEscapedJsonString(out, std::string());
+    return;
+  }
+  AppendEscapedJsonString(out, std::string(value));
+}
+
+bool TryGetProperty(iTJSDispatch2* object, const tjs_char* name,
+                    tTJSVariant* out_value) {
+  return object != nullptr &&
+         TJS_SUCCEEDED(object->PropGet(0, name, nullptr, out_value, object));
+}
+
+bool TryGetBoolProperty(iTJSDispatch2* object, const tjs_char* name,
+                        bool default_value) {
+  tTJSVariant value;
+  if (!TryGetProperty(object, name, &value) || value.Type() == tvtVoid) {
+    return default_value;
+  }
+  return static_cast<bool>(value);
+}
+
+ttstr GetStringProperty(iTJSDispatch2* object, const tjs_char* name) {
+  tTJSVariant value;
+  if (!TryGetProperty(object, name, &value) || value.Type() == tvtVoid) {
+    return ttstr();
+  }
+  return ttstr(value);
+}
+
+bool TryGetMainMenuObject(tTJSVariant* out_menu_variant) {
+  if (out_menu_variant == nullptr) {
+    return false;
+  }
+
+  const tjs_int window_count = TVPGetWindowCount();
+  for (tjs_int i = 0; i < window_count; ++i) {
+    tTJSNI_Window* window = TVPGetWindowListAt(i);
+    if (window == nullptr) {
+      continue;
+    }
+
+    iTJSDispatch2* window_dispatch = window->GetWindowDispatch();
+    if (window_dispatch == nullptr) {
+      continue;
+    }
+
+    const bool ok =
+        TJS_SUCCEEDED(window_dispatch->PropGet(0, TJS_W("menu"), nullptr,
+                                              out_menu_variant, window_dispatch));
+    window_dispatch->Release();
+    if (ok && out_menu_variant->Type() == tvtObject &&
+        out_menu_variant->AsObjectNoAddRef() != nullptr) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void AppendMenuJsonNode(iTJSDispatch2* item, const std::string& path,
+                        std::string& out) {
+  out += "{\"path\":";
+  AppendEscapedJsonString(out, path);
+  out += ",\"caption\":";
+  AppendEscapedJsonString(out, GetStringProperty(item, TJS_W("caption")));
+  out += ",\"enabled\":";
+  out += TryGetBoolProperty(item, TJS_W("enabled"), true) ? "true" : "false";
+  out += ",\"visible\":";
+  out += TryGetBoolProperty(item, TJS_W("visible"), true) ? "true" : "false";
+  out += ",\"checked\":";
+  out += TryGetBoolProperty(item, TJS_W("checked"), false) ? "true" : "false";
+  out += ",\"radio\":";
+  out += TryGetBoolProperty(item, TJS_W("radio"), false) ? "true" : "false";
+  out += ",\"children\":";
+
+  tTJSVariant children_variant;
+  if (!TryGetProperty(item, TJS_W("children"), &children_variant) ||
+      children_variant.Type() != tvtObject ||
+      children_variant.AsObjectNoAddRef() == nullptr) {
+    out += "[]";
+    out.push_back('}');
+    return;
+  }
+
+  iTJSDispatch2* children = children_variant.AsObjectNoAddRef();
+  out.push_back('[');
+  bool first = true;
+  for (tjs_int index = 0;; ++index) {
+    tTJSVariant child_variant;
+    if (TJS_FAILED(children->PropGetByNum(0, index, &child_variant, children)) ||
+        child_variant.Type() == tvtVoid) {
+      break;
+    }
+    iTJSDispatch2* child = child_variant.AsObjectNoAddRef();
+    if (child == nullptr) {
+      continue;
+    }
+    if (!first) {
+      out.push_back(',');
+    }
+    first = false;
+    const std::string child_path =
+        path.empty() ? std::to_string(index) : path + "/" + std::to_string(index);
+    AppendMenuJsonNode(child, child_path, out);
+  }
+  out += "]}";
+}
+
+std::string BuildMainMenuJson() {
+  tTJSVariant root_menu_variant;
+  if (!TryGetMainMenuObject(&root_menu_variant)) {
+    return "[]";
+  }
+
+  iTJSDispatch2* root_menu = root_menu_variant.AsObjectNoAddRef();
+  if (root_menu == nullptr) {
+    return "[]";
+  }
+
+  tTJSVariant children_variant;
+  if (!TryGetProperty(root_menu, TJS_W("children"), &children_variant) ||
+      children_variant.Type() != tvtObject ||
+      children_variant.AsObjectNoAddRef() == nullptr) {
+    return "[]";
+  }
+
+  iTJSDispatch2* children = children_variant.AsObjectNoAddRef();
+  std::string out = "[";
+  bool first = true;
+  for (tjs_int index = 0;; ++index) {
+    tTJSVariant child_variant;
+    if (TJS_FAILED(children->PropGetByNum(0, index, &child_variant, children)) ||
+        child_variant.Type() == tvtVoid) {
+      break;
+    }
+    iTJSDispatch2* child = child_variant.AsObjectNoAddRef();
+    if (child == nullptr) {
+      continue;
+    }
+    if (!first) {
+      out.push_back(',');
+    }
+    first = false;
+    AppendMenuJsonNode(child, std::to_string(index), out);
+  }
+  out.push_back(']');
+  return out;
+}
+
+bool ParseMenuPath(const char* path_utf8, std::vector<tjs_int>* out_segments) {
+  if (path_utf8 == nullptr || out_segments == nullptr) {
+    return false;
+  }
+
+  std::string path(path_utf8);
+  if (path.empty()) {
+    return false;
+  }
+
+  size_t start = 0;
+  while (start < path.size()) {
+    const size_t slash = path.find('/', start);
+    const std::string part = path.substr(
+        start, slash == std::string::npos ? std::string::npos : slash - start);
+    if (part.empty()) {
+      return false;
+    }
+    char* end_ptr = nullptr;
+    const long index = std::strtol(part.c_str(), &end_ptr, 10);
+    if (end_ptr == nullptr || *end_ptr != '\0' || index < 0) {
+      return false;
+    }
+    out_segments->push_back(static_cast<tjs_int>(index));
+    if (slash == std::string::npos) {
+      break;
+    }
+    start = slash + 1;
+  }
+
+  return !out_segments->empty();
+}
+
+bool ResolveMenuItemByPath(const std::vector<tjs_int>& path_segments,
+                           tTJSVariant* out_item_variant) {
+  if (out_item_variant == nullptr || path_segments.empty()) {
+    return false;
+  }
+
+  tTJSVariant current_variant;
+  if (!TryGetMainMenuObject(&current_variant) ||
+      current_variant.Type() != tvtObject ||
+      current_variant.AsObjectNoAddRef() == nullptr) {
+    return false;
+  }
+
+  for (const tjs_int segment : path_segments) {
+    iTJSDispatch2* current = current_variant.AsObjectNoAddRef();
+    if (current == nullptr) {
+      return false;
+    }
+
+    tTJSVariant children_variant;
+    if (!TryGetProperty(current, TJS_W("children"), &children_variant) ||
+        children_variant.Type() != tvtObject ||
+        children_variant.AsObjectNoAddRef() == nullptr) {
+      return false;
+    }
+
+    iTJSDispatch2* children = children_variant.AsObjectNoAddRef();
+    tTJSVariant next_variant;
+    if (TJS_FAILED(children->PropGetByNum(0, segment, &next_variant, children)) ||
+        next_variant.Type() != tvtObject ||
+        next_variant.AsObjectNoAddRef() == nullptr) {
+      return false;
+    }
+
+    current_variant = next_variant;
+  }
+
+  *out_item_variant = current_variant;
+  return true;
+}
+
+engine_result_t CopyUtf8StringToBuffer(const std::string& text, char* out_buffer,
+                                       uint32_t buffer_size,
+                                       uint32_t* out_bytes_written) {
+  if (out_bytes_written == nullptr) {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "out_bytes_written is null");
+  }
+  if (out_buffer == nullptr || buffer_size == 0) {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "out_buffer is null or buffer_size is 0");
+  }
+
+  const uint32_t copy_bytes = static_cast<uint32_t>(
+      std::min<size_t>(text.size(), static_cast<size_t>(buffer_size - 1)));
+  if (copy_bytes > 0) {
+    std::memcpy(out_buffer, text.data(), copy_bytes);
+  }
+  out_buffer[copy_bytes] = '\0';
+  *out_bytes_written = copy_bytes;
+  return ENGINE_RESULT_OK;
 }
 
 engine_result_t DispatchInputEventNow(engine_handle_s* impl,
@@ -1909,6 +2201,108 @@ engine_result_t engine_send_input(engine_handle_t handle,
   return ENGINE_RESULT_OK;
 }
 
+engine_result_t engine_get_main_menu_json(engine_handle_t handle,
+                                          char* out_buffer,
+                                          uint32_t buffer_size,
+                                          uint32_t* out_bytes_written) {
+  std::lock_guard<std::recursive_mutex> registry_guard(g_registry_mutex);
+  engine_handle_s* impl = nullptr;
+  auto result = ValidateHandleLocked(handle, &impl);
+  if (result != ENGINE_RESULT_OK) {
+    return result;
+  }
+
+  std::lock_guard<std::recursive_mutex> guard(impl->mutex);
+  result = ValidateHandleThreadLocked(impl);
+  if (result != ENGINE_RESULT_OK) {
+    return result;
+  }
+  if (impl->state != ToStateValue(EngineState::kOpened) &&
+      impl->state != ToStateValue(EngineState::kPaused)) {
+    return SetHandleErrorAndReturnLocked(
+        impl, ENGINE_RESULT_INVALID_STATE,
+        "engine_open_game must succeed before engine_get_main_menu_json");
+  }
+
+  const std::string json = BuildMainMenuJson();
+  result = CopyUtf8StringToBuffer(json, out_buffer, buffer_size, out_bytes_written);
+  if (result != ENGINE_RESULT_OK) {
+    return result;
+  }
+
+  ClearHandleErrorLocked(impl);
+  SetThreadError(nullptr);
+  return ENGINE_RESULT_OK;
+}
+
+engine_result_t engine_activate_menu_item(engine_handle_t handle,
+                                          const char* item_path_utf8) {
+  if (item_path_utf8 == nullptr || item_path_utf8[0] == '\0') {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "item_path_utf8 is null or empty");
+  }
+
+  std::lock_guard<std::recursive_mutex> registry_guard(g_registry_mutex);
+  engine_handle_s* impl = nullptr;
+  auto result = ValidateHandleLocked(handle, &impl);
+  if (result != ENGINE_RESULT_OK) {
+    return result;
+  }
+
+  std::lock_guard<std::recursive_mutex> guard(impl->mutex);
+  result = ValidateHandleThreadLocked(impl);
+  if (result != ENGINE_RESULT_OK) {
+    return result;
+  }
+  if (impl->state != ToStateValue(EngineState::kOpened) &&
+      impl->state != ToStateValue(EngineState::kPaused)) {
+    return SetHandleErrorAndReturnLocked(
+        impl, ENGINE_RESULT_INVALID_STATE,
+        "engine_open_game must succeed before engine_activate_menu_item");
+  }
+
+  std::vector<tjs_int> path_segments;
+  if (!ParseMenuPath(item_path_utf8, &path_segments)) {
+    return SetHandleErrorAndReturnLocked(impl, ENGINE_RESULT_INVALID_ARGUMENT,
+                                         "invalid menu item path");
+  }
+
+  tTJSVariant item_variant;
+  if (!ResolveMenuItemByPath(path_segments, &item_variant) ||
+      item_variant.Type() != tvtObject ||
+      item_variant.AsObjectNoAddRef() == nullptr) {
+    return SetHandleErrorAndReturnLocked(impl, ENGINE_RESULT_INVALID_ARGUMENT,
+                                         "menu item path not found");
+  }
+
+  iTJSDispatch2* item = item_variant.AsObjectNoAddRef();
+  if (!TryGetBoolProperty(item, TJS_W("enabled"), true) ||
+      !TryGetBoolProperty(item, TJS_W("visible"), true)) {
+    return SetHandleErrorAndReturnLocked(impl, ENGINE_RESULT_INVALID_STATE,
+                                         "menu item is disabled or hidden");
+  }
+
+  tTJSVariant fire_click_variant;
+  if (!TryGetProperty(item, TJS_W("fireClick"), &fire_click_variant) ||
+      fire_click_variant.Type() != tvtObject ||
+      fire_click_variant.AsObjectNoAddRef() == nullptr) {
+    return SetHandleErrorAndReturnLocked(impl, ENGINE_RESULT_NOT_SUPPORTED,
+                                         "menu item cannot be activated");
+  }
+
+  tTJSVariantClosure fire_click = fire_click_variant.AsObjectClosureNoAddRef();
+  const tjs_error call_result =
+      fire_click.FuncCall(0, nullptr, nullptr, nullptr, 0, nullptr, item);
+  if (TJS_FAILED(call_result)) {
+    return SetHandleErrorAndReturnLocked(impl, ENGINE_RESULT_INTERNAL_ERROR,
+                                         "menu item activation failed");
+  }
+
+  ClearHandleErrorLocked(impl);
+  SetThreadError(nullptr);
+  return ENGINE_RESULT_OK;
+}
+
 engine_result_t engine_set_render_target_iosurface(engine_handle_t handle,
                                                     uint32_t iosurface_id,
                                                     uint32_t width,
@@ -2799,6 +3193,43 @@ engine_result_t engine_send_input(engine_handle_t handle,
   impl->last_error.clear();
   SetThreadError(nullptr);
   return ENGINE_RESULT_OK;
+}
+
+engine_result_t engine_get_main_menu_json(engine_handle_t handle,
+                                          char* out_buffer,
+                                          uint32_t buffer_size,
+                                          uint32_t* out_bytes_written) {
+  (void)handle;
+  if (out_bytes_written == nullptr) {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "out_bytes_written is null");
+  }
+  if (out_buffer == nullptr || buffer_size == 0) {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "out_buffer is null or buffer_size is 0");
+  }
+
+  const char* empty_menu = "[]";
+  const uint32_t copy_bytes = static_cast<uint32_t>(
+      std::min<size_t>(2u, static_cast<size_t>(buffer_size - 1)));
+  if (copy_bytes > 0) {
+    std::memcpy(out_buffer, empty_menu, copy_bytes);
+  }
+  out_buffer[copy_bytes] = '\0';
+  *out_bytes_written = copy_bytes;
+  SetThreadError(nullptr);
+  return ENGINE_RESULT_OK;
+}
+
+engine_result_t engine_activate_menu_item(engine_handle_t handle,
+                                          const char* item_path_utf8) {
+  (void)handle;
+  if (item_path_utf8 == nullptr || item_path_utf8[0] == '\0') {
+    return SetThreadErrorAndReturn(ENGINE_RESULT_INVALID_ARGUMENT,
+                                   "item_path_utf8 is null or empty");
+  }
+  return SetThreadErrorAndReturn(ENGINE_RESULT_NOT_SUPPORTED,
+                                 "engine_activate_menu_item is not supported in stub build");
 }
 
 engine_result_t engine_set_render_target_iosurface(engine_handle_t handle,
