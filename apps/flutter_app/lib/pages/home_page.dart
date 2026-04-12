@@ -14,6 +14,7 @@ import '../services/game_manager.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
+import '../widgets/app_dynamic_widgets.dart';
 import 'game_detail_page.dart';
 import 'game_page.dart';
 import 'settings_page.dart';
@@ -908,10 +909,13 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.videogame_asset_off,
-              size: 72,
-              color: colorScheme.primary.withValues(alpha: 0.3),
+            AppLoopingFloat(
+              offsetAmount: 6.0,
+              child: Icon(
+                Icons.videogame_asset_off,
+                size: 72,
+                color: colorScheme.primary.withValues(alpha: 0.3),
+              ),
             ),
             const SizedBox(height: 32),
             Text(
@@ -1069,34 +1073,37 @@ class _CoverCardState extends State<_CoverCard> {
       scale: _scale,
       duration: AppAnimations.quick,
       curve: AppAnimations.warmEaseOut,
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
-          ),
-        ),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildBackground(colorScheme),
-            _buildGradientOverlay(),
-            _buildTitleOverlay(game),
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: widget.onTap,
-                onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
-                onTapUp: (_) => setState(() => _scale = 1.0),
-                onTapCancel: () => setState(() => _scale = 1.0),
-                onLongPress: () => _showContextMenu(context),
-                onSecondaryTap: () => _showContextMenu(context),
-              ),
+      child: Hero(
+        tag: 'cover_card_${game.path}',
+        child: Card(
+          clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outlineVariant,
+              width: 1,
             ),
-          ],
+          ),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _buildBackground(colorScheme),
+              _buildGradientOverlay(),
+              _buildTitleOverlay(game),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: widget.onTap,
+                  onTapDown: (_) => setState(() => _scale = AppAnimations.cardPressScale),
+                  onTapUp: (_) => setState(() => _scale = 1.0),
+                  onTapCancel: () => setState(() => _scale = 1.0),
+                  onLongPress: () => _showContextMenu(context),
+                  onSecondaryTap: () => _showContextMenu(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1104,19 +1111,13 @@ class _CoverCardState extends State<_CoverCard> {
 
   Widget _buildBackground(ColorScheme colorScheme) {
     if (_hasCover) {
-      return Hero(
-        tag: 'cover_card_${game.path}',
-        child: Image.file(
-          File(game.coverPath!),
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
-        ),
+      return Image.file(
+        File(game.coverPath!),
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildPlaceholder(colorScheme),
       );
     }
-    return Hero(
-      tag: 'cover_card_${game.path}',
-      child: _buildPlaceholder(colorScheme),
-    );
+    return _buildPlaceholder(colorScheme);
   }
 
   Widget _buildPlaceholder(ColorScheme colorScheme) {

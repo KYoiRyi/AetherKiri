@@ -15,6 +15,7 @@ import '../services/game_metadata_scraper.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_animations.dart';
 import '../utils/xp3_utils.dart';
+import '../widgets/app_dynamic_widgets.dart';
 import 'scrape_select_page.dart';
 
 class GameDetailResult {
@@ -541,30 +542,27 @@ class _GameDetailPageState extends State<GameDetailPage> {
   /// 顶部居中卡片：仅封面
   Widget _buildTopCoverCard(ColorScheme colorScheme) {
     final height = _coverCardWidth / _coverCardAspectRatio;
-    return Card(
-      elevation: 4,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: SizedBox(
-        width: _coverCardWidth,
-        height: height,
-        child: _hasCover
-            ? Hero(
-                tag: 'cover_card_${game.path}',
-                child: Image.file(
+    return Hero(
+      tag: 'cover_card_${game.path}',
+      child: Card(
+        elevation: 4,
+        shadowColor: colorScheme.shadow.withValues(alpha: 0.12),
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: SizedBox(
+          width: _coverCardWidth,
+          height: height,
+          child: _hasCover
+              ? Image.file(
                   File(game.coverPath!),
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) =>
                       _buildCoverPlaceholder(colorScheme, height),
-                ),
-              )
-            : Hero(
-                tag: 'cover_card_${game.path}',
-                child: _buildCoverPlaceholder(colorScheme, height),
-              ),
+                )
+              : _buildCoverPlaceholder(colorScheme, height),
+        ),
       ),
     );
   }
@@ -694,7 +692,7 @@ class _GameDetailPageState extends State<GameDetailPage> {
   Widget _buildLaunchButton(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: FilledButton.icon(
+      child: AppBreathingButton(
         onPressed: () {
           gm.markPlayed(game.path);
           Navigator.of(context).pop(
@@ -703,13 +701,6 @@ class _GameDetailPageState extends State<GameDetailPage> {
         },
         icon: const Icon(Icons.play_arrow_rounded),
         label: Text(l10n.launchGame),
-        style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
       ),
     );
   }
@@ -727,36 +718,36 @@ class _GameDetailPageState extends State<GameDetailPage> {
             width: 1,
           ),
         ),
-        child: Column(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.image_outlined),
-              title: Text(l10n.setCover),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _setCover,
-            ),
-            const Divider(height: 1, indent: 56),
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: Text(l10n.rename),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _rename,
-            ),
-            const Divider(height: 1, indent: 56),
-            ListTile(
-              leading: const Icon(Icons.cloud_download_outlined),
-              title: Text(l10n.scrapeMetadata),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _openScrape,
-            ),
-            const Divider(height: 1, indent: 56),
-            ListTile(
-              leading: Icon(_isXp3 ? Icons.unarchive_outlined : Icons.archive_outlined),
-              title: Text(_isXp3 ? l10n.unpackXp3 : l10n.packXp3),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: _packUnpack,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            children: [
+              AppBouncingTile(
+                leading: const Icon(Icons.image_outlined),
+                title: Text(l10n.setCover),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _setCover,
+              ),
+              AppBouncingTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: Text(l10n.rename),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _rename,
+              ),
+              AppBouncingTile(
+                leading: const Icon(Icons.cloud_download_outlined),
+                title: Text(l10n.scrapeMetadata),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _openScrape,
+              ),
+              AppBouncingTile(
+                leading: Icon(_isXp3 ? Icons.unarchive_outlined : Icons.archive_outlined),
+                title: Text(_isXp3 ? l10n.unpackXp3 : l10n.packXp3),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _packUnpack,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -775,11 +766,15 @@ class _GameDetailPageState extends State<GameDetailPage> {
             width: 1,
           ),
         ),
-        child: ListTile(
-          leading: Icon(Icons.delete_outline, color: colorScheme.error),
-          title: Text(l10n.remove, style: TextStyle(color: colorScheme.error)),
-          trailing: Icon(Icons.chevron_right, color: colorScheme.error),
-          onTap: _remove,
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: AppBouncingTile(
+            leading: const Icon(Icons.delete_outline),
+            title: Text(l10n.remove),
+            trailing: const Icon(Icons.chevron_right),
+            color: colorScheme.error,
+            onTap: _remove,
+          ),
         ),
       ),
     );
