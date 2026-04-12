@@ -1695,7 +1695,7 @@ class _GameMenuDialogState extends State<_GameMenuDialog> {
               child: ListView.separated(
                 shrinkWrap: true,
                 itemCount: _currentEntries.length,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, _) =>
                     const Divider(color: Colors.white12, height: 1),
                 itemBuilder: (context, index) {
                   final entry = _currentEntries[index];
@@ -1737,7 +1737,7 @@ class _GameMenuDialogState extends State<_GameMenuDialog> {
                             try {
                               await widget.onActivate(entry);
                               if (mounted) {
-                                Navigator.of(context).pop();
+                                Navigator.of(this.context).pop();
                               }
                             } finally {
                               if (mounted) {
