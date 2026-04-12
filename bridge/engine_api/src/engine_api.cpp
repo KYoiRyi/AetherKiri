@@ -46,7 +46,9 @@ void krkr_GetSurfaceDimensions(uint32_t*, uint32_t*);
 #include "base/ScriptMgnIntf.h"
 #include "base/SysInitIntf.h"
 #include "base/impl/SysInitImpl.h"
+#include "base/impl/SystemImpl.h"
 #include "utils/DebugIntf.h"
+#include "base/KAGParser.h"
 #include "visual/GraphicsLoaderIntf.h"
 #include "visual/WindowIntf.h"
 #include "visual/ogl/ogl_common.h"
@@ -588,6 +590,7 @@ void TeardownEmbeddedRuntime(engine_handle_t handle, engine_handle_s* impl) {
 #if defined(_WIN32)
   TVPResetDirectSoundForRestart();
 #endif
+  TVPResetKAGParserStateForRestart();
   TVPResetEventStateForRestart();
   TVPResetVariantStateForRestart();
   TVPResetScriptEngineStateForRestart();

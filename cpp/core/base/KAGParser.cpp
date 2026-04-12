@@ -247,6 +247,7 @@ typedef tTJSHashCache<ttstr, tTVPScenarioCacheItemHolder, tTJSHashFunc<ttstr>,
                       (TVP_SCENARIO_MAX_CACHE_SIZE * 2)>
     tTVPScenarioCache;
 tTVPScenarioCache TVPScenarioCache(TVP_SCENARIO_MAX_CACHE_SIZE);
+static tTJSVariant *TVPKAGCharCache[65536] = {};
 
 //---------------------------------------------------------------------------
 void TVPClearScnearioCache() { TVPScenarioCache.Clear(); }
@@ -261,6 +262,15 @@ struct tTVPClearScenarioCacheCallback : public tTVPCompactEventCallbackIntf {
 } static TVPClearScenarioCacheCallback;
 
 static bool TVPClearScenarioCacheCallbackInit = false;
+
+void TVPResetKAGParserStateForRestart() {
+    TVPClearScnearioCache();
+    TVPClearScenarioCacheCallbackInit = false;
+    for(auto &entry : TVPKAGCharCache) {
+        delete entry;
+        entry = nullptr;
+    }
+}
 
 //---------------------------------------------------------------------------
 tTVPScenarioCacheItem *TVPGetScenario(const ttstr &storagename, bool isstring) {
@@ -1608,16 +1618,14 @@ parse_start:
                     DicObj->PropSetByVS(TJS_MEMBERENSURE,
                                         __tag_name.AsVariantStringNoAddRef(),
                                         &tag_val, DicObj);
-                    // Process-lifetime cache: intentionally never freed
-                    static tTJSVariant *sCharCache[65536] = {};
                     tTJSVariant *pCachedVal = nullptr;
                     if((unsigned)ch < 65536)
-                        pCachedVal = sCharCache[(unsigned)ch];
+                        pCachedVal = TVPKAGCharCache[(unsigned)ch];
                     if(!pCachedVal) {
                         pCachedVal = new tTJSVariant(
                             TJS::TJSMapGlobalStringMap(ttstr(&ch, 1)));
                         if((unsigned)ch < 65536)
-                            sCharCache[(unsigned)ch] = pCachedVal;
+                            TVPKAGCharCache[(unsigned)ch] = pCachedVal;
                     }
                     static ttstr text_name(
                         TJS::TJSMapGlobalStringMap(TJS_W("text")));

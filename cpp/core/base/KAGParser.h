@@ -371,6 +371,7 @@ public:
 };
 
 extern iTJSDispatch2 *TVPCreateNativeClass_KAGParser();
+extern void TVPResetKAGParserStateForRestart();
 
 
 #endif
