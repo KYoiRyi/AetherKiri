@@ -30,7 +30,7 @@ public:
         return tTJSVariant(0);
     }
 
-    void setHMENU(const tTJSVariant& v) {}
+    void setHMENU(tTJSVariant v) {}
 };
 
 NCB_GET_INSTANCE_HOOK(MenuItemExt) {
@@ -66,7 +66,7 @@ public:
         return menuVar;
     }
 
-    void setMenu(const tTJSVariant& v) {
+    void setMenu(tTJSVariant v) {
         menuVar = v;
     }
 };
