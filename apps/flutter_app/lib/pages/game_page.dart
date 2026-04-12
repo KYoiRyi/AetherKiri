@@ -120,6 +120,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     _bridge = widget.engineBridgeBuilder(ffiLibraryPath: widget.ffiLibraryPath);
     _loadSettings();
     _applyOrientation();
+    unawaited(_enterFullscreenMode());
     _log('Initializing engine for: ${widget.gamePath}');
     if (widget.ffiLibraryPath != null) {
       _log('Using custom dylib: ${widget.ffiLibraryPath}');
@@ -259,6 +260,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       unawaited(_finalizePlaySession());
     }
     unawaited(_destroyEngine());
+    unawaited(_restoreSystemUiOverlays());
     _restoreOrientation();
     super.dispose();
   }
@@ -281,6 +283,7 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         if (pauseOnLifecycle) {
+          unawaited(_enterFullscreenMode());
           unawaited(_resumeForLifecycle());
         }
         break;
@@ -856,6 +859,26 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   void _restoreOrientation() {
     if (!Platform.isAndroid && !Platform.isIOS) return;
     SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+  }
+
+  Future<void> _enterFullscreenMode() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+    if (Platform.isAndroid) {
+      await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      return;
+    }
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: <SystemUiOverlay>[],
+    );
+  }
+
+  Future<void> _restoreSystemUiOverlays() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return;
+    await SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
   }
 
   /// Apply the current fps_limit setting to the C++ engine layer.
