@@ -365,6 +365,7 @@ tTJSNI_BaseLayer::tTJSNI_BaseLayer() {
     AttentionLeft = AttentionTop = 0;
 
     Enabled = true;
+    SelProcessLock = false;
     Focusable = false;
     JoinFocusChain = true;
 
@@ -8351,6 +8352,21 @@ tTJSNC_Layer::tTJSNC_Layer() : tTJSNativeClass(TJS_W("Layer")) {
     }
     TJS_END_NATIVE_METHOD_DECL(/*func. name*/ setSizeToImageSize)
     //----------------------------------------------------------------------
+    TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ onButtonClick) {
+        TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                                /*var. type*/ tTJSNI_Layer);
+
+        tTJSVariantClosure obj = _this->GetActionOwnerNoAddRef();
+        if(obj.Object) {
+            TVP_ACTION_INVOKE_BEGIN(1, "onButtonClick", objthis);
+            TVP_ACTION_INVOKE_MEMBER("linkNum");
+            TVP_ACTION_INVOKE_END(obj);
+        }
+
+        return TJS_S_OK;
+    }
+    TJS_END_NATIVE_METHOD_DECL(/*func. name*/ onButtonClick)
+    //----------------------------------------------------------------------
     TJS_BEGIN_NATIVE_METHOD_DECL(/*func. name*/ setImagePos) {
         TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
                                 /*var. type*/ tTJSNI_Layer);
@@ -10995,6 +11011,24 @@ TJS_BEGIN_NATIVE_PROP_SETTER {
 TJS_END_NATIVE_PROP_SETTER
 }
 TJS_END_NATIVE_PROP_DECL(enabled)
+//----------------------------------------------------------------------
+TJS_BEGIN_NATIVE_PROP_DECL(selProcessLock){ TJS_BEGIN_NATIVE_PROP_GETTER{
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_Layer);
+*result = _this->GetSelProcessLock();
+return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_GETTER
+
+TJS_BEGIN_NATIVE_PROP_SETTER {
+    TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,
+                            /*var. type*/ tTJSNI_Layer);
+    _this->SetSelProcessLock(param->operator bool());
+    return TJS_S_OK;
+}
+TJS_END_NATIVE_PROP_SETTER
+}
+TJS_END_NATIVE_PROP_DECL(selProcessLock)
 //----------------------------------------------------------------------
 TJS_BEGIN_NATIVE_PROP_DECL(nodeEnabled){ TJS_BEGIN_NATIVE_PROP_GETTER{
     TJS_GET_NATIVE_INSTANCE(/*var. name*/ _this,

@@ -527,6 +527,7 @@ private:
     bool Enabled; // is layer enabled for input?
     bool EnabledWork; // work are for delivering onNodeEnabled or
                       // onNodeDisabled
+    bool SelProcessLock; // compatibility flag used by older UI scripts
     bool Focusable; // is layer focusable ?
     bool JoinFocusChain; // does layer join the focus chain ?
     tTJSNI_BaseLayer *FocusWork;
@@ -693,6 +694,8 @@ public:
     void SetEnabled(bool b);
     bool ParentEnabled();
     bool GetEnabled() const { return Enabled; }
+    void SetSelProcessLock(bool b) { SelProcessLock = b; }
+    bool GetSelProcessLock() const { return SelProcessLock; }
 
     bool GetNodeEnabled() {
         return GetEnabled() && ParentEnabled() && !IsDisabledByMode();
