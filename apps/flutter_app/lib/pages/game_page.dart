@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../engine/engine_bridge.dart';
@@ -102,9 +101,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
   bool _startupPollInFlight = false;
   Timer? _memoryStatsTimer;
   bool _memoryStatsPollInFlight = false;
-  Directory? _debugDumpDirectory;
-  File? _startupRawLogFile;
-  File? _menuDumpLogFile;
 
   String _playSessionId = '';
   int _playActiveMillis = 0;
@@ -122,7 +118,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _forceLandscape = widget.forceLandscape;
     _bridge = widget.engineBridgeBuilder(ffiLibraryPath: widget.ffiLibraryPath);
-    unawaited(_resetDebugDumpFiles());
     _loadSettings();
     _applyOrientation();
     _log('Initializing engine for: ${widget.gamePath}');
@@ -757,7 +752,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
       if (raw.isEmpty) {
         break;
       }
-      unawaited(_appendStartupRawLog(raw));
       final lines = raw.split('\n');
       for (final line in lines) {
         final trimmed = line.trim();
@@ -943,106 +937,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
     }
   }
 
-  Future<Directory> _ensureDebugDumpDirectory() async {
-    if (_debugDumpDirectory != null) {
-      return _debugDumpDirectory!;
-    }
-
-    final candidates = <String>[
-      _normalizeGamePath(widget.gamePath),
-      widget.gamePath,
-    ];
-    for (final candidate in candidates) {
-      if (candidate.isEmpty) continue;
-      try {
-        final dir = Directory(candidate);
-        if (await dir.exists()) {
-          _debugDumpDirectory = dir;
-          return dir;
-        }
-      } catch (_) {
-        // Fall through to application support directory.
-      }
-    }
-
-    final supportDir = await getApplicationSupportDirectory();
-    final fallbackDir = Directory('${supportDir.path}/debug_dumps');
-    await fallbackDir.create(recursive: true);
-    _debugDumpDirectory = fallbackDir;
-    return fallbackDir;
-  }
-
-  Future<File> _getStartupRawLogFile() async {
-    if (_startupRawLogFile != null) {
-      return _startupRawLogFile!;
-    }
-    final dir = await _ensureDebugDumpDirectory();
-    _startupRawLogFile = File('${dir.path}/aether_startup_raw.log');
-    return _startupRawLogFile!;
-  }
-
-  Future<File> _getMenuDumpLogFile() async {
-    if (_menuDumpLogFile != null) {
-      return _menuDumpLogFile!;
-    }
-    final dir = await _ensureDebugDumpDirectory();
-    _menuDumpLogFile = File('${dir.path}/aether_game_menu_dump.log');
-    return _menuDumpLogFile!;
-  }
-
-  Future<void> _resetDebugDumpFiles() async {
-    try {
-      final startupFile = await _getStartupRawLogFile();
-      await startupFile.writeAsString('', flush: true);
-      final menuFile = await _getMenuDumpLogFile();
-      await menuFile.writeAsString('', flush: true);
-      _log('Debug dumps ready: ${startupFile.path} / ${menuFile.path}');
-    } catch (error) {
-      _log('Failed to prepare debug dump files: $error');
-    }
-  }
-
-  Future<void> _appendStartupRawLog(String raw) async {
-    if (raw.isEmpty) return;
-    try {
-      final file = await _getStartupRawLogFile();
-      await file.writeAsString(raw, mode: FileMode.append, flush: true);
-    } catch (error) {
-      _log('Failed to write startup raw log: $error');
-    }
-  }
-
-  Future<void> _writeGameMenuDump(
-    String rawJson,
-    List<_GameMenuEntry> entries,
-  ) async {
-    final buffer = StringBuffer();
-    buffer.writeln('=== RAW JSON ===');
-    buffer.writeln(rawJson);
-    buffer.writeln();
-    buffer.writeln('=== VISIBLE ENTRIES ===');
-    for (final entry in entries) {
-      buffer.writeln('${entry.path}\t${entry.caption}');
-    }
-    buffer.writeln();
-    buffer.writeln('=== PRETTY JSON ===');
-    try {
-      buffer.writeln(
-        const JsonEncoder.withIndent('  ').convert(jsonDecode(rawJson)),
-      );
-    } catch (_) {
-      buffer.writeln('(pretty print failed)');
-    }
-
-    try {
-      final file = await _getMenuDumpLogFile();
-      await file.writeAsString(buffer.toString(), flush: true);
-      _log('Game menu dump written: ${file.path}');
-    } catch (error) {
-      _log('Failed to write game menu dump: $error');
-    }
-  }
-
   // --- UI ---
 
   void _toggleOverlay() {
@@ -1076,7 +970,6 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
         .map(_GameMenuEntry.fromJson)
         .where((entry) => entry.visible)
         .toList(growable: false);
-    unawaited(_writeGameMenuDump(rawJson, entries));
     if (entries.isEmpty) {
       _log('Game menu is empty');
       return;
