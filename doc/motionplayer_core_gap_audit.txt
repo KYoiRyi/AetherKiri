@@ -97,6 +97,19 @@ Confirmed compatible or non-blocking
    web tree mainly because AetherKiri has extra bitmap-eviction recovery logic.
    Current assessment: non-blocking for motionplayer.
 
+7. Script and event bridge headers are already aligned with the web project.
+   Verified:
+   - cpp/core/base/ScriptMgnIntf.h
+   - cpp/core/base/EventIntf.h
+
+8. The PSB value-layer types referenced by motionplayer are present in
+   AetherKiri's psbfile implementation.
+   Confirmed at least:
+   - PSBNumberType
+   - PSBResource
+   - PSBDictionary
+   - PSBList
+
 Pending audit targets
 1. LayerIntf.cpp still differs from kirikiriroid2-web beyond the bezier/mesh methods now ported.
    Need to continue checking whether remaining diffs matter to motionplayer runtime behavior.
@@ -112,6 +125,14 @@ Pending audit targets
 
 4. No compile validation yet against third-party headers such as spdlog.
    A single-file syntax check stopped at missing external include paths, so unresolved compile-time API mismatches may still remain.
+
+5. High-risk build-system issue still open.
+   AetherKiri does not currently mirror kirikiriroid2-web's
+   `krkr2plugins_ncbind` plus `whole-archive/force_load` retention path.
+   Since motionplayer registration depends heavily on static NCB objects in
+   translation units such as `cpp/plugins/motionplayer/main.cpp`, link-time
+   dead stripping remains a plausible failure mode even when source-level APIs
+   look aligned.
 
 Recommended next checks
 1. Continue diffing LayerIntf.cpp against kirikiriroid2-web, but only for methods reachable from motionplayer.
