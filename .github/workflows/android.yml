@@ -5,18 +5,22 @@ on:
 
 permissions:
   contents: read
-  actions: write
+
+env:
+  VCPKG_CACHE_TAG: android-vcpkg-cache
+  VCPKG_CACHE_ASSET: android-vcpkg-cache.tar.zst
+  VCPKG_LEGACY_CACHE_RESTORE_KEY: Linux-android-vcpkg-
 
 jobs:
   build:
     name: Build Android App
     runs-on: ubuntu-latest
+    outputs:
+      vcpkg-cache-ready: ${{ steps.detect-vcpkg-cache.outputs.changed }}
+      build-succeeded: ${{ steps.build-android.outcome == 'success' && 'true' || 'false' }}
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
       CCACHE_DIR: ${{ github.workspace }}/.ccache
-      VCPKG_CACHE_PREFIX: ${{ runner.os }}-android-vcpkg
-      VCPKG_CACHE_SHARED_PREFIX: ${{ runner.os }}-android-vcpkg-shared-
-      VCPKG_CACHE_SAVE_KEY: ${{ runner.os }}-android-vcpkg-shared-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Checkout Repository
@@ -25,7 +29,7 @@ jobs:
       - name: Install Build Systems
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build pkg-config autoconf automake libtool gettext bison flex curl unzip zip ccache jq
+          sudo apt-get install -y cmake ninja-build pkg-config autoconf automake libtool gettext bison flex curl unzip zip zstd ccache jq
 
       - name: Restore ccache
         id: restore-ccache
@@ -54,19 +58,47 @@ jobs:
         run: |
           flutter config --no-analytics
 
-      - name: Restore vcpkg cache
-        id: restore-vcpkg
+      - name: Restore shared vcpkg cache from release asset
+        id: restore-release-vcpkg
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.cache/vcpkg"
+          if gh release download "${VCPKG_CACHE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "${VCPKG_CACHE_ASSET}" \
+            --dir "${RUNNER_TEMP}/vcpkg-release-cache"; then
+            mkdir -p "${RUNNER_TEMP}/vcpkg-release-cache/extracted"
+            tar --zstd -xf "${RUNNER_TEMP}/vcpkg-release-cache/${VCPKG_CACHE_ASSET}" \
+              -C "${RUNNER_TEMP}/vcpkg-release-cache/extracted"
+            cp -a "${RUNNER_TEMP}/vcpkg-release-cache/extracted/workspace/." "${GITHUB_WORKSPACE}/" || true
+            cp -a "${RUNNER_TEMP}/vcpkg-release-cache/extracted/home-cache/." "$HOME/.cache/" || true
+            echo "hit=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hit=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore legacy vcpkg cache fallback
+        if: steps.restore-release-vcpkg.outputs.hit != 'true'
+        id: restore-legacy-vcpkg
         uses: actions/cache/restore@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-android-vcpkg-shared
+          key: ${{ runner.os }}-android-vcpkg-legacy-bootstrap
           restore-keys: |
-            ${{ env.VCPKG_CACHE_SHARED_PREFIX }}
-            ${{ env.VCPKG_CACHE_PREFIX }}-
+            ${{ env.VCPKG_LEGACY_CACHE_RESTORE_KEY }}
+
+      - name: Mark vcpkg cache baseline
+        run: |
+          mkdir -p "$HOME/.cache/vcpkg/archives"
+          touch "${RUNNER_TEMP}/vcpkg-cache-before-build.marker"
 
       - name: Build Android Release
+        id: build-android
+        continue-on-error: true
         run: |
           chmod +x ./build.sh
           export CMAKE_C_COMPILER_LAUNCHER=ccache
@@ -74,66 +106,97 @@ jobs:
           export NDK_CCACHE=ccache
           ./build.sh android release --jobs=4
 
+      - name: Detect vcpkg cache updates
+        id: detect-vcpkg-cache
+        if: always()
+        run: |
+          set -euo pipefail
+          if find .devtools/vcpkg "$HOME/.cache/vcpkg/archives" -type f -newer "${RUNNER_TEMP}/vcpkg-cache-before-build.marker" | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pack shared vcpkg cache
+        if: always() && steps.detect-vcpkg-cache.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          rm -rf "${RUNNER_TEMP}/vcpkg-cache-payload"
+          mkdir -p "${RUNNER_TEMP}/vcpkg-cache-payload/workspace/.devtools"
+          mkdir -p "${RUNNER_TEMP}/vcpkg-cache-payload/home-cache/vcpkg"
+          if [ -d "${GITHUB_WORKSPACE}/.devtools/vcpkg" ]; then
+            cp -a "${GITHUB_WORKSPACE}/.devtools/vcpkg" "${RUNNER_TEMP}/vcpkg-cache-payload/workspace/.devtools/"
+          fi
+          if [ -d "$HOME/.cache/vcpkg/archives" ]; then
+            cp -a "$HOME/.cache/vcpkg/archives" "${RUNNER_TEMP}/vcpkg-cache-payload/home-cache/vcpkg/"
+          fi
+          tar --zstd -cf "${RUNNER_TEMP}/${VCPKG_CACHE_ASSET}" \
+            -C "${RUNNER_TEMP}/vcpkg-cache-payload" \
+            workspace home-cache
+
+      - name: Upload vcpkg cache payload artifact
+        if: always() && steps.detect-vcpkg-cache.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-vcpkg-cache-payload
+          path: ${{ runner.temp }}/${{ env.VCPKG_CACHE_ASSET }}
+          retention-days: 1
+
       - name: Upload Artifact
-        if: success()
+        if: steps.build-android.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: AetherKiri-Android-APK
           path: apps/flutter_app/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 7
 
-      - name: Save vcpkg cache
-        id: save-vcpkg
-        if: success()
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            .devtools/vcpkg
-            ~/.cache/vcpkg/archives
-          key: ${{ env.VCPKG_CACHE_SAVE_KEY }}
-
-      - name: Cleanup old vcpkg caches
-        if: success() && steps.save-vcpkg.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          CURRENT_KEY: ${{ env.VCPKG_CACHE_SAVE_KEY }}
-          SHARED_PREFIX: ${{ env.VCPKG_CACHE_SHARED_PREFIX }}
-          LEGACY_PREFIX: ${{ env.VCPKG_CACHE_PREFIX }}-
-        run: |
-          set -euo pipefail
-
-          cleanup_prefix() {
-            local prefix="$1"
-            local page_json
-            page_json="$(gh api \
-              -H "Accept: application/vnd.github+json" \
-              "/repos/${GITHUB_REPOSITORY}/actions/caches?per_page=100&key=${prefix}")"
-
-            echo "$page_json" | jq -r '.actions_caches[] | @base64' | while read -r entry; do
-              [ -n "$entry" ] || continue
-              local decoded
-              decoded="$(printf '%s' "$entry" | base64 -d)"
-              local cache_id cache_key
-              cache_id="$(printf '%s' "$decoded" | jq -r '.id')"
-              cache_key="$(printf '%s' "$decoded" | jq -r '.key')"
-
-              if [ "$cache_key" = "$CURRENT_KEY" ]; then
-                continue
-              fi
-
-              gh api \
-                --method DELETE \
-                -H "Accept: application/vnd.github+json" \
-                "/repos/${GITHUB_REPOSITORY}/actions/caches/${cache_id}" || true
-            done
-          }
-
-          cleanup_prefix "$SHARED_PREFIX"
-          cleanup_prefix "$LEGACY_PREFIX"
-
       - name: Save ccache
-        if: success() && steps.restore-ccache.outputs.cache-matched-key == ''
+        if: steps.build-android.outcome == 'success' && steps.restore-ccache.outputs.cache-matched-key == ''
         uses: actions/cache/save@v4
         with:
           path: .ccache
           key: ${{ runner.os }}-android-ccache
+
+      - name: Fail build if Android build failed
+        if: steps.build-android.outcome != 'success'
+        run: exit 1
+
+  publish-vcpkg-cache:
+    name: Publish shared Android vcpkg cache
+    runs-on: ubuntu-latest
+    needs: build
+    if: always() && needs.build.outputs.vcpkg-cache-ready == 'true'
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.repository }}-android-vcpkg-cache
+      cancel-in-progress: false
+
+    steps:
+      - name: Download vcpkg cache payload artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-vcpkg-cache-payload
+          path: ${{ runner.temp }}/android-vcpkg-cache
+
+      - name: Ensure cache release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view "${VCPKG_CACHE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1 || \
+          gh release create "${VCPKG_CACHE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${VCPKG_CACHE_TAG}" \
+            --notes "Shared Android vcpkg cache" \
+            --prerelease
+
+      - name: Publish single shared vcpkg cache asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "${VCPKG_CACHE_TAG}" \
+            "${RUNNER_TEMP}/android-vcpkg-cache/${VCPKG_CACHE_ASSET}#${VCPKG_CACHE_ASSET}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --clobber
