@@ -3,6 +3,10 @@ name: Android Build
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   build:
     name: Build Android App
@@ -10,6 +14,9 @@ jobs:
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
       CCACHE_DIR: ${{ github.workspace }}/.ccache
+      VCPKG_CACHE_PREFIX: ${{ runner.os }}-android-vcpkg
+      VCPKG_CACHE_SHARED_PREFIX: ${{ runner.os }}-android-vcpkg-shared-
+      VCPKG_CACHE_SAVE_KEY: ${{ runner.os }}-android-vcpkg-shared-${{ github.run_id }}-${{ github.run_attempt }}
 
     steps:
       - name: Checkout Repository
@@ -54,7 +61,10 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-android-vcpkg
+          key: ${{ runner.os }}-android-vcpkg-shared
+          restore-keys: |
+            ${{ env.VCPKG_CACHE_SHARED_PREFIX }}
+            ${{ env.VCPKG_CACHE_PREFIX }}-
 
       - name: Build Android Release
         run: |
@@ -73,13 +83,53 @@ jobs:
           retention-days: 7
 
       - name: Save vcpkg cache
-        if: success() && steps.restore-vcpkg.outputs.cache-matched-key == ''
+        id: save-vcpkg
+        if: success()
         uses: actions/cache/save@v4
         with:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-android-vcpkg
+          key: ${{ env.VCPKG_CACHE_SAVE_KEY }}
+
+      - name: Cleanup old vcpkg caches
+        if: success() && steps.save-vcpkg.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURRENT_KEY: ${{ env.VCPKG_CACHE_SAVE_KEY }}
+          SHARED_PREFIX: ${{ env.VCPKG_CACHE_SHARED_PREFIX }}
+          LEGACY_PREFIX: ${{ env.VCPKG_CACHE_PREFIX }}-
+        run: |
+          set -euo pipefail
+
+          cleanup_prefix() {
+            local prefix="$1"
+            local page_json
+            page_json="$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${GITHUB_REPOSITORY}/actions/caches?per_page=100&key=${prefix}")"
+
+            echo "$page_json" | jq -r '.actions_caches[] | @base64' | while read -r entry; do
+              [ -n "$entry" ] || continue
+              local decoded
+              decoded="$(printf '%s' "$entry" | base64 -d)"
+              local cache_id cache_key
+              cache_id="$(printf '%s' "$decoded" | jq -r '.id')"
+              cache_key="$(printf '%s' "$decoded" | jq -r '.key')"
+
+              if [ "$cache_key" = "$CURRENT_KEY" ]; then
+                continue
+              fi
+
+              gh api \
+                --method DELETE \
+                -H "Accept: application/vnd.github+json" \
+                "/repos/${GITHUB_REPOSITORY}/actions/caches/${cache_id}" || true
+            done
+          }
+
+          cleanup_prefix "$SHARED_PREFIX"
+          cleanup_prefix "$LEGACY_PREFIX"
 
       - name: Save ccache
         if: success() && steps.restore-ccache.outputs.cache-matched-key == ''
