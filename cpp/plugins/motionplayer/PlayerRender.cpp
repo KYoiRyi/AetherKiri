@@ -1288,21 +1288,13 @@ namespace motion {
                    command.meshDivY < 2) {
                     return false;
                 }
-                auto localMeshPoints =
-                    buildMeshPoints(command.localMeshPoints, 0.0f, 0.0f);
-                if(command.meshType == 1) {
-                    targetLayer->BezierPatchCopy(
-                        localMeshPoints.data(), command.meshDivX,
-                        command.meshDivY, srcBmp.get(), sourceRect, stNearest,
-                        command.clearEnabled);
-                } else if(command.meshType == 2) {
-                    targetLayer->MeshCopy(localMeshPoints.data(),
-                                          command.meshDivX, command.meshDivY,
-                                          srcBmp.get(), sourceRect, stNearest,
-                                          command.clearEnabled);
-                } else {
-                    return false;
-                }
+                // AetherKiri: no mesh/bezier Layer API — fall back to
+                // affine transform using the 4 corner control points.
+                const auto localPts =
+                    buildAffineTrianglePoints(command.localCorners, 0.0f, 0.0f);
+                targetLayer->AffineCopy(localPts.data(), srcBmp.get(),
+                                        sourceRect, stNearest,
+                                        command.clearEnabled);
             }
             detail::logoChainTraceLogf(
                 motionPath, "execute.layerSource", "0x6C7440", _clampedEvalTime,
@@ -1551,26 +1543,14 @@ namespace motion {
                            command.meshDivX < 2 || command.meshDivY < 2) {
                             continue;
                         }
-                        auto worldMeshPoints =
-                            buildMeshPoints(command.worldMeshPoints,
-                                            -0.5f, -0.5f);
-                        if(command.meshType == 1) {
-                            branch = "direct.operateBezierPatch";
-                            renderLayer->OperateBezierPatch(
-                                worldMeshPoints.data(), command.meshDivX,
-                                command.meshDivY, srcBmp.get(), sourceRect,
-                                blendMode, opa, stNearest,
-                                command.clearEnabled);
-                        } else if(command.meshType == 2) {
-                            branch = "direct.operateMesh";
-                            renderLayer->OperateMesh(
-                                worldMeshPoints.data(), command.meshDivX,
-                                command.meshDivY, srcBmp.get(), sourceRect,
-                                blendMode, opa, stNearest,
-                                command.clearEnabled);
-                        } else {
-                            continue;
-                        }
+                        // AetherKiri: no mesh/bezier Layer API — fall back
+                        // to affine transform using the 4 corner control points.
+                        branch = "direct.operateAffine(meshFallback)";
+                        const auto worldPts =
+                            buildAffineTrianglePoints(command.worldCorners, -0.5f, -0.5f);
+                        renderLayer->OperateAffine(
+                            worldPts.data(), srcBmp.get(), sourceRect,
+                            blendMode, opa, stNearest);
                     }
                     detail::logoChainTraceLogf(
                         motionPath, "execute.copy", "0x6C7440",
