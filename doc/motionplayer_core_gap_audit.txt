@@ -142,6 +142,7 @@ Pending audit targets
    `krkr2plugin` at the final link points currently known to matter:
    - top-level runtime target in `CMakeLists.txt`
    - `engine_api` in `bridge/engine_api/CMakeLists.txt`
+   - `motionplayer-dll` test target in `tests/unit-tests/plugins/CMakeLists.txt`
    This reduces the risk of `motionplayer/main.cpp` static NCB registration
    objects being dead-stripped by the linker.
 
