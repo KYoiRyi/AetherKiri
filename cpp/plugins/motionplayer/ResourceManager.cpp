@@ -7,6 +7,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
+#include <cstring>
 
 #include <spdlog/spdlog.h>
 
@@ -21,6 +23,61 @@ namespace {
                            return static_cast<char>(std::tolower(ch));
                        });
         return value;
+    }
+
+    bool tryParseDecryptSeed(const tTJSVariant &value, tjs_int &outSeed) {
+        switch(value.Type()) {
+            case tvtInteger:
+                outSeed = static_cast<tjs_int>(value.AsInteger());
+                return true;
+
+            case tvtReal:
+                outSeed = static_cast<tjs_int>(value.AsReal());
+                return true;
+
+            case tvtString: {
+                const auto seedText = ttstr(value).AsStdString();
+                if(seedText.empty()) {
+                    outSeed = 0;
+                    return true;
+                }
+                char *end = nullptr;
+                const auto parsed =
+                    std::strtoll(seedText.c_str(), &end, 0);
+                if(end == seedText.c_str()) {
+                    return false;
+                }
+                outSeed = static_cast<tjs_int>(parsed);
+                return true;
+            }
+
+            case tvtOctet: {
+                auto *octet = value.AsOctetNoAddRef();
+                if(!octet) {
+                    return false;
+                }
+                const auto *data =
+                    static_cast<const std::uint8_t *>(octet->GetData());
+                const auto length =
+                    static_cast<size_t>(octet->GetLength());
+                if(data == nullptr || length == 0) {
+                    outSeed = 0;
+                    return true;
+                }
+
+                std::uint64_t accum = 0;
+                const auto limit = std::min(length, sizeof(accum));
+                for(size_t index = 0; index < limit; ++index) {
+                    accum |= static_cast<std::uint64_t>(data[index])
+                        << (index * 8);
+                }
+                outSeed = static_cast<tjs_int>(accum);
+                return true;
+            }
+
+            default:
+                return false;
+        }
     }
 }
 
@@ -68,10 +125,11 @@ tjs_error motion::ResourceManager::setEmotePSBDecryptSeed(tTJSVariant *,
     if(count != 1) {
         return TJS_E_BADPARAMCOUNT;
     }
-    if((*p)->Type() != tvtInteger) {
+    tjs_int parsedSeed = 0;
+    if(!tryParseDecryptSeed(*p[0], parsedSeed)) {
         return TJS_E_INVALIDPARAM;
     }
-    _decryptSeed = static_cast<tjs_int>(*p[0]);
+    _decryptSeed = parsedSeed;
     LOGGER->info("setEmotePSBDecryptSeed: {}", _decryptSeed);
     return TJS_S_OK;
 }

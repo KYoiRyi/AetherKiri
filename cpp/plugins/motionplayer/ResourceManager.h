@@ -20,6 +20,9 @@ namespace motion {
         tTJSVariant getLastLoadedModule() const;
         tTJSVariant findLoaded(ttstr path) const;
         [[nodiscard]] static tjs_int getEmotePSBDecryptSeed();
+        [[nodiscard]] static tjs_int getDecryptSeed() {
+            return getEmotePSBDecryptSeed();
+        }
 
         static tjs_error setEmotePSBDecryptSeed(tTJSVariant *r, tjs_int count,
                                                 tTJSVariant **p,
