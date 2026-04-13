@@ -3,28 +3,73 @@
 //
 
 #include "ResourceManager.h"
+#include "tjsDictionary.h"
 
-#include "tjsObject.h"
-#include "psbfile/PSBFile.h"
+#include <algorithm>
+#include <cctype>
+
+#include <spdlog/spdlog.h>
+
+#include "RuntimeSupport.h"
 
 #define LOGGER spdlog::get("plugin")
 
-motion::ResourceManager::ResourceManager(iTJSDispatch2 *kag,
-                                         tjs_int cacheSize) {
-    LOGGER->info("kag: {}, cacheSize: {}", static_cast<void *>(kag), cacheSize);
-    if(cacheSize > 0) {
-        std::lock_guard<std::mutex> lock(_mutex);
-        _cacheLimit = static_cast<size_t>(cacheSize);
-        trimCacheLocked();
+namespace {
+    std::string lowercase(std::string value) {
+        std::transform(value.begin(), value.end(), value.begin(),
+                       [](unsigned char ch) {
+                           return static_cast<char>(std::tolower(ch));
+                       });
+        return value;
     }
+}
+
+motion::ResourceManager::ResourceManager() : _state(std::make_shared<State>()) {}
+
+motion::ResourceManager::ResourceManager(iTJSDispatch2 *kag,
+                                         tjs_int cacheSize) :
+    _state(std::make_shared<State>()) {
+    LOGGER->info("kag: {}, cacheSize: {}", static_cast<void *>(kag), cacheSize);
+
+    // Pre-define ShortCutInitialPadKeyMap on the KAG window if not already set.
+    // The encrypted keybinder.tjs accesses .ShortCutInitialPadKeyMap on the
+    // window object. If undefined, it crashes with "Invalid object context".
+    if(kag) {
+        const tjs_char *padKeys[] = {
+            TJS_W("ShortCutInitialPadKeyMap"),
+            TJS_W("ShortCutInitialGamePadKeyMap"),
+            TJS_W("_proceedingKeyList"),
+            nullptr
+        };
+        for(int i = 0; padKeys[i]; ++i) {
+            tTJSVariant existing;
+            if(TJS_FAILED(kag->PropGet(0, padKeys[i], nullptr, &existing, kag)) ||
+               existing.Type() == tvtVoid) {
+                iTJSDispatch2 *dict = TJSCreateDictionaryObject();
+                if(dict) {
+                    tTJSVariant v(dict, dict);
+                    kag->PropSet(TJS_MEMBERENSURE, padKeys[i], nullptr,
+                                 &v, kag);
+                    dict->Release();
+                }
+            }
+        }
+    }
+}
+
+tjs_int motion::ResourceManager::getEmotePSBDecryptSeed() {
+    return _decryptSeed;
 }
 
 tjs_error motion::ResourceManager::setEmotePSBDecryptSeed(tTJSVariant *,
                                                           tjs_int count,
                                                           tTJSVariant **p,
                                                           iTJSDispatch2 *) {
-    if(count != 1 || !p || !p[0] || (*p)->Type() != tvtInteger) {
+    if(count != 1) {
         return TJS_E_BADPARAMCOUNT;
+    }
+    if((*p)->Type() != tvtInteger) {
+        return TJS_E_INVALIDPARAM;
     }
     _decryptSeed = static_cast<tjs_int>(*p[0]);
     LOGGER->info("setEmotePSBDecryptSeed: {}", _decryptSeed);
@@ -40,95 +85,55 @@ tjs_error motion::ResourceManager::setEmotePSBDecryptFunc(tTJSVariant *r,
 }
 
 tTJSVariant motion::ResourceManager::load(ttstr path) const {
-    auto canonical = path.AsLowerCase().AsStdString();
-    auto file = std::make_shared<PSB::PSBFile>();
-    file->setSeed(_decryptSeed);
-    if(!file->loadPSBFile(path)) {
-        LOGGER->error("emote load file: {} failed", path.AsStdString());
-        iTJSDispatch2 *empty = TJSCreateCustomObject();
-        tTJSVariant result{ empty, empty };
-        empty->Release();
-        return result;
+    const auto rawPath = path.AsStdString();
+    const auto loweredPath = lowercase(rawPath);
+    if(loweredPath.find(".mtn") != std::string::npos) {
+        LOGGER->warn("Motion resource manager load: {}", rawPath);
     }
-    {
-        std::lock_guard<std::mutex> lock(_mutex);
-        _lastLoadedPath = canonical;
-        _loadedFiles[canonical] = file;
-        _cacheOrder.erase(std::remove(_cacheOrder.begin(), _cacheOrder.end(), canonical),
-                          _cacheOrder.end());
-        _cacheOrder.push_back(canonical);
-        trimCacheLocked();
+    const auto loaded = detail::loadPSBVariant(path, _decryptSeed);
+    if(loaded.Type() != tvtVoid && _state) {
+        const auto key = rawPath;
+        _state->loadedModules[key] = loaded;
+        _state->lastLoadedPath = key;
+        _state->lastLoadedModule = loaded;
     }
-
-    iTJSDispatch2 *dic = TJSCreateCustomObject();
-    auto objs = file->getObjects();
-    if(objs != nullptr) {
-        for(const auto &[k, v] : *objs) {
-            tTJSVariant tmp = v->toTJSVal();
-            dic->PropSet(TJS_MEMBERENSURE, ttstr{ k }.c_str(), nullptr, &tmp,
-                         dic);
-        }
-    }
-    tTJSVariant result{ dic, dic };
-    dic->Release();
-    return result;
+    return loaded;
 }
 
-void motion::ResourceManager::unload(const ttstr &path) const {
-    const auto canonical = path.AsLowerCase().AsStdString();
-    std::lock_guard<std::mutex> lock(_mutex);
-    _loadedFiles.erase(canonical);
-    _cacheOrder.erase(std::remove(_cacheOrder.begin(), _cacheOrder.end(), canonical),
-                      _cacheOrder.end());
-    if(_lastLoadedPath == canonical) {
-        _lastLoadedPath.clear();
+void motion::ResourceManager::unload(ttstr path) const {
+    LOGGER->debug("ResourceManager::unload({})", path.AsStdString());
+    if(!_state) {
+        return;
+    }
+
+    const auto key = path.AsStdString();
+    _state->loadedModules.erase(key);
+    if(_state->lastLoadedPath == key) {
+        _state->lastLoadedPath.clear();
+        _state->lastLoadedModule.Clear();
     }
 }
 
 void motion::ResourceManager::clearCache() const {
-    std::lock_guard<std::mutex> lock(_mutex);
-    _loadedFiles.clear();
-    _cacheOrder.clear();
-    _lastLoadedPath.clear();
-}
-
-ttstr motion::ResourceManager::getLastLoadedPath() {
-    std::lock_guard<std::mutex> lock(_mutex);
-    return ttstr(_lastLoadedPath.c_str());
-}
-
-bool motion::ResourceManager::hasLoadedPath(const ttstr &path) {
-    std::lock_guard<std::mutex> lock(_mutex);
-    return _loadedFiles.find(path.AsLowerCase().AsStdString()) != _loadedFiles.end();
-}
-
-int motion::ResourceManager::getDecryptSeed() {
-    return _decryptSeed;
-}
-
-std::shared_ptr<PSB::PSBFile>
-motion::ResourceManager::getLoadedFile(const ttstr &path) {
-    const auto canonical = path.AsLowerCase().AsStdString();
-    std::lock_guard<std::mutex> lock(_mutex);
-    auto it = _loadedFiles.find(canonical);
-    if(it == _loadedFiles.end()) {
-        return nullptr;
+    LOGGER->debug("ResourceManager::clearCache()");
+    if(!_state) {
+        return;
     }
-    return it->second;
+
+    _state->loadedModules.clear();
+    _state->lastLoadedPath.clear();
+    _state->lastLoadedModule.Clear();
 }
 
-void motion::ResourceManager::trimCacheLocked() {
-    while(_cacheLimit > 0 && _loadedFiles.size() > _cacheLimit &&
-          !_cacheOrder.empty()) {
-        const auto victim = _cacheOrder.front();
-        _cacheOrder.pop_front();
-        auto it = _loadedFiles.find(victim);
-        if(it == _loadedFiles.end()) {
-            continue;
-        }
-        if(_lastLoadedPath == victim) {
-            _lastLoadedPath.clear();
-        }
-        _loadedFiles.erase(it);
+tTJSVariant motion::ResourceManager::getLastLoadedModule() const {
+    return _state ? _state->lastLoadedModule : tTJSVariant{};
+}
+
+tTJSVariant motion::ResourceManager::findLoaded(ttstr path) const {
+    if(!_state) {
+        return {};
     }
+
+    const auto it = _state->loadedModules.find(path.AsStdString());
+    return it != _state->loadedModules.end() ? it->second : tTJSVariant{};
 }
