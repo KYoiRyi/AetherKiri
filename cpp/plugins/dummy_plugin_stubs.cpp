@@ -4,11 +4,6 @@
 // The engine already has built-in support for the functionality these
 // plugins originally provided, but some games explicitly link them by name.
 
-#define NCB_MODULE_NAME TJS_W("motionplayer_nod3d.dll")
-static void motionplayer_nod3d_stub() {}
-NCB_PRE_REGIST_CALLBACK(motionplayer_nod3d_stub);
-
-#undef NCB_MODULE_NAME
 #define NCB_MODULE_NAME TJS_W("k2compat.dll")
 static void k2compat_stub() {}
 NCB_PRE_REGIST_CALLBACK(k2compat_stub);

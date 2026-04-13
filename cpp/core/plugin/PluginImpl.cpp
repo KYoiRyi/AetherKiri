@@ -479,9 +479,12 @@ static void TVPRegisterGfxFireStub() {
 
 void TVPLoadPlugin(const ttstr &name) {
     ttstr normalizedShortName = TVPGetNormalizedPluginName(name);
+    ttstr resolvedName = name;
+    if(normalizedShortName == TJS_W("motionplayer_nod3d.dll"))
+        resolvedName = TJS_W("motionplayer.dll");
 
     const char *stub = nullptr;
-    bool loaded = TVPLoadInternalPlugin(name);
+    bool loaded = TVPLoadInternalPlugin(resolvedName);
     if(!loaded && TVPIsProxyPluginName(normalizedShortName)) {
         loaded = TVPRegisterProxyFsStub();
         if(loaded) {
