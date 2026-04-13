@@ -110,6 +110,16 @@ Confirmed compatible or non-blocking
    - PSBDictionary
    - PSBList
 
+9. PSBMedia helper methods used by motionplayer already exist in AetherKiri.
+   Confirmed:
+   - getImagesByPrefix
+   - getImageInfo
+   - addLayerPositions / getLayerPositions
+   - addButtonBounds / getButtonBounds
+   - removeByPrefix
+   Current assessment: this area is not a source-level blocker. If a bug
+   remains here, it is more likely to be behavioral than missing-API related.
+
 Pending audit targets
 1. LayerIntf.cpp still differs from kirikiriroid2-web beyond the bezier/mesh methods now ported.
    Need to continue checking whether remaining diffs matter to motionplayer runtime behavior.
