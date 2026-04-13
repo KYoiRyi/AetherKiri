@@ -80,7 +80,24 @@ tjs_error motion::ResourceManager::setEmotePSBDecryptFunc(tTJSVariant *r,
                                                           tjs_int n,
                                                           tTJSVariant **p,
                                                           iTJSDispatch2 *obj) {
-    LOGGER->critical("setEmotePSBDecryptFunc no implement!");
+    if(n == 0) {
+        _decryptFunc.Clear();
+        LOGGER->info("setEmotePSBDecryptFunc: cleared");
+        return TJS_S_OK;
+    }
+    if(n != 1) {
+        return TJS_E_BADPARAMCOUNT;
+    }
+    if((*p)->Type() != tvtObject && (*p)->Type() != tvtVoid) {
+        return TJS_E_INVALIDPARAM;
+    }
+
+    _decryptFunc = *p[0];
+    if(_decryptFunc.Type() == tvtObject && _decryptFunc.AsObjectNoAddRef()) {
+        LOGGER->info("setEmotePSBDecryptFunc: callback registered");
+    } else {
+        LOGGER->info("setEmotePSBDecryptFunc: cleared");
+    }
     return TJS_S_OK;
 }
 

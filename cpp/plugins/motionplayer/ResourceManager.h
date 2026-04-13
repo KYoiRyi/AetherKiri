@@ -38,5 +38,6 @@ namespace motion {
 
         std::shared_ptr<State> _state;
         inline static int _decryptSeed;
+        inline static tTJSVariant _decryptFunc;
     };
 } // namespace motion
