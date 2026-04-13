@@ -69,17 +69,15 @@ namespace PSB {
         }
     } // namespace
 
-    void initPSBMedia() {}
-
-    void deInitPSBMedia() {}
-
     void registerRootResources(const ttstr &container,
                                const std::shared_ptr<const PSBDictionary> &root) {
+        initPSBMedia();
         registerRootResourcesForContainer(GetGlobalPSBMedia(), container, root);
     }
 
     void registerRootResources(const std::vector<ttstr> &containers,
                                const std::shared_ptr<const PSBDictionary> &root) {
+        initPSBMedia();
         auto *psbMedia = GetGlobalPSBMedia();
         if(psbMedia == nullptr) {
             return;
