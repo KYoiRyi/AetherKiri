@@ -36,7 +36,10 @@ target_include_directories(engine_api
 
 if(TARGET krkr2core AND TARGET krkr2plugin)
     target_compile_definitions(engine_api PRIVATE ENGINE_API_USE_KRKR2_RUNTIME)
-    target_link_libraries(engine_api PRIVATE krkr2core krkr2plugin)
+    # Keep static NCB registration objects from krkr2plugin alive in the
+    # final engine_api link as well.
+    set(_KRKR2PLUGIN_LINK_ITEM "$<LINK_LIBRARY:WHOLE_ARCHIVE,krkr2plugin>")
+    target_link_libraries(engine_api PRIVATE krkr2core ${_KRKR2PLUGIN_LINK_ITEM})
 endif()
 
 # On Apple platforms, ANGLE GL symbols conflict with system OpenGL.framework.

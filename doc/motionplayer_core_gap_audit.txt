@@ -136,13 +136,14 @@ Pending audit targets
 4. No compile validation yet against third-party headers such as spdlog.
    A single-file syntax check stopped at missing external include paths, so unresolved compile-time API mismatches may still remain.
 
-5. High-risk build-system issue still open.
-   AetherKiri does not currently mirror kirikiriroid2-web's
-   `krkr2plugins_ncbind` plus `whole-archive/force_load` retention path.
-   Since motionplayer registration depends heavily on static NCB objects in
-   translation units such as `cpp/plugins/motionplayer/main.cpp`, link-time
-   dead stripping remains a plausible failure mode even when source-level APIs
-   look aligned.
+5. High-risk build-system issue identified and patched.
+   AetherKiri originally did not mirror kirikiriroid2-web's static-registration
+   retention path. This was addressed by forcing whole-archive linkage of
+   `krkr2plugin` at the final link points currently known to matter:
+   - top-level runtime target in `CMakeLists.txt`
+   - `engine_api` in `bridge/engine_api/CMakeLists.txt`
+   This reduces the risk of `motionplayer/main.cpp` static NCB registration
+   objects being dead-stripped by the linker.
 
 Recommended next checks
 1. Continue diffing LayerIntf.cpp against kirikiriroid2-web, but only for methods reachable from motionplayer.
