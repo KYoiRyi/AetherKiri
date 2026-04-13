@@ -1,0 +1,88 @@
+AetherKiri motionplayer core gap audit
+Date: 2026-04-13
+
+Scope
+- Static audit only.
+- No full-project build attempted.
+- Focused on imported motionplayer's direct host/core dependencies.
+
+Confirmed present
+- cpp/core/visual/WindowIntf.h
+- cpp/core/visual/LayerIntf.h
+- cpp/core/visual/LayerBitmapIntf.h
+- cpp/core/visual/GraphicsLoaderIntf.h
+- cpp/core/visual/tvpgl.h
+- cpp/core/base/StorageIntf.h
+- cpp/core/base/EventIntf.h
+- cpp/core/base/ScriptMgnIntf.h
+- cpp/core/environ/ConfigManager/IndividualConfigManager.h
+
+Fixed during audit
+1. Layer bezier/mesh operations were missing from AetherKiri LayerIntf.
+   Added:
+   - BezierPatchCopy
+   - MeshCopy
+   - OperateBezierPatch
+   - OperateMesh
+
+2. PSBMediaRegistry layer was missing from AetherKiri psbfile.
+   Added:
+   - cpp/plugins/psbfile/PSBMediaRegistry.h
+   - cpp/plugins/psbfile/PSBMediaRegistry.cpp
+   - CMake wiring in cpp/plugins/psbfile/CMakeLists.txt
+
+3. Storage lookup was not motionplayer-aware enough.
+   Added:
+   - internal plugin resolution in TVPGetPlacedPath
+   - motion_*.tjs -> *.mtn/.psb fallback in TVPIsExistentStorage
+
+Confirmed compatible or non-blocking
+1. GraphicsLoaderIntf difference is non-blocking for motionplayer.
+   The observed diff is a cache-stat declaration only:
+   - TVPGetGraphicCacheTotalBytes
+   motionplayer only directly uses TVPLoadGraphic, which is declared in both trees.
+
+2. PlayerUpdateLayers.cpp includes wasm_simd128.h only under __EMSCRIPTEN__.
+   This is not a native AetherKiri blocker by itself.
+
+3. Render-path Layer/Window methods used by motionplayer are declared in AetherKiri.
+   Checked:
+   - GetOwnerNoAddRef
+   - GetParent / SetParent
+   - SetType
+   - GetAbsoluteOrderMode / SetAbsoluteOrderMode
+   - SetVisible
+   - GetWidth / GetHeight
+   - GetImageWidth / GetImageHeight
+   - GetHasImage / SetHasImage
+   - SetImageSize / SetSize / SetClip
+   - GetMainImage / GetClip
+   - CopyRect
+   - BezierPatchCopy / OperateBezierPatch
+   - GetMainImagePixelBuffer
+   - GetMainImagePixelBufferPitch
+   - GetMainImagePixelBufferForWrite
+
+Pending audit targets
+1. LayerIntf.cpp still differs from kirikiriroid2-web beyond the bezier/mesh methods now ported.
+   Need to continue checking whether remaining diffs matter to motionplayer runtime behavior.
+
+2. StorageIntf.cpp still differs from kirikiriroid2-web beyond the plugin-aware placed-path logic and motion fallback now ported.
+   Need to continue checking whether any remaining differences affect motion script loading paths.
+
+3. psbfile main/registry lifecycle split differs from kirikiriroid2-web.
+   Current state is intentional:
+   - AetherKiri keeps PSB media lifecycle ownership in psbfile/main.cpp
+   - PSBMediaRegistry only provides resource registration helpers
+   This should be revisited if later code starts calling initPSBMedia/deInitPSBMedia directly.
+
+4. No compile validation yet against third-party headers such as spdlog.
+   A single-file syntax check stopped at missing external include paths, so unresolved compile-time API mismatches may still remain.
+
+Recommended next checks
+1. Continue diffing LayerIntf.cpp against kirikiriroid2-web, but only for methods reachable from motionplayer.
+2. Diff RuntimeSupport.cpp-sensitive host APIs next:
+   - PSBMedia
+   - StorageIntf
+   - ScriptMgn/Event hooks
+3. If needed, add a small non-linking compile harness for a few high-risk translation units once dependency include paths are available.
