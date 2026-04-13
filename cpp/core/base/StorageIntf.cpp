@@ -1324,7 +1324,7 @@ tTJSBinaryStream *TVPCreateStream(const ttstr &_name, tjs_uint32 flags) {
 //---------------------------------------------------------------------------
 void TVPClearStorageCaches() {
     TVPClearXP3SegmentCache();
-    TVPClearAutoPathSearchCache();
+    TVPClearAutoPathCache();
 }
 //---------------------------------------------------------------------------
 
