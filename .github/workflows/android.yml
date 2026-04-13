@@ -54,6 +54,9 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Disable Analytics
         run: |
           flutter config --no-analytics
@@ -100,18 +103,37 @@ jobs:
         id: build-android
         continue-on-error: true
         run: |
+          set -euo pipefail
           chmod +x ./build.sh
           export CMAKE_C_COMPILER_LAUNCHER=ccache
           export CMAKE_CXX_COMPILER_LAUNCHER=ccache
           export NDK_CCACHE=ccache
-          ./build.sh android release --jobs=4
+
+          for attempt in 1 2 3; do
+            if ./build.sh android release --jobs=4; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+
+            echo "Android build failed on attempt ${attempt}, retrying..."
+            sleep $((attempt * 20))
+          done
 
       - name: Detect vcpkg cache updates
         id: detect-vcpkg-cache
         if: always()
         run: |
           set -euo pipefail
-          if find .devtools/vcpkg "$HOME/.cache/vcpkg/archives" -type f -newer "${RUNNER_TEMP}/vcpkg-cache-before-build.marker" | grep -q .; then
+          changed_file="$(
+            find .devtools/vcpkg "$HOME/.cache/vcpkg/archives" \
+              -type f \
+              -newer "${RUNNER_TEMP}/vcpkg-cache-before-build.marker" \
+              -print -quit
+          )"
+          if [ -n "$changed_file" ]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
