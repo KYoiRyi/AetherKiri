@@ -127,7 +127,10 @@ namespace motion {
     }
 
     void EmotePlayer::assignState() { STUB_WARN(assignState); }
-    void EmotePlayer::initPhysics() { STUB_WARN(initPhysics); }
+    void EmotePlayer::initPhysics() {
+        _player.initPhysics();
+        _modified = true;
+    }
 
     // Aligned to libkrkr2.so sub_5302E4: delegates to Player's rotAnimator
     void EmotePlayer::setRot(double rot, double transition, double ease) {
