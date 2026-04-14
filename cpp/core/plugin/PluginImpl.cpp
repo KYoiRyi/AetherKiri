@@ -522,7 +522,6 @@ void TVPLoadPlugin(const ttstr &name) {
         PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), true,
                                                    stub);
     } else {
-        spdlog::error("Loading Plugin: {} Failed", name.AsStdString());
         const char *stub = nullptr;
         if(TJS::TVPIsMockEnabled()) {
             if(normalizedShortName == TJS_W("gamepad.dll")) {
@@ -533,8 +532,15 @@ void TVPLoadPlugin(const ttstr &name) {
                 TVPRegisterGfxFireStub();
                 stub = "gfxFireStub";
             }
+            TVPRegisteredPlugins.insert(normalizedShortName);
+            loaded = true;
+            if(!stub)
+                stub = "MockPluginPresence";
+            spdlog::warn("Loading Plugin: {} Mocked as present", name.AsStdString());
+        } else {
+            spdlog::error("Loading Plugin: {} Failed", name.AsStdString());
         }
-        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), false, stub);
+        PluginCallTracer::Instance().LogPluginLoad(name.AsStdString(), loaded, stub);
     }
 }
 
