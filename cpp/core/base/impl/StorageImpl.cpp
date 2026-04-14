@@ -532,7 +532,11 @@ void TVPPreNormalizeStorageName(ttstr &name) {
 #else // posix
     if(namelen >= 1) {
         if(name[0] == TJS_W('/')) {
+#if defined(__ANDROID__)
+            name = ttstr(TJS_W("file://")) + name;
+#else
             name = ttstr(TJS_W("file://.")) + name;
+#endif
             return;
         }
     }
