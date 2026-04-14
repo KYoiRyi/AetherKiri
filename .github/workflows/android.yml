@@ -33,7 +33,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-android-ccache
+          key: ${{ runner.os }}-android-ccache-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-android-ccache-
 
       - name: Setup ccache config
         run: |
@@ -153,8 +155,8 @@ jobs:
           retention-days: 7
 
       - name: Save ccache
-        if: success() && steps.restore-ccache.outputs.cache-matched-key == ''
+        if: always() && !cancelled()
         uses: actions/cache/save@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-android-ccache
+          key: ${{ runner.os }}-android-ccache-${{ github.run_id }}

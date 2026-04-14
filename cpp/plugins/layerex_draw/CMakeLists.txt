@@ -6,12 +6,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE krkr2plugin)
 
 if(WINDOWS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE -DUNICODE -D_UNICODE)
-    target_sources(${PROJECT_NAME} PUBLIC
+    target_sources(${PROJECT_NAME} PRIVATE
             windows/main.cpp
             windows/LayerExDraw.cpp
     )
 else()
-    target_sources(${PROJECT_NAME} PUBLIC
+    target_sources(${PROJECT_NAME} PRIVATE
             general/main.cpp
             general/LayerExDraw.cpp
             general/DrawPath.cpp

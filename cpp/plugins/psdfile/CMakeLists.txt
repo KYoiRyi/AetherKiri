@@ -5,7 +5,7 @@ add_subdirectory(psdparse)
 
 add_library(${PROJECT_NAME} STATIC)
 
-target_sources(${PROJECT_NAME} PUBLIC
+target_sources(${PROJECT_NAME} PRIVATE
     main.cpp
     psdclass.cpp
     psdclass_loadmem.cpp
