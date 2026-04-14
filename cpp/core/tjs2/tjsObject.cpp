@@ -23,6 +23,8 @@
 static std::atomic<int64_t> sTJSCustomObjectCount{0};
 static std::atomic<int64_t> sObjByHash[8] = {};
 
+iTJSDispatch2 *TVPGetScriptDispatch();
+
 extern "C" int64_t TJS_GetCustomObjectCount() {
     return sTJSCustomObjectCount.load(std::memory_order_relaxed);
 }
@@ -38,6 +40,63 @@ namespace TJS {
                (!TJS_strcmp(membername, TJS_W("debugWindowEnabled")) ||
                 !TJS_strcmp(membername, TJS_W("inXP3archivePacked")) ||
                 !TJS_strcmp(membername, TJS_W("convertMode")));
+    }
+
+    static bool TJSMockTryGlobalPropGet(const tjs_char *membername,
+                                        tTJSVariant *result) {
+        if(!TVPIsMockEnabled() || !membername || !result)
+            return false;
+
+        iTJSDispatch2 *global = ::TVPGetScriptDispatch();
+        if(!global)
+            return false;
+
+        tTJSVariant value;
+        tjs_error hr = TJS_E_FAIL;
+        try {
+            hr = global->PropGet(0, membername, nullptr, &value, global);
+        } catch(...) {
+            global->Release();
+            return false;
+        }
+        global->Release();
+
+        if(TJS_FAILED(hr) || value.Type() == tvtVoid)
+            return false;
+
+        result->CopyRef(value);
+        return true;
+    }
+
+    static tjs_error TJSMockFallbackPropGet(const tjs_char *membername,
+                                            tTJSVariant *result) {
+        if(TJSMockTryGlobalPropGet(membername, result))
+            return TJS_S_OK;
+
+        if(result) {
+            if(auto *mock = TVPGetGlobalMockObject())
+                *result = tTJSVariant(mock, mock);
+            else
+                result->Clear();
+        }
+        return TJS_S_OK;
+    }
+
+    static tjs_error TJSMockFallbackFuncCall(tjs_uint32 flag,
+                                             const tjs_char *membername,
+                                             tjs_uint32 *hint,
+                                             tTJSVariant *result,
+                                             tjs_int numparams,
+                                             tTJSVariant **param,
+                                             iTJSDispatch2 *objthis) {
+        tTJSVariant value;
+        if(TJSMockTryGlobalPropGet(membername, &value))
+            return TJSDefaultFuncCall(flag, value, result, numparams, param,
+                                      objthis);
+
+        if(result)
+            result->Clear();
+        return TJS_S_OK;
     }
 
     //---------------------------------------------------------------------------
@@ -1257,6 +1316,9 @@ namespace TJS {
                     return TJSDefaultFuncCall(flag, value_func, result,
                                               numparams, param, objthis);
             }
+            if(TJS::TVPIsMockEnabled())
+                return TJSMockFallbackFuncCall(flag, membername, hint, result,
+                                               numparams, param, objthis);
 
             PluginCallTracer::Instance().LogMissingMember(membername, "FuncCall", objthis);
             return TJS_E_MEMBERNOTFOUND; // member not found
@@ -1335,6 +1397,8 @@ namespace TJS {
                 if(CallGetMissing(membername, value))
                     return TJSDefaultPropGet(flag, value, result, objthis);
             }
+            if(TJS::TVPIsMockEnabled())
+                return TJSMockFallbackPropGet(membername, result);
         }
 
         if(!data && flag & TJS_MEMBERENSURE) {
@@ -1410,6 +1474,8 @@ namespace TJS {
                     return TJS_S_OK;
             }
         }
+        if(!data && TJS::TVPIsMockEnabled())
+            data = Add(membername, hint);
 
         if(flag & TJS_MEMBERENSURE)
             data = Add(membername,
@@ -1508,6 +1574,8 @@ namespace TJS {
                     return TJS_S_OK;
             }
         }
+        if(!data && TJS::TVPIsMockEnabled())
+            data = Add(membername);
 
         if(flag & TJS_MEMBERENSURE)
             data = Add(membername); // create a member when
