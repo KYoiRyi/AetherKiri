@@ -603,3 +603,5 @@ NCB_REGISTER_CLASS(D3DEmotePlayer) {
     NCB_METHOD(getOuterForce);
     NCB_METHOD_RAW_CALLBACK(contains, &EmotePlayer::containsCompat, 0);
 }
+
+extern "C" void TVPRegisterMotionPlayerPluginAnchor() {}
