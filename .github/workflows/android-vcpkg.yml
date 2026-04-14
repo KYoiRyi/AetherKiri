@@ -7,17 +7,6 @@ on:
         description: Android ABI to prebuild
         required: false
         default: arm64-v8a
-  push:
-    branches:
-      - main
-      - codex-emote
-    paths:
-      - vcpkg.json
-      - vcpkg-configuration.json
-      - vcpkg/**
-      - cmake/vcpkg_android.cmake
-      - build/build_android.sh
-      - .github/workflows/android-vcpkg.yml
 
 permissions:
   contents: write

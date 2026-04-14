@@ -83,10 +83,10 @@ VCPKG_BIN="$VCPKG_ROOT/vcpkg"
 
 if [[ ! -x "$VCPKG_BIN" ]]; then
     if [[ -x "$VCPKG_ROOT/bootstrap-vcpkg.sh" ]]; then
-        log_warn "vcpkg binary missing, bootstrapping existing tree..."
+        echo "[WARN] vcpkg binary missing, bootstrapping existing tree..."
         (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
     else
-        log_warn "vcpkg tree is incomplete, recreating..."
+        echo "[WARN] vcpkg tree is incomplete, recreating..."
         recreate_local_vcpkg
     fi
 fi
