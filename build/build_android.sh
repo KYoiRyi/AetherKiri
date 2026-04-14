@@ -61,7 +61,7 @@ fi
 
 FLUTTER_APP_DIR="$PROJECT_ROOT/apps/flutter_app"
 
-if [[ -d "$PROJECT_ROOT/.devtools/vcpkg/.git" ]]; then
+if [[ -d "$PROJECT_ROOT/.devtools/vcpkg" ]]; then
     VCPKG_ROOT="$PROJECT_ROOT/.devtools/vcpkg"
 elif [[ -n "${VCPKG_ROOT:-}" && -f "$VCPKG_ROOT/.vcpkg-root" ]]; then
     :
