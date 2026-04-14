@@ -823,23 +823,6 @@ engine_result_t OpenGameCore(engine_handle_t handle,
   // as empty (TVPProjectDir is not set yet), corrupting path resolution.
 
   std::string normalized_game_root_path(game_root_path_utf8);
-#if defined(__ANDROID__)
-  // The host may pass either a native absolute path or a legacy
-  // krkr-style file URI. Canonicalize to a native absolute path here so
-  // StartApplication always normalizes from the same source form.
-  if (normalized_game_root_path.rfind("file://./", 0) == 0) {
-    normalized_game_root_path.erase(0, 8);
-  } else if (normalized_game_root_path.rfind("file:///", 0) == 0) {
-    normalized_game_root_path.erase(0, 7);
-    normalized_game_root_path.insert(normalized_game_root_path.begin(), '/');
-  } else if (normalized_game_root_path.rfind("file://", 0) == 0) {
-    normalized_game_root_path.erase(0, 7);
-    if (!normalized_game_root_path.empty() &&
-        normalized_game_root_path.front() != '/') {
-      normalized_game_root_path.insert(normalized_game_root_path.begin(), '/');
-    }
-  }
-#endif
   // Only append trailing slash for directory paths.  Archive files
   // (.xp3, .zip, etc.) must keep their original extension so the
   // storage system can recognise them as archives.
