@@ -209,8 +209,6 @@ log_info "Parallel jobs:  $PARALLEL_JOBS"
 # ============================================================
 # Step 1: Install vcpkg dependencies for Android
 # ============================================================
-log_step "Step 1/3: Installing vcpkg dependencies for Android"
-
 export VCPKG_ROOT
 export ANDROID_NDK_HOME
 export ANDROID_HOME
@@ -218,63 +216,78 @@ export ANDROID_HOME
 # Parse comma-separated ABIs
 IFS=',' read -ra ABI_ARRAY <<< "$TARGET_ABIS"
 
-VCPKG_LOCK_FILE="$VCPKG_ROOT/.vcpkg-root"
-
-# Wait for vcpkg filesystem lock to be released (handles background binary cache submissions)
-wait_for_vcpkg_lock() {
-    local max_retries=30
-    local retry_interval=2
-    local attempt=0
-
-    while (( attempt < max_retries )); do
-        # Try a vcpkg command that actually acquires the filesystem lock.
-        # 'vcpkg list' needs the lock, unlike 'vcpkg version' which does not.
-        if (cd "$PROJECT_ROOT" && "$VCPKG_BIN" list --x-install-root="$VCPKG_ROOT/installed" &>/dev/null); then
-            return 0
+if [[ "${SKIP_ANDROID_VCPKG_INSTALL:-0}" == "1" ]]; then
+    log_step "Step 1/3: Using prebuilt Android vcpkg dependencies"
+    for ABI in "${ABI_ARRAY[@]}"; do
+        TRIPLET="$(abi_to_triplet "$ABI")"
+        if [[ ! -d "$VCPKG_ROOT/installed/$TRIPLET" ]]; then
+            log_error "Prebuilt vcpkg triplet missing: $TRIPLET"
+            log_info "Expected directory: $VCPKG_ROOT/installed/$TRIPLET"
+            exit 1
         fi
-        attempt=$((attempt + 1))
-        log_info "Waiting for vcpkg lock to be released... (${attempt}/${max_retries})"
-        sleep "$retry_interval"
+        log_info "Using prebuilt vcpkg packages for $TRIPLET ✓"
     done
+else
+    log_step "Step 1/3: Installing vcpkg dependencies for Android"
 
-    log_warn "vcpkg lock wait timed out after $((max_retries * retry_interval))s, proceeding anyway..."
-    return 0
-}
+    VCPKG_LOCK_FILE="$VCPKG_ROOT/.vcpkg-root"
 
-OVERLAY_PORTS="$PROJECT_ROOT/vcpkg/ports"
-OVERLAY_TRIPLETS="$PROJECT_ROOT/vcpkg/triplets"
+    # Wait for vcpkg filesystem lock to be released (handles background binary cache submissions)
+    wait_for_vcpkg_lock() {
+        local max_retries=30
+        local retry_interval=2
+        local attempt=0
 
-for ABI in "${ABI_ARRAY[@]}"; do
-    TRIPLET="$(abi_to_triplet "$ABI")"
-    log_info "Installing vcpkg packages for triplet: $TRIPLET (ABI: $ABI)..."
+        while (( attempt < max_retries )); do
+            # Try a vcpkg command that actually acquires the filesystem lock.
+            # 'vcpkg list' needs the lock, unlike 'vcpkg version' which does not.
+            if (cd "$PROJECT_ROOT" && "$VCPKG_BIN" list --x-install-root="$VCPKG_ROOT/installed" &>/dev/null); then
+                return 0
+            fi
+            attempt=$((attempt + 1))
+            log_info "Waiting for vcpkg lock to be released... (${attempt}/${max_retries})"
+            sleep "$retry_interval"
+        done
 
-    # Wait for any previous vcpkg lock to be released
-    wait_for_vcpkg_lock
-
-    # Clean stale ANGLE build cache to ensure overlay port changes take effect
-    if [[ -d "$VCPKG_ROOT/buildtrees/angle" ]]; then
-        log_info "Cleaning ANGLE build cache for rebuild..."
-        rm -rf "$VCPKG_ROOT/buildtrees/angle"
-        rm -rf "$VCPKG_ROOT/packages/angle_${TRIPLET}"
-    fi
-
-    # Use manifest mode: vcpkg install from project root where vcpkg.json lives
-    # Only build Release libraries to save time and cache space
-    (cd "$PROJECT_ROOT" && VCPKG_BUILD_TYPE=release "$VCPKG_BIN" install \
-        --triplet "$TRIPLET" \
-        --x-install-root="$VCPKG_ROOT/installed" \
-        --x-manifest-root="$PROJECT_ROOT" \
-        --overlay-ports="$OVERLAY_PORTS" \
-        --overlay-triplets="$OVERLAY_TRIPLETS" \
-    ) || {
-        log_error "vcpkg install failed for triplet: $TRIPLET"
-        log_info "You can try running manually:"
-        log_info "  cd $PROJECT_ROOT && $VCPKG_BIN install --triplet $TRIPLET --overlay-ports=$OVERLAY_PORTS --overlay-triplets=$OVERLAY_TRIPLETS"
-        exit 1
+        log_warn "vcpkg lock wait timed out after $((max_retries * retry_interval))s, proceeding anyway..."
+        return 0
     }
 
-    log_info "vcpkg packages installed for $TRIPLET ✓"
-done
+    OVERLAY_PORTS="$PROJECT_ROOT/vcpkg/ports"
+    OVERLAY_TRIPLETS="$PROJECT_ROOT/vcpkg/triplets"
+
+    for ABI in "${ABI_ARRAY[@]}"; do
+        TRIPLET="$(abi_to_triplet "$ABI")"
+        log_info "Installing vcpkg packages for triplet: $TRIPLET (ABI: $ABI)..."
+
+        # Wait for any previous vcpkg lock to be released
+        wait_for_vcpkg_lock
+
+        # Clean stale ANGLE build cache to ensure overlay port changes take effect
+        if [[ -d "$VCPKG_ROOT/buildtrees/angle" ]]; then
+            log_info "Cleaning ANGLE build cache for rebuild..."
+            rm -rf "$VCPKG_ROOT/buildtrees/angle"
+            rm -rf "$VCPKG_ROOT/packages/angle_${TRIPLET}"
+        fi
+
+        # Use manifest mode: vcpkg install from project root where vcpkg.json lives
+        # Only build Release libraries to save time and cache space
+        (cd "$PROJECT_ROOT" && VCPKG_BUILD_TYPE=release "$VCPKG_BIN" install \
+            --triplet "$TRIPLET" \
+            --x-install-root="$VCPKG_ROOT/installed" \
+            --x-manifest-root="$PROJECT_ROOT" \
+            --overlay-ports="$OVERLAY_PORTS" \
+            --overlay-triplets="$OVERLAY_TRIPLETS" \
+        ) || {
+            log_error "vcpkg install failed for triplet: $TRIPLET"
+            log_info "You can try running manually:"
+            log_info "  cd $PROJECT_ROOT && $VCPKG_BIN install --triplet $TRIPLET --overlay-ports=$OVERLAY_PORTS --overlay-triplets=$OVERLAY_TRIPLETS"
+            exit 1
+        }
+
+        log_info "vcpkg packages installed for $TRIPLET ✓"
+    done
+fi
 
 # ============================================================
 # Step 2: Build Flutter Android APK

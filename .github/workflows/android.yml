@@ -91,6 +91,19 @@ jobs:
           restore-keys: |
             ${{ env.VCPKG_LEGACY_CACHE_RESTORE_KEY }}
 
+      - name: Require prebuilt Android vcpkg dependencies
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.restore-vcpkg-bundle.outputs.hit }}" != "true" && "${{ steps.restore-legacy-vcpkg.outputs.cache-matched-key }}" = "" ]]; then
+            echo "No prebuilt Android vcpkg bundle or legacy cache was restored." >&2
+            echo "Run the Android Vcpkg Bundle workflow first." >&2
+            exit 1
+          fi
+          if [[ ! -d ".devtools/vcpkg/installed/arm64-android" ]]; then
+            echo "Prebuilt Android vcpkg triplet arm64-android is missing." >&2
+            exit 1
+          fi
+
       - name: Build Android Release
         run: |
           set -euo pipefail
@@ -98,6 +111,7 @@ jobs:
           export CMAKE_C_COMPILER_LAUNCHER=ccache
           export CMAKE_CXX_COMPILER_LAUNCHER=ccache
           export NDK_CCACHE=ccache
+          export SKIP_ANDROID_VCPKG_INSTALL=1
 
           for attempt in 1 2 3; do
             if ./build.sh android release --jobs=4; then
