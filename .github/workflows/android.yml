@@ -60,6 +60,30 @@ jobs:
         run: |
           flutter config --no-analytics
 
+      - name: Detect Android SDK and NDK
+        run: |
+          set -euo pipefail
+          if [[ -z "${ANDROID_HOME:-}" ]]; then
+            if [[ -d "$HOME/Android/Sdk" ]]; then
+              echo "ANDROID_HOME=$HOME/Android/Sdk" >> "$GITHUB_ENV"
+            elif [[ -d "/usr/local/lib/android/sdk" ]]; then
+              echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "ANDROID_HOME=${ANDROID_HOME}" >> "$GITHUB_ENV"
+          fi
+
+          sdk_root="${ANDROID_HOME:-${HOME}/Android/Sdk}"
+          if [[ -d "${sdk_root}/ndk" ]]; then
+            latest_ndk="$(find "${sdk_root}/ndk" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)"
+            latest_ndk_version="$(basename "${latest_ndk}")"
+            echo "ANDROID_NDK_HOME=${latest_ndk}" >> "$GITHUB_ENV"
+            echo "ANDROID_NDK_VERSION=${latest_ndk_version}" >> "$GITHUB_ENV"
+          else
+            echo "Android NDK directory not found under ${sdk_root}/ndk" >&2
+            exit 1
+          fi
+
       - name: Restore Android vcpkg bundle
         id: restore-vcpkg-bundle
         env:

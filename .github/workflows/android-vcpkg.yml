@@ -138,16 +138,50 @@ jobs:
       - name: Pack Android vcpkg bundle
         run: |
           set -euo pipefail
+          case "${TARGET_ABI}" in
+            arm64-v8a) TRIPLET="arm64-android" ;;
+            armeabi-v7a) TRIPLET="arm-android" ;;
+            x86_64) TRIPLET="x64-android" ;;
+            x86) TRIPLET="x86-android" ;;
+            *)
+              echo "Unsupported ABI: ${TARGET_ABI}" >&2
+              exit 1
+              ;;
+          esac
+
           rm -rf "${RUNNER_TEMP}/android-vcpkg-bundle-payload"
-          mkdir -p "${RUNNER_TEMP}/android-vcpkg-bundle-payload/workspace/.devtools"
-          mkdir -p "${RUNNER_TEMP}/android-vcpkg-bundle-payload/home-cache/vcpkg"
-          cp -a ".devtools/vcpkg" "${RUNNER_TEMP}/android-vcpkg-bundle-payload/workspace/.devtools/"
-          if [[ -d "$HOME/.cache/vcpkg/archives" ]]; then
-            cp -a "$HOME/.cache/vcpkg/archives" "${RUNNER_TEMP}/android-vcpkg-bundle-payload/home-cache/vcpkg/"
+          BUNDLE_VCPKG_ROOT="${RUNNER_TEMP}/android-vcpkg-bundle-payload/workspace/.devtools/vcpkg"
+          mkdir -p "${BUNDLE_VCPKG_ROOT}"
+
+          cp -a ".devtools/vcpkg/.vcpkg-root" "${BUNDLE_VCPKG_ROOT}/"
+          cp -a ".devtools/vcpkg/scripts" "${BUNDLE_VCPKG_ROOT}/"
+          if [[ -d ".devtools/vcpkg/triplets" ]]; then
+            cp -a ".devtools/vcpkg/triplets" "${BUNDLE_VCPKG_ROOT}/"
           fi
+          if [[ -f ".devtools/vcpkg/vcpkg" ]]; then
+            cp -a ".devtools/vcpkg/vcpkg" "${BUNDLE_VCPKG_ROOT}/"
+          fi
+          if [[ -f ".devtools/vcpkg/bootstrap-vcpkg.sh" ]]; then
+            cp -a ".devtools/vcpkg/bootstrap-vcpkg.sh" "${BUNDLE_VCPKG_ROOT}/"
+          fi
+
+          mkdir -p "${BUNDLE_VCPKG_ROOT}/installed"
+          cp -a ".devtools/vcpkg/installed/${TRIPLET}" "${BUNDLE_VCPKG_ROOT}/installed/"
+          if [[ -d ".devtools/vcpkg/installed/vcpkg" ]]; then
+            cp -a ".devtools/vcpkg/installed/vcpkg" "${BUNDLE_VCPKG_ROOT}/installed/"
+          fi
+
           tar --zstd -cf "${RUNNER_TEMP}/${VCPKG_BUNDLE_ASSET}" \
             -C "${RUNNER_TEMP}/android-vcpkg-bundle-payload" \
-            workspace home-cache
+            workspace
+
+          bundle_size_bytes="$(stat -c%s "${RUNNER_TEMP}/${VCPKG_BUNDLE_ASSET}")"
+          bundle_size_mb="$((bundle_size_bytes / 1024 / 1024))"
+          echo "Bundle size: ${bundle_size_mb} MB"
+          if (( bundle_size_bytes >= 2147483648 )); then
+            echo "Bundled asset still exceeds GitHub's 2 GB release upload limit." >&2
+            exit 1
+          fi
 
       - name: Ensure bundle release exists
         env:
