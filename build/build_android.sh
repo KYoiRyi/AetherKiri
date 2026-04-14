@@ -61,16 +61,34 @@ fi
 
 FLUTTER_APP_DIR="$PROJECT_ROOT/apps/flutter_app"
 
+recreate_local_vcpkg() {
+    echo "[INFO] Recreating local vcpkg in .devtools/vcpkg..."
+    rm -rf "$PROJECT_ROOT/.devtools/vcpkg"
+    mkdir -p "$PROJECT_ROOT/.devtools"
+    git clone https://github.com/microsoft/vcpkg.git "$PROJECT_ROOT/.devtools/vcpkg"
+    (cd "$PROJECT_ROOT/.devtools/vcpkg" && ./bootstrap-vcpkg.sh -disableMetrics)
+}
+
 if [[ -d "$PROJECT_ROOT/.devtools/vcpkg" ]]; then
     VCPKG_ROOT="$PROJECT_ROOT/.devtools/vcpkg"
 elif [[ -n "${VCPKG_ROOT:-}" && -f "$VCPKG_ROOT/.vcpkg-root" ]]; then
     :
 else
     echo "[INFO] vcpkg not found. Automatically setting up vcpkg in .devtools/vcpkg..."
-    mkdir -p "$PROJECT_ROOT/.devtools"
-    git clone https://github.com/microsoft/vcpkg.git "$PROJECT_ROOT/.devtools/vcpkg"
-    (cd "$PROJECT_ROOT/.devtools/vcpkg" && ./bootstrap-vcpkg.sh -disableMetrics)
+    recreate_local_vcpkg
     VCPKG_ROOT="$PROJECT_ROOT/.devtools/vcpkg"
+fi
+
+VCPKG_BIN="$VCPKG_ROOT/vcpkg"
+
+if [[ ! -x "$VCPKG_BIN" ]]; then
+    if [[ -x "$VCPKG_ROOT/bootstrap-vcpkg.sh" ]]; then
+        log_warn "vcpkg binary missing, bootstrapping existing tree..."
+        (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
+    else
+        log_warn "vcpkg tree is incomplete, recreating..."
+        recreate_local_vcpkg
+    fi
 fi
 
 VCPKG_BIN="$VCPKG_ROOT/vcpkg"
@@ -163,11 +181,6 @@ fi
 if [[ ! -d "$VCPKG_ROOT" ]]; then
     log_error "vcpkg not found at: $VCPKG_ROOT"
     exit 1
-fi
-
-if [[ ! -x "$VCPKG_BIN" ]]; then
-    log_warn "vcpkg binary not found, bootstrapping..."
-    (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
 fi
 
 if [[ -z "${ANDROID_HOME:-}" ]]; then

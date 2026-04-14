@@ -96,11 +96,18 @@ jobs:
       - name: Bootstrap vcpkg if needed
         run: |
           set -euo pipefail
+          if [[ -d ".devtools/vcpkg" && ! -x ".devtools/vcpkg/bootstrap-vcpkg.sh" && ! -x ".devtools/vcpkg/vcpkg" ]]; then
+            rm -rf .devtools/vcpkg
+          fi
           if [[ ! -d ".devtools/vcpkg/.git" ]]; then
             mkdir -p .devtools
             git clone https://github.com/microsoft/vcpkg.git .devtools/vcpkg
           fi
           if [[ ! -x ".devtools/vcpkg/vcpkg" ]]; then
+            if [[ ! -x ".devtools/vcpkg/bootstrap-vcpkg.sh" ]]; then
+              rm -rf .devtools/vcpkg
+              git clone https://github.com/microsoft/vcpkg.git .devtools/vcpkg
+            fi
             (cd .devtools/vcpkg && ./bootstrap-vcpkg.sh -disableMetrics)
           fi
 
