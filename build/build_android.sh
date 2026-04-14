@@ -23,6 +23,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 BUILD_TYPE="${1:-debug}"
 BUILD_TYPE_LOWER="$(echo "$BUILD_TYPE" | tr '[:upper:]' '[:lower:]')"
+SKIP_ANDROID_VCPKG_INSTALL="${SKIP_ANDROID_VCPKG_INSTALL:-0}"
 
 # Parse optional --abi argument
 TARGET_ABIS="arm64-v8a"
@@ -73,6 +74,10 @@ if [[ -d "$PROJECT_ROOT/.devtools/vcpkg" ]]; then
     VCPKG_ROOT="$PROJECT_ROOT/.devtools/vcpkg"
 elif [[ -n "${VCPKG_ROOT:-}" && -f "$VCPKG_ROOT/.vcpkg-root" ]]; then
     :
+elif [[ "$SKIP_ANDROID_VCPKG_INSTALL" == "1" ]]; then
+    echo "[ERROR] Prebuilt vcpkg root not found."
+    echo "[INFO] Expected path: $PROJECT_ROOT/.devtools/vcpkg"
+    exit 1
 else
     echo "[INFO] vcpkg not found. Automatically setting up vcpkg in .devtools/vcpkg..."
     recreate_local_vcpkg
@@ -81,7 +86,13 @@ fi
 
 VCPKG_BIN="$VCPKG_ROOT/vcpkg"
 
-if [[ ! -x "$VCPKG_BIN" ]]; then
+if [[ "$SKIP_ANDROID_VCPKG_INSTALL" == "1" ]]; then
+    if [[ ! -f "$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" ]]; then
+        echo "[ERROR] Prebuilt vcpkg toolchain file missing."
+        echo "[INFO] Expected path: $VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+        exit 1
+    fi
+elif [[ ! -x "$VCPKG_BIN" ]]; then
     if [[ -x "$VCPKG_ROOT/bootstrap-vcpkg.sh" ]]; then
         echo "[WARN] vcpkg binary missing, bootstrapping existing tree..."
         (cd "$VCPKG_ROOT" && ./bootstrap-vcpkg.sh -disableMetrics)
@@ -216,7 +227,7 @@ export ANDROID_HOME
 # Parse comma-separated ABIs
 IFS=',' read -ra ABI_ARRAY <<< "$TARGET_ABIS"
 
-if [[ "${SKIP_ANDROID_VCPKG_INSTALL:-0}" == "1" ]]; then
+if [[ "$SKIP_ANDROID_VCPKG_INSTALL" == "1" ]]; then
     log_step "Step 1/3: Using prebuilt Android vcpkg dependencies"
     for ABI in "${ABI_ARRAY[@]}"; do
         TRIPLET="$(abi_to_triplet "$ABI")"

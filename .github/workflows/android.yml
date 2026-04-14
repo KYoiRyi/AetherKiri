@@ -79,8 +79,24 @@ jobs:
             echo "hit=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate restored Android vcpkg bundle
+        id: validate-vcpkg-bundle
+        run: |
+          set -euo pipefail
+          if [[ -d ".devtools/vcpkg/installed/arm64-android" && -f ".devtools/vcpkg/scripts/buildsystems/vcpkg.cmake" ]]; then
+            echo "usable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "usable=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ -f ".devtools/vcpkg/bootstrap-vcpkg.sh" ]]; then
+            chmod +x ".devtools/vcpkg/bootstrap-vcpkg.sh"
+          fi
+          if [[ -f ".devtools/vcpkg/vcpkg" ]]; then
+            chmod +x ".devtools/vcpkg/vcpkg"
+          fi
+
       - name: Restore legacy vcpkg cache fallback
-        if: steps.restore-vcpkg-bundle.outputs.hit != 'true'
+        if: steps.validate-vcpkg-bundle.outputs.usable != 'true'
         id: restore-legacy-vcpkg
         uses: actions/cache/restore@v4
         with:
@@ -94,13 +110,17 @@ jobs:
       - name: Require prebuilt Android vcpkg dependencies
         run: |
           set -euo pipefail
-          if [[ "${{ steps.restore-vcpkg-bundle.outputs.hit }}" != "true" && "${{ steps.restore-legacy-vcpkg.outputs.cache-matched-key }}" = "" ]]; then
+          if [[ "${{ steps.validate-vcpkg-bundle.outputs.usable }}" != "true" && "${{ steps.restore-legacy-vcpkg.outputs.cache-matched-key }}" = "" ]]; then
             echo "No prebuilt Android vcpkg bundle or legacy cache was restored." >&2
             echo "Run the Android Vcpkg Bundle workflow first." >&2
             exit 1
           fi
           if [[ ! -d ".devtools/vcpkg/installed/arm64-android" ]]; then
             echo "Prebuilt Android vcpkg triplet arm64-android is missing." >&2
+            exit 1
+          fi
+          if [[ ! -f ".devtools/vcpkg/scripts/buildsystems/vcpkg.cmake" ]]; then
+            echo "Prebuilt Android vcpkg toolchain file is missing." >&2
             exit 1
           fi
 
