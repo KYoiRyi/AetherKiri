@@ -65,6 +65,10 @@ int TVPDrawSceneOnce(int interval);
 
 extern "C" void TVPRegisterKrkrGLESPluginAnchor();
 extern "C" void TVPRegisterKrkrLive2DPluginAnchor();
+extern "C" void TVPRegisterMotionPlayerPluginAnchor();
+extern "C" void TVPRegisterLayerExDrawPluginAnchor();
+extern "C" void TVPRegisterKAGParserExPluginAnchor();
+extern "C" void TVPRegisterPSBFilePluginAnchor();
 
 struct engine_handle_s {
   std::recursive_mutex mutex;
@@ -210,6 +214,10 @@ void InstallCrashSignalHandlers() {
 void EnsureInternalPluginAnchorsLinked() {
   TVPRegisterKrkrGLESPluginAnchor();
   TVPRegisterKrkrLive2DPluginAnchor();
+  TVPRegisterMotionPlayerPluginAnchor();
+  TVPRegisterLayerExDrawPluginAnchor();
+  TVPRegisterKAGParserExPluginAnchor();
+  TVPRegisterPSBFilePluginAnchor();
 }
 
 void EnsureRuntimeLoggersInitialized() {

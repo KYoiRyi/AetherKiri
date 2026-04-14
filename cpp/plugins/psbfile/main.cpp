@@ -441,5 +441,7 @@ NCB_REGISTER_CLASS(PSBFile) {
     RawCallback(TJS_W("load"), &load, 0);
 }
 
+extern "C" void TVPRegisterPSBFilePluginAnchor() {}
+
 NCB_PRE_REGIST_CALLBACK(initPsbFile);
 NCB_POST_UNREGIST_CALLBACK(deInitPsbFile);

@@ -477,6 +477,30 @@ static void TVPRegisterGfxFireStub() {
     spdlog::info("Registered gfxFire stub for missing gfxEffect.dll");
 }
 
+static void TVPEnsureGlobalIntStub(const tjs_char *name, tjs_int value) {
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if(!global)
+        return;
+
+    tTJSVariant existing;
+    const bool missing =
+        TJS_FAILED(global->PropGet(0, name, nullptr, &existing, global)) ||
+        existing.Type() == tvtVoid;
+    if(missing) {
+        tTJSVariant stubValue(value);
+        global->PropSet(TJS_MEMBERENSURE, name, nullptr, &stubValue, global);
+    }
+    global->Release();
+}
+
+static void TVPRegisterMockGfxCapabilityFlags() {
+    TVPEnsureGlobalIntStub(TJS_W("gfxFireEnabled"), 0);
+    TVPEnsureGlobalIntStub(TJS_W("gfxMovieEnabled"), 0);
+    TVPEnsureGlobalIntStub(TJS_W("gfxFlashEnabled"), 0);
+    TVPEnsureGlobalIntStub(TJS_W("gfxParticleEnabled"), 0);
+    TVPEnsureGlobalIntStub(TJS_W("gfxAlphaMovieEnabled"), 0);
+}
+
 void TVPLoadPlugin(const ttstr &name) {
     ttstr normalizedShortName = TVPGetNormalizedPluginName(name);
     ttstr resolvedName = name;
@@ -559,6 +583,9 @@ static void TVPSearchPluginsAt(std::vector<tTVPFoundPlugin> &list,
 }
 
 void TVPLoadInternalPlugins() {
+    if(TJS::TVPIsMockEnabled()) {
+        TVPRegisterMockGfxCapabilityFlags();
+    }
     PluginCallTracer::Instance().LogRegistrationStart();
     ncbAutoRegister::AllRegist();
     ncbAutoRegister::LoadAllModules();
