@@ -646,6 +646,55 @@ void TVPExecuteExpression(const ttstr &content, tTJSVariant *result) {
     TVPExecuteExpression(content, nullptr, result);
 }
 
+static const tjs_nchar *TVPAffineSourceCompatScript = TJS_N(R"(
+try {
+    var bridge = function(targetName, memberName, sourceValue) {
+        var target = global[targetName];
+        if(target !== void && target[memberName] === void &&
+           sourceValue !== void) {
+            target[memberName] = sourceValue;
+        }
+    };
+
+    bridge("AffineSourceImage", "AffineSourceBMPBase", global.AffineSourceBMPBase);
+    bridge("AffineSourceImage", "AffineSource", global.AffineSource);
+    bridge("AffineSourceImage", "Scripts", global.Scripts);
+    bridge("AffineSourceImage", "Storages", global.Storages);
+    bridge("AffineSourceImage", "clNone", global.clNone);
+    bridge("AffineSourceImage", "ltAlpha", global.ltAlpha);
+    bridge("AffineSourceImage", "ltBinder", global.ltBinder);
+    bridge("AffineSourceImage", "stRefNoClip", global.stRefNoClip);
+    bridge("AffineSourceImage", "getMultiResolutionInformation",
+           global.getMultiResolutionInformation);
+    bridge("AffineSourceImage", "calcImageMatrix", global.calcImageMatrix);
+    bridge("AffineSourceImage", "affineResolutions", global.affineResolutions);
+    bridge("AffineSourceImage", "affineBaseResolution",
+           global.affineBaseResolution);
+
+    bridge("AffineSourceBitmap", "AffineSourceBMPBase", global.AffineSourceBMPBase);
+    bridge("AffineSourceBitmap", "AffineSource", global.AffineSource);
+    bridge("AffineSourceBitmap", "ltBinder", global.ltBinder);
+
+    bridge("AffineSourceMotion", "AffineSource", global.AffineSource);
+    bridge("AffineSourceMotion", "EmoteVariable", global.EmoteVariable);
+    bridge("AffineSourceMotion", "Motion", global.Motion);
+    bridge("AffineSourceMotion", "Storages", global.Storages);
+    bridge("AffineSourceMotion", "clNone", global.clNone);
+    bridge("AffineSourceMotion", "ltBinder", global.ltBinder);
+    bridge("AffineSourceMotion", "ltAlpha", global.ltAlpha);
+} catch(e) {
+}
+)");
+
+static void TVPApplyScriptCompatBridges(iTJSDispatch2 *context) {
+    if(!TVPScriptEngine)
+        return;
+
+    tTJSVariant ignored;
+    TVPScriptEngine->ExecScript(ttstr(TVPAffineSourceCompatScript), &ignored,
+                                context, nullptr);
+}
+
 //---------------------------------------------------------------------------
 void TVPExecuteExpression(const ttstr &content, const ttstr &name,
                           tjs_int lineofs, tTJSVariant *result) {
@@ -812,6 +861,8 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
         else
             TVPScriptEngine->EvalExpression(buffer, result, context,
                                             &shortname);
+
+        TVPApplyScriptCompatBridges(context);
     }
 }
 
