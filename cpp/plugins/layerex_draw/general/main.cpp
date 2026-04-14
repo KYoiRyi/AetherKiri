@@ -931,5 +931,3 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerExDraw, Layer) {
 
 NCB_PRE_REGIST_CALLBACK(initGdiPlus);
 NCB_POST_UNREGIST_CALLBACK(deInitGdiPlus);
-
-extern "C" void TVPRegisterLayerExDrawPluginAnchor() {}

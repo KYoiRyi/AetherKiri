@@ -258,5 +258,3 @@ void doneStorage() {
 
 NCB_PRE_REGIST_CALLBACK(initStorage);
 NCB_POST_UNREGIST_CALLBACK(doneStorage);
-
-extern "C" void TVPRegisterPSDPluginAnchor() {}
