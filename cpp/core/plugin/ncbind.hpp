@@ -2048,7 +2048,10 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 
 	void RegistVariant(NameT name, const TJS::tTJSVariant &val, FlagsT flg) override {
 		if (!_tjs2ClassObj) return;
-		_tjs2ClassObj->PropSet(TJS_MEMBERENSURE | flg, name, nullptr, &val, ((flg & TJS_STATICMEMBER) ? _global : _tjs2ClassObj));
+		tjs_error hr = _tjs2ClassObj->PropSet(TJS_MEMBERENSURE | flg, name, nullptr, &val, ((flg & TJS_STATICMEMBER) ? _global : _tjs2ClassObj));
+		if(TJS_FAILED(hr)) {
+			spdlog::warn("NCB_ATTACH: PropSet '{}' on '{}' failed (hr={})", ttstr(name).AsStdString(), ttstr(_tjs2ClassName).AsStdString(), (int)hr);
+		}
 	}
 
 	void RegistItem(NameT name, ItemT item) override {
