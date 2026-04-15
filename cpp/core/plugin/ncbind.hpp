@@ -2060,10 +2060,20 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 			TVPThrowExceptionMessage(TJS_W("Constructor attached: "), ttstr(_className));
 		}
 		iTJSDispatch2 *dsp = item->GetDispatch();
-		tTJSVariant val(dsp);
-		dsp->Release();
 		FlagsT flg = item->GetFlags();
-		RegistVariant(name, val, flg);
+
+		// Use RegisterNCM so native instances can find the attached methods.
+		// PropSet(MEMBERENSURE) only adds to the class object symbol table,
+		// which native instances do not search.
+		auto *nativeClass = dynamic_cast<tTJSNativeClass*>(_tjs2ClassObj);
+		if (nativeClass) {
+			nativeClass->RegisterNCM(name, dsp, _className, item->GetType(), flg);
+		} else {
+			// Fallback for non-native class objects (pure TJS classes)
+			tTJSVariant val(dsp);
+			RegistVariant(name, val, flg);
+		}
+		dsp->Release();
 		item->Release();
 	}
 
