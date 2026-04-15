@@ -743,6 +743,8 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
                 auto *rawBuf = new tjs_uint8[size];
                 stream->Read(rawBuf, size);
 
+                spdlog::debug("export_scripts: loading bytecode '{}' ({} bytes)", name.AsStdString(), size);
+
                 // Load bytecode from memory copy (for execution)
                 tTVPMemoryStream memStream(rawBuf, size);
                 isbytecode = TVPScriptEngine->LoadByteCode(
@@ -751,6 +753,7 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
                 if(isbytecode) {
                     // Dump disassembled script using same raw bytes
                     try {
+                        spdlog::debug("export_scripts: dumping '{}'", name.AsStdString());
                         auto loader = std::make_unique<tTJSByteCodeLoader>();
                         std::unique_ptr<tTJSScriptBlock,
                                         std::function<void(tTJSScriptBlock *)>>
@@ -765,6 +768,7 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
                                 tmpPlace.replace(pos, strlen(".xp3>"), "_xp3/");
                                 auto absPath = std::filesystem::path{
                                     tmpPlace.substr(strlen("file://."))};
+                                spdlog::debug("export_scripts: writing to '{}'", absPath.string());
                                 std::filesystem::create_directories(
                                     absPath.parent_path());
                                 auto dumpStream = std::make_unique<tTVPMemoryStream>();
@@ -780,11 +784,16 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
                                     fwrite(buffer.data(), sizeof(char16_t),
                                            buffer.size(), f);
                                     fclose(f);
+                                    spdlog::debug("export_scripts: wrote {} chars", buffer.size());
                                 }
                             }
+                        } else {
+                            spdlog::warn("export_scripts: ReadByteCode returned null for '{}'", name.AsStdString());
                         }
+                    } catch(const std::exception &e) {
+                        spdlog::error("export_scripts: exception dumping '{}': {}", name.AsStdString(), e.what());
                     } catch(...) {
-                        // Export failure should not break script execution
+                        spdlog::error("export_scripts: unknown exception dumping '{}'", name.AsStdString());
                     }
                 }
                 delete[] rawBuf;
@@ -820,8 +829,10 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
                 of << buffer.AsStdString() << std::endl;
                 of.close();
             }
+        } catch(const std::exception &e) {
+            spdlog::error("export_scripts: text export exception for '{}': {}", name.AsStdString(), e.what());
         } catch(...) {
-            // Export failure should not break script execution
+            spdlog::error("export_scripts: text export unknown exception for '{}'", name.AsStdString());
         }
     }
 
