@@ -55,6 +55,14 @@
  *  Controls the TJS2 engine console log file written by TVPLogStreamHolder. */
 #define ENGINE_OPTION_CONSOLE_LOG_FILE "console_log_file"
 
+/** Enable/disable spdlog trace-level logging ("0"/"1", default "0").
+ *  When enabled, sets spdlog level to trace for maximum verbosity. */
+#define ENGINE_OPTION_TRACE_LOG "trace_log"
+
+/** Enable/disable auto-export of TJS scripts from XP3 ("0"/"1", default "0").
+ *  When enabled, disassembles bytecode and exports scripts during game load. */
+#define ENGINE_OPTION_EXPORT_SCRIPTS "export_scripts"
+
 /* ── ANGLE Backend Values ───────────────────────────────────────── */
 
 /** Use ANGLE's OpenGL ES backend (default). */

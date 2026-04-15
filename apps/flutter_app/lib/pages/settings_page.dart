@@ -32,6 +32,8 @@ class SettingsPage extends StatefulWidget {
     required this.pluginTrace,
     required this.mockEnabled,
     required this.consoleLogFile,
+    required this.traceLog,
+    required this.exportScripts,
   });
 
   final EngineMode engineMode;
@@ -47,6 +49,8 @@ class SettingsPage extends StatefulWidget {
   final bool pluginTrace;
   final bool mockEnabled;
   final bool consoleLogFile;
+  final bool traceLog;
+  final bool exportScripts;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -66,6 +70,8 @@ class SettingsResult {
     required this.pluginTrace,
     required this.mockEnabled,
     required this.consoleLogFile,
+    required this.traceLog,
+    required this.exportScripts,
   });
 
   final EngineMode engineMode;
@@ -79,6 +85,8 @@ class SettingsResult {
   final bool pluginTrace;
   final bool mockEnabled;
   final bool consoleLogFile;
+  final bool traceLog;
+  final bool exportScripts;
 }
 
 class _SettingsPageState extends State<SettingsPage> {
@@ -93,6 +101,8 @@ class _SettingsPageState extends State<SettingsPage> {
   late bool _pluginTrace;
   late bool _mockEnabled;
   late bool _consoleLogFile;
+  late bool _traceLog;
+  late bool _exportScripts;
   String _localeCode = 'system';
   String _themeModeCode = 'system';
   bool _dirty = false;
@@ -111,6 +121,8 @@ class _SettingsPageState extends State<SettingsPage> {
     _pluginTrace = widget.pluginTrace;
     _mockEnabled = widget.mockEnabled;
     _consoleLogFile = widget.consoleLogFile;
+    _traceLog = widget.traceLog;
+    _exportScripts = widget.exportScripts;
     _loadLocale();
     _loadThemeMode();
   }
@@ -153,6 +165,8 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setBool(PrefsKeys.pluginTrace, _pluginTrace);
     await prefs.setBool(PrefsKeys.mockEnabled, _mockEnabled);
     await prefs.setBool(PrefsKeys.consoleLogFile, _consoleLogFile);
+    await prefs.setBool(PrefsKeys.traceLog, _traceLog);
+    await prefs.setBool(PrefsKeys.exportScripts, _exportScripts);
 
     if (mounted) {
       Navigator.pop(
@@ -169,6 +183,8 @@ class _SettingsPageState extends State<SettingsPage> {
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
           consoleLogFile: _consoleLogFile,
+          traceLog: _traceLog,
+          exportScripts: _exportScripts,
         ),
       );
     }
@@ -517,6 +533,26 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: _consoleLogFile,
                     onChanged: (value) {
                       setState(() => _consoleLogFile = value);
+                      _markDirty();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.traceLog),
+                    subtitle: Text(l10n.traceLogDesc),
+                    value: _traceLog,
+                    onChanged: (value) {
+                      setState(() => _traceLog = value);
+                      _markDirty();
+                    },
+                  ),
+                  const Divider(height: 1),
+                  SwitchListTile(
+                    title: Text(l10n.exportScripts),
+                    subtitle: Text(l10n.exportScriptsDesc),
+                    value: _exportScripts,
+                    onChanged: (value) {
+                      setState(() => _exportScripts = value);
                       _markDirty();
                     },
                   ),

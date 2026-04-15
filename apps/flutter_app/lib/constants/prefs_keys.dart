@@ -19,6 +19,8 @@ class PrefsKeys {
   static const String pluginTrace = 'krkr2_plugin_trace';
   static const String mockEnabled = 'krkr2_mock_enabled';
   static const String consoleLogFile = 'krkr2_console_log_file';
+  static const String traceLog = 'krkr2_trace_log';
+  static const String exportScripts = 'krkr2_export_scripts';
 
   /// Pending play session: JSON { "path": "...", "startTime": "ISO8601" }. Cleared on normal exit or applied on next launch.
   static const String pendingPlaySession = 'krkr2_pending_play_session';
@@ -40,6 +42,8 @@ class PrefsKeys {
   static const String optionPluginTrace = 'plugin_trace';
   static const String optionMockEnabled = 'mock_enabled';
   static const String optionConsoleLogFile = 'console_log_file';
+  static const String optionTraceLog = 'trace_log';
+  static const String optionExportScripts = 'export_scripts';
 
   // ── Engine option values ────────────────────────────────────────
   static const String angleBackendGles = 'gles';

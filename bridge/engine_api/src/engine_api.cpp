@@ -1818,6 +1818,30 @@ engine_result_t engine_set_option(engine_handle_t handle,
     return ENGINE_RESULT_OK;
   }
 
+  // Handle trace_log option: enable/disable spdlog trace-level logging
+  if (key == ENGINE_OPTION_TRACE_LOG) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    spdlog::set_level(enabled ? spdlog::level::trace : spdlog::level::debug);
+    spdlog::flush_on(enabled ? spdlog::level::trace : spdlog::level::debug);
+    spdlog::info("engine_set_option: trace_log={}", enabled);
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
+  // Handle export_scripts option: enable/disable TJS script export
+  if (key == ENGINE_OPTION_EXPORT_SCRIPTS) {
+    const std::string v(option->value_utf8);
+    const bool enabled = (v == "1" || v == "true");
+    spdlog::info("engine_set_option: export_scripts={}", enabled);
+    TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
+    ClearHandleErrorLocked(impl);
+    SetThreadError(nullptr);
+    return ENGINE_RESULT_OK;
+  }
+
   TVPSetCommandLine(ttstr(option->key_utf8).c_str(), ttstr(option->value_utf8));
 
   if (key == ENGINE_OPTION_ARCHIVE_CACHE_COUNT) {
