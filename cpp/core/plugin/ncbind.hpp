@@ -3,6 +3,7 @@
 
 #include "tjsCommHead.h"
 #include "StorageImpl.h"
+#include <spdlog/spdlog.h>
 #include "tjsNative.h"
 #include "ScriptMgnIntf.h"
 #include "tjsArray.h"
@@ -2031,6 +2032,11 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 		_global = TVPGetScriptDispatch();
 		_tjs2ClassObj = GetGlobalObject(_tjs2ClassName, _global);
 
+		if (!_tjs2ClassObj) {
+			spdlog::warn("NCB_ATTACH: target class '{}' not found for native class '{}'; skipping method registration",
+			             ttstr(_tjs2ClassName).AsStdString(), ttstr(_className).AsStdString());
+		}
+
 		// クラスIDを生成
 		IdentT id  = TJSRegisterNativeClass(_className);
 
@@ -2041,6 +2047,7 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 	}
 
 	void RegistVariant(NameT name, const TJS::tTJSVariant &val, FlagsT flg) override {
+		if (!_tjs2ClassObj) return;
 		_tjs2ClassObj->PropSet(TJS_MEMBERENSURE | flg, name, nullptr, &val, ((flg & TJS_STATICMEMBER) ? _global : _tjs2ClassObj));
 	}
 
