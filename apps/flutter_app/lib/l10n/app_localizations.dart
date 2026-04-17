@@ -526,6 +526,18 @@ abstract class AppLocalizations {
   /// **'Write engine console log to krkr.console.log file'**
   String get consoleLogFileDesc;
 
+  /// No description provided for @traceLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace Log'**
+  String get traceLog;
+
+  /// No description provided for @traceLogDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable spdlog trace-level verbose logging for maximum debug output'**
+  String get traceLogDesc;
+
   /// No description provided for @exportScripts.
   ///
   /// In en, this message translates to:
@@ -549,18 +561,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Maximum rendering frequency when limit is enabled'**
   String get targetFrameRateDesc;
-
-  /// No description provided for @traceLog.
-  ///
-  /// In en, this message translates to:
-  /// **'Trace Log'**
-  String get traceLog;
-
-  /// No description provided for @traceLogDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'Enable spdlog trace-level verbose logging for maximum debug output'**
-  String get traceLogDesc;
 
   /// No description provided for @fpsLabel.
   ///

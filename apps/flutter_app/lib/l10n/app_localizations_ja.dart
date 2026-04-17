@@ -234,6 +234,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get consoleLogFileDesc => 'エンジンコンソールログを krkr.console.log に出力します';
 
   @override
+  String get traceLog => 'トレースログ';
+
+  @override
+  String get traceLogDesc => 'spdlog トレースレベルの詳細ログを有効にして最大限のデバッグ情報を出力します';
+
+  @override
   String get exportScripts => 'TJS スクリプトエクスポート';
 
   @override
@@ -245,13 +251,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get targetFrameRateDesc => '制限有効時の最大描画頻度';
-
-  @override
-  String get traceLog => 'トレースログ';
-
-  @override
-  String get traceLogDesc =>
-      'spdlog トレースレベルの詳細ログを有効にして最大限のデバッグ情報を出力します';
 
   @override
   String fpsLabel(int fps) {

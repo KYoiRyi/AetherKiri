@@ -13,10 +13,15 @@ vcpkg_installed/
 .gradle/
 .act/
 .devtools
-*.md
-*.lock
 /stats_server
 local.properties
+
+# Local-only docs / notes
+/AGENTS.md
+/notes/
+
+# Lockfiles that should stay local
+/bridge/flutter_engine_bridge/pubspec.lock
 
 java_pid*.hprof
 .DS_Store

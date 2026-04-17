@@ -244,6 +244,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write engine console log to krkr.console.log file';
 
   @override
+  String get traceLog => 'Trace Log';
+
+  @override
+  String get traceLogDesc =>
+      'Enable spdlog trace-level verbose logging for maximum debug output';
+
+  @override
   String get exportScripts => 'Export TJS Scripts';
 
   @override
@@ -256,13 +263,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get targetFrameRateDesc =>
       'Maximum rendering frequency when limit is enabled';
-
-  @override
-  String get traceLog => 'Trace Log';
-
-  @override
-  String get traceLogDesc =>
-      'Enable spdlog trace-level verbose logging for maximum debug output';
 
   @override
   String fpsLabel(int fps) {
