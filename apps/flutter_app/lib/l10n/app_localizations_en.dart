@@ -244,6 +244,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write engine console log to krkr.console.log file';
 
   @override
+  String get traceLog => 'Trace Log';
+
+  @override
+  String get traceLogDesc =>
+      'Enable spdlog trace-level verbose logging for maximum debug output';
+
+  @override
+  String get exportScripts => 'Export TJS Scripts';
+
+  @override
+  String get exportScriptsDesc =>
+      'Auto-export disassembled TJS bytecode scripts from XP3 during game load';
+
+  @override
   String get targetFrameRate => 'Target Frame Rate';
 
   @override

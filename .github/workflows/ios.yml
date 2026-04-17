@@ -17,17 +17,16 @@ jobs:
 
       - name: Install Build Systems
         run: |
-          brew install cmake ninja pkg-config autoconf automake autoconf-archive gettext coreutils bison ccache jq
+          brew install cmake ninja pkg-config autoconf automake autoconf-archive gettext coreutils bison ccache
           echo "$(brew --prefix gettext)/bin" >> $GITHUB_PATH
           echo "$(brew --prefix bison)/bin" >> $GITHUB_PATH
 
       - name: Restore ccache
+        id: restore-ccache
         uses: actions/cache/restore@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-ios-ccache-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-ios-ccache-
+          key: ${{ runner.os }}-ios-ccache
 
       - name: Setup ccache config
         run: |
@@ -50,9 +49,7 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}
-          restore-keys: |
-             ${{ runner.os }}-ios-vcpkg-
+          key: ${{ runner.os }}-ios-vcpkg
 
       - name: Build iOS Release
         run: |
@@ -88,25 +85,11 @@ jobs:
           path: |
             .devtools/vcpkg
             ~/.cache/vcpkg/archives
-          key: ${{ runner.os }}-ios-vcpkg-${{ hashFiles('vcpkg.json') }}
+          key: ${{ runner.os }}-ios-vcpkg
 
       - name: Save ccache
-        if: success()
+        if: success() && steps.restore-ccache.outputs.cache-matched-key == ''
         uses: actions/cache/save@v4
         with:
           path: .ccache
-          key: ${{ runner.os }}-ios-ccache-${{ github.run_id }}
-
-      - name: Clean up older caches
-        if: success()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Fetching list of caches..."
-          gh api -H "Accept: application/vnd.github+json" "/repos/$GITHUB_REPOSITORY/actions/caches?ref=$GITHUB_REF" > caches.json || exit 0
-          
-          CURRENT_CCACHE_KEY="${{ runner.os }}-ios-ccache-${{ github.run_id }}"
-          jq -r ".actions_caches[] | select(.key | startswith(\"${{ runner.os }}-ios-ccache-\")) | select(.key != \"$CURRENT_CCACHE_KEY\") | .id" caches.json | while read id; do
-            echo "Deleting old ccache ID: $id"
-            gh api --method DELETE -H "Accept: application/vnd.github+json" /repos/$GITHUB_REPOSITORY/actions/caches/$id || true
-          done
+          key: ${{ runner.os }}-ios-ccache

@@ -721,6 +721,7 @@ void TVPExecuteStorage(const ttstr &name, tTJSVariant *result,
     TVPExecuteStorage(name, nullptr, result, isexpression, modestr);
 }
 #include <fstream>
+#include <filesystem>
 #include <tjsByteCodeLoader.h>
 //---------------------------------------------------------------------------
 void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
@@ -730,66 +731,89 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
     if(!TVPScriptEngine)
         TVPThrowInternalError;
 
+    // Check if export_scripts is enabled (used by both bytecode and text paths)
+    tTJSVariant exportOpt;
+    bool doExport = false;
+    if(TVPGetCommandLine(TJS_W("export_scripts"), &exportOpt)) {
+        ttstr val = exportOpt.AsStringNoAddRef();
+        doExport = (val == TJS_W("1") || val == TJS_W("true"));
+    }
+
     { // for bytecode
         ttstr place(TVPSearchPlacedPath(name));
         ttstr shortname(TVPExtractStorageName(place));
         std::unique_ptr<tTJSBinaryStream> stream{ TVPCreateBinaryStreamForRead(
             place, modestr) };
         if(stream) {
-            bool isbytecode = TVPScriptEngine->LoadByteCode(
-                stream.get(), result, context, shortname.c_str());
+            bool isbytecode;
+            if(doExport) {
+                // Snapshot raw bytes before LoadByteCode consumes the stream
+                auto size = static_cast<tjs_uint>(stream->GetSize());
+                auto *rawBuf = new tjs_uint8[size];
+                stream->Read(rawBuf, size);
 
-            if(isbytecode) {
-                // save extract binary file for debug!
-                //                auto loader =
-                //                std::make_unique<tTJSByteCodeLoader>(); auto
-                //                *buff =
-                //                    new tjs_uint8[static_cast<unsigned
-                //                    int>(stream->GetSize())];
-                //                stream->Read(buff,
-                //                static_cast<tjs_uint>(stream->GetSize()));
-                //
-                //                std::unique_ptr<tTJSScriptBlock,
-                //                                std::function<void(tTJSScriptBlock
-                //                                *)>>
-                //                    blk{ loader->ReadByteCode(TVPScriptEngine,
-                //                    name.c_str(),
-                //                                              buff,
-                //                                              stream->GetSize()),
-                //                         [](auto *ptr) { ptr->Release(); } };
-                //                delete[] buff;
-                //                if(!blk)
-                //                    return;
-                //                auto tmpPlace = place.AsStdString();
-                //                tmpPlace.replace(tmpPlace.find(".xp3>"),
-                //                std::strlen(".xp3>"),
-                //                                 "_xp3/");
-                //                std::filesystem::path absoluteScriptPath{
-                //                tmpPlace.substr(
-                //                    std::strlen("file://.")) };
-                //                std::filesystem::create_directories(
-                //                    absoluteScriptPath.parent_path());
-                //                auto memoryStream =
-                //                std::make_unique<tTVPMemoryStream>();
-                //                blk->Dump(memoryStream.get());
-                //
-                //                std::vector<char16_t>
-                //                buffer(memoryStream->GetSize() /
-                //                                             sizeof(char16_t));
-                //
-                //                memoryStream->Seek(0, TJS_BS_SEEK_SET);
-                //                memoryStream->Read(buffer.data(),
-                //                memoryStream->GetSize()); FILE *f =
-                //                fopen(absoluteScriptPath.c_str(), "wb");
-                //                // 写入 UTF-16 LE BOM 小端
-                //                char16_t bom = 0xFEFF;
-                //                fwrite(&bom, sizeof(char16_t), 1, f);
-                //
-                //                fwrite(buffer.data(), sizeof(char16_t),
-                //                buffer.size(), f); fclose(f);
-                // end
-                return;
+                spdlog::debug("export_scripts: loading bytecode '{}' ({} bytes)", name.AsStdString(), size);
+
+                // Load bytecode from memory copy (for execution)
+                tTVPMemoryStream memStream(rawBuf, size);
+                isbytecode = TVPScriptEngine->LoadByteCode(
+                    &memStream, result, context, shortname.c_str());
+
+                if(isbytecode) {
+                    // Dump disassembled script using same raw bytes
+                    try {
+                        spdlog::debug("export_scripts: dumping '{}'", name.AsStdString());
+                        auto loader = std::make_unique<tTJSByteCodeLoader>();
+                        std::unique_ptr<tTJSScriptBlock,
+                                        std::function<void(tTJSScriptBlock *)>>
+                            blk{ loader->ReadByteCode(TVPScriptEngine, name.c_str(),
+                                                      rawBuf, size),
+                                 [](auto *ptr) { ptr->Release(); } };
+
+                        if(blk) {
+                            auto tmpPlace = place.AsStdString();
+                            auto pos = tmpPlace.find(".xp3>");
+                            if(pos != std::string::npos) {
+                                tmpPlace.replace(pos, strlen(".xp3>"), "_xp3/");
+                                auto absPath = std::filesystem::path{
+                                    tmpPlace.substr(strlen("file://."))};
+                                spdlog::debug("export_scripts: writing to '{}'", absPath.string());
+                                std::filesystem::create_directories(
+                                    absPath.parent_path());
+                                auto dumpStream = std::make_unique<tTVPMemoryStream>();
+                                blk->Dump(dumpStream.get());
+                                auto bufSize = dumpStream->GetSize();
+                                std::vector<char16_t> buffer(bufSize / sizeof(char16_t));
+                                dumpStream->Seek(0, TJS_BS_SEEK_SET);
+                                dumpStream->Read(buffer.data(), bufSize);
+                                FILE *f = fopen(absPath.c_str(), "wb");
+                                if(f) {
+                                    char16_t bom = 0xFEFF;
+                                    fwrite(&bom, sizeof(char16_t), 1, f);
+                                    fwrite(buffer.data(), sizeof(char16_t),
+                                           buffer.size(), f);
+                                    fclose(f);
+                                    spdlog::debug("export_scripts: wrote {} chars", buffer.size());
+                                }
+                            }
+                        } else {
+                            spdlog::warn("export_scripts: ReadByteCode returned null for '{}'", name.AsStdString());
+                        }
+                    } catch(const std::exception &e) {
+                        spdlog::error("export_scripts: exception dumping '{}': {}", name.AsStdString(), e.what());
+                    } catch(...) {
+                        spdlog::error("export_scripts: unknown exception dumping '{}'", name.AsStdString());
+                    }
+                }
+                delete[] rawBuf;
+            } else {
+                // Normal path (no export)
+                isbytecode = TVPScriptEngine->LoadByteCode(
+                    stream.get(), result, context, shortname.c_str());
             }
+
+            if(isbytecode)
+                return;
         }
     }
 
@@ -800,19 +824,26 @@ void TVPExecuteStorage(const ttstr &name, iTJSDispatch2 *context,
     ttstr buffer;
     stream->Read(buffer, 0);
 
-    // save extract script file for debug!
-    //    auto tmpPlace = place.AsStdString();
-    //    auto i = tmpPlace.find(".xp3>");
-    //    if(i > -1) {
-    //        tmpPlace.replace(i, std::strlen(".xp3>"), "_xp3/");
-    //        std::filesystem::path absoluteScriptPath{ tmpPlace.substr(
-    //            std::strlen("file://.")) };
-    //        std::filesystem::create_directories(absoluteScriptPath.parent_path());
-    //        std::ofstream of{ absoluteScriptPath };
-    //        of << buffer.AsStdString() << std::endl;
-    //        of.close();
-    //    }
-    // end
+    // Export plain-text script when export_scripts is enabled
+    if(doExport) {
+        try {
+            auto tmpPlace = place.AsStdString();
+            auto pos = tmpPlace.find(".xp3>");
+            if(pos != std::string::npos) {
+                tmpPlace.replace(pos, strlen(".xp3>"), "_xp3/");
+                auto absPath = std::filesystem::path{
+                    tmpPlace.substr(strlen("file://."))};
+                std::filesystem::create_directories(absPath.parent_path());
+                std::ofstream of{absPath};
+                of << buffer.AsStdString() << std::endl;
+                of.close();
+            }
+        } catch(const std::exception &e) {
+            spdlog::error("export_scripts: text export exception for '{}': {}", name.AsStdString(), e.what());
+        } catch(...) {
+            spdlog::error("export_scripts: text export unknown exception for '{}'", name.AsStdString());
+        }
+    }
 
     if(TVPScriptEngine) {
 

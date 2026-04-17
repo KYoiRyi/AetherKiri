@@ -3,6 +3,7 @@
 
 #include "tjsCommHead.h"
 #include "StorageImpl.h"
+#include <spdlog/spdlog.h>
 #include "tjsNative.h"
 #include "ScriptMgnIntf.h"
 #include "tjsArray.h"
@@ -2031,6 +2032,11 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 		_global = TVPGetScriptDispatch();
 		_tjs2ClassObj = GetGlobalObject(_tjs2ClassName, _global);
 
+		if (!_tjs2ClassObj) {
+			spdlog::warn("NCB_ATTACH: target class '{}' not found for native class '{}'; skipping method registration",
+			             ttstr(_tjs2ClassName).AsStdString(), ttstr(_className).AsStdString());
+		}
+
 		// クラスIDを生成
 		IdentT id  = TJSRegisterNativeClass(_className);
 
@@ -2041,7 +2047,11 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 	}
 
 	void RegistVariant(NameT name, const TJS::tTJSVariant &val, FlagsT flg) override {
-		_tjs2ClassObj->PropSet(TJS_MEMBERENSURE | flg, name, nullptr, &val, ((flg & TJS_STATICMEMBER) ? _global : _tjs2ClassObj));
+		if (!_tjs2ClassObj) return;
+		tjs_error hr = _tjs2ClassObj->PropSet(TJS_MEMBERENSURE | flg, name, nullptr, &val, ((flg & TJS_STATICMEMBER) ? _global : _tjs2ClassObj));
+		if(TJS_FAILED(hr)) {
+			spdlog::warn("NCB_ATTACH: PropSet '{}' on '{}' failed (hr={})", ttstr(name).AsStdString(), ttstr(_tjs2ClassName).AsStdString(), (int)hr);
+		}
 	}
 
 	void RegistItem(NameT name, ItemT item) override {
@@ -2050,10 +2060,20 @@ struct ncbAttachTJS2Class : public ncbRegistNativeClassBase {
 			TVPThrowExceptionMessage(TJS_W("Constructor attached: "), ttstr(_className));
 		}
 		iTJSDispatch2 *dsp = item->GetDispatch();
-		tTJSVariant val(dsp);
-		dsp->Release();
 		FlagsT flg = item->GetFlags();
-		RegistVariant(name, val, flg);
+
+		// Use RegisterNCM so native instances can find the attached methods.
+		// PropSet(MEMBERENSURE) only adds to the class object symbol table,
+		// which native instances do not search.
+		auto *nativeClass = dynamic_cast<tTJSNativeClass*>(_tjs2ClassObj);
+		if (nativeClass) {
+			nativeClass->RegisterNCM(name, dsp, _className, item->GetType(), flg);
+		} else {
+			// Fallback for non-native class objects (pure TJS classes)
+			tTJSVariant val(dsp);
+			RegistVariant(name, val, flg);
+		}
+		dsp->Release();
 		item->Release();
 	}
 

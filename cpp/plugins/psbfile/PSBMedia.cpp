@@ -1205,12 +1205,6 @@ namespace PSB {
 
         try {
             ttstr archivePath(archiveKey.c_str());
-            if(auto cached = motion::ResourceManager::getLoadedFile(archivePath)) {
-                LOGGER->info("PSB lazy-load archive(from cache): {}", archiveKey);
-                RegisterPSBResourcesIntoMedia(*this, *cached, archiveKey);
-                return true;
-            }
-
             PSBFile psb;
             psb.setSeed(motion::ResourceManager::getDecryptSeed());
             if(!psb.loadPSBFile(archivePath)) {

@@ -234,6 +234,7 @@ struct AxisParam {
 
     static int toAlign(int &length) {
         length = ((length + ALIGN_OFFSET) / ALIGN_DIV) * ALIGN_DIV;
+        return length;
     }
 };
 

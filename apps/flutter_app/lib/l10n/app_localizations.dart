@@ -526,6 +526,30 @@ abstract class AppLocalizations {
   /// **'Write engine console log to krkr.console.log file'**
   String get consoleLogFileDesc;
 
+  /// No description provided for @traceLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Trace Log'**
+  String get traceLog;
+
+  /// No description provided for @traceLogDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable spdlog trace-level verbose logging for maximum debug output'**
+  String get traceLogDesc;
+
+  /// No description provided for @exportScripts.
+  ///
+  /// In en, this message translates to:
+  /// **'Export TJS Scripts'**
+  String get exportScripts;
+
+  /// No description provided for @exportScriptsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-export disassembled TJS bytecode scripts from XP3 during game load'**
+  String get exportScriptsDesc;
+
   /// No description provided for @targetFrameRate.
   ///
   /// In en, this message translates to:

@@ -19,3 +19,5 @@ static ncbCallbackAutoRegister g_extkagparser_cb(
 static ncbCallbackAutoRegister g_extkagparser_unload_cb(
     TJS_W("ExtKAGParser.dll"), ncbAutoRegister::PostRegist, nullptr,
     &UnlinkKAGParserCompatibility);
+
+extern "C" void TVPRegisterKAGParserExPluginAnchor() {}

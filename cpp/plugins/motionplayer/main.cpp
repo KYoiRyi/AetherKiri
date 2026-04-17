@@ -1,632 +1,382 @@
 //
 // Created by LiDon on 2025/9/13.
-// TODO: implement emoteplayer.dll plugin
+// Reverse-engineered from libkrkr2.so emoteplayer.dll + motionplayer.dll
 //
 #include <spdlog/spdlog.h>
 #include "tjs.h"
-#include "tjsDictionary.h"
 #include "ncbind.hpp"
 #include "psbfile/PSBFile.h"
-#include "base/ScriptMgnIntf.h"
 
 #include "ResourceManager.h"
 #include "EmotePlayer.h"
 #include "Player.h"
 #include "SeparateLayerAdaptor.h"
+#include "D3DEmoteModule.h"
+#include "SourceCache.h"
+#include "D3DAdaptor.h"
 
 using namespace motion;
-using namespace TJS;
 
 #define NCB_MODULE_NAME TJS_W("motionplayer.dll")
 #define LOGGER spdlog::get("plugin")
 
-static motion::SeparateLayerAdaptor *GetSeparateLayerAdaptorInstance(iTJSDispatch2 *objthis) {
-    return ncbInstanceAdaptor<motion::SeparateLayerAdaptor>::GetNativeInstance(objthis);
-}
+static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams,
+                                          tTJSVariant **param,
+                                          iTJSDispatch2 *objthis);
 
-static iTJSDispatch2 *GetSeparateAdaptorRenderTarget(motion::SeparateLayerAdaptor *adaptor);
+// ============================================================
+// Subclass registrations (used as Motion.XXX)
+// ============================================================
 
-class GenericMockObject;
-static tjs_error Universal_missing_method(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis);
+NCB_REGISTER_SUBCLASS_DELAY(SourceCache) { NCB_CONSTRUCTOR(()); }
+NCB_REGISTER_SUBCLASS_DELAY(ObjSource) { NCB_CONSTRUCTOR(()); }
 
-iTJSDispatch2 *ResolveLayerTreeOwnerBase(iTJSDispatch2 *base) {
-    if(!base) return nullptr;
-    auto *adaptor = ncbInstanceAdaptor<motion::SeparateLayerAdaptor>::GetNativeInstance(base);
-    if(adaptor) return GetSeparateAdaptorRenderTarget(adaptor);
-    return base;
-}
-
-static iTJSDispatch2 *GetSeparateAdaptorRenderTarget(motion::SeparateLayerAdaptor *adaptor) {
-    if(!adaptor) return nullptr;
-    if(adaptor->getTarget()) return adaptor->getTarget();
-
-    auto *owner = adaptor->getOwner();
-    if(!owner) return nullptr;
-
-    tTJSVariant windowVar;
-    iTJSDispatch2 *windowObj = owner;
-    if(TJS_SUCCEEDED(owner->PropGet(0, TJS_W("window"), nullptr, &windowVar, owner)) &&
-       windowVar.Type() == tvtObject && windowVar.AsObjectNoAddRef()) {
-        windowObj = windowVar.AsObjectNoAddRef();
-    }
-
-    tTJSVariant parentVar;
-    if(TJS_FAILED(owner->PropGet(0, TJS_W("primaryLayer"), nullptr, &parentVar, owner)) ||
-       parentVar.Type() != tvtObject || !parentVar.AsObjectNoAddRef()) {
-        if(TJS_FAILED(windowObj->PropGet(0, TJS_W("primaryLayer"), nullptr, &parentVar, windowObj)) ||
-           parentVar.Type() != tvtObject || !parentVar.AsObjectNoAddRef()) {
-            return owner;
-        }
-    }
-
-    iTJSDispatch2 *global = TVPGetScriptDispatch();
-    if(!global) return owner;
-
-    tTJSVariant layerClassVar;
-    if(TJS_FAILED(global->PropGet(0, TJS_W("Layer"), nullptr, &layerClassVar, global)) ||
-       layerClassVar.Type() != tvtObject || !layerClassVar.AsObjectNoAddRef()) {
-        global->Release();
-        return owner;
-    }
-
-    iTJSDispatch2 *layerClass = layerClassVar.AsObjectNoAddRef();
-    tTJSVariant args[2] = { tTJSVariant(windowObj, windowObj),
-                            tTJSVariant(parentVar.AsObjectNoAddRef(), parentVar.AsObjectNoAddRef()) };
-    tTJSVariant *argv[] = { &args[0], &args[1] };
-    iTJSDispatch2 *layerObj = nullptr;
-    const auto hr = layerClass->CreateNew(0, nullptr, nullptr, &layerObj, 2, argv, layerClass);
-    global->Release();
-    if(TJS_FAILED(hr) || !layerObj) {
-        return owner;
-    }
-
-    auto syncProp = [&](const tjs_char *name) {
-        tTJSVariant value;
-        if(TJS_SUCCEEDED(owner->PropGet(0, name, nullptr, &value, owner))) {
-            layerObj->PropSet(TJS_MEMBERENSURE, name, nullptr, &value, layerObj);
-        }
-    };
-    syncProp(TJS_W("left"));
-    syncProp(TJS_W("top"));
-    syncProp(TJS_W("width"));
-    syncProp(TJS_W("height"));
-    syncProp(TJS_W("visible"));
-    syncProp(TJS_W("opacity"));
-    syncProp(TJS_W("name"));
-
-    // Prevent the render target from intercepting mouse events;
-    // hitThreshold=256 makes hit test always fail (max alpha is 255)
-    tTJSVariant htVal(static_cast<tjs_int>(256));
-    layerObj->PropSet(TJS_MEMBERENSURE, TJS_W("hitThreshold"), nullptr, &htVal, layerObj);
-
-    // Ensure the owner AnimKAGLayer passes hit test even without its own bitmap;
-    // hitThreshold=0 means bounds-only checking (no alpha test needed)
-    tTJSVariant ownerHtVal(static_cast<tjs_int>(0));
-    owner->PropSet(TJS_MEMBERENSURE, TJS_W("hitThreshold"), nullptr, &ownerHtVal, owner);
-
-    adaptor->setTarget(layerObj);
-    layerObj->Release();
-    return adaptor->getTarget() ? adaptor->getTarget() : owner;
-}
-
-static tjs_error SeparateLayerAdaptor_getWidth(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                               iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
-        return TJS_S_OK;
-    }
-    tTJSVariant value;
-    const auto hr = target->PropGet(0, TJS_W("width"), nullptr, &value, target);
-    if(r) {
-        *r = TJS_SUCCEEDED(hr) ? value : tTJSVariant(static_cast<tjs_int>(0));
-    }
-    return TJS_S_OK;
-}
-
-static tjs_error SeparateLayerAdaptor_getHeight(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                                iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
-        return TJS_S_OK;
-    }
-    tTJSVariant value;
-    const auto hr = target->PropGet(0, TJS_W("height"), nullptr, &value, target);
-    if(r) {
-        *r = TJS_SUCCEEDED(hr) ? value : tTJSVariant(static_cast<tjs_int>(0));
-    }
-    return TJS_S_OK;
-}
-
-static tjs_error SeparateLayerAdaptor_loadImages(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                                 iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target || count < 1) return TJS_E_INVALIDPARAM;
-    return target->FuncCall(0, TJS_W("loadImages"), nullptr, r, count, p, target);
-}
-
-static tjs_error SeparateLayerAdaptor_fillRect(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                               iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target || count < 5) return TJS_E_INVALIDPARAM;
-    return target->FuncCall(0, TJS_W("fillRect"), nullptr, r, count, p, target);
-}
-
-static tjs_error SeparateLayerAdaptor_operateRect(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                                  iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target || count < 9) return TJS_E_INVALIDPARAM;
-    return target->FuncCall(0, TJS_W("operateRect"), nullptr, r, count, p, target);
-}
-
-static tjs_error SeparateLayerAdaptor_getFace(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                              iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target) { if(r) *r = tTJSVariant(static_cast<tjs_int>(0)); return TJS_S_OK; }
-    tTJSVariant value;
-    const auto hr = target->PropGet(0, TJS_W("face"), nullptr, &value, target);
-    if(r) *r = TJS_SUCCEEDED(hr) ? value : tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-
-static tjs_error SeparateLayerAdaptor_setFace(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                              iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target || count < 1) return TJS_E_INVALIDPARAM;
-    return target->PropSet(TJS_MEMBERENSURE, TJS_W("face"), nullptr, p[0], target);
-}
-
-static tjs_error SeparateLayerAdaptor_getImageWidth(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                                    iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target) { if(r) *r = tTJSVariant(static_cast<tjs_int>(0)); return TJS_S_OK; }
-    tTJSVariant value;
-    const auto hr = target->PropGet(0, TJS_W("imageWidth"), nullptr, &value, target);
-    if(r) *r = TJS_SUCCEEDED(hr) ? value : tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-
-static tjs_error SeparateLayerAdaptor_getImageHeight(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                                     iTJSDispatch2 *objthis) {
-    auto *adaptor = GetSeparateLayerAdaptorInstance(objthis);
-    auto *target = GetSeparateAdaptorRenderTarget(adaptor);
-    if(!target) { if(r) *r = tTJSVariant(static_cast<tjs_int>(0)); return TJS_S_OK; }
-    tTJSVariant value;
-    const auto hr = target->PropGet(0, TJS_W("imageHeight"), nullptr, &value, target);
-    if(r) *r = TJS_SUCCEEDED(hr) ? value : tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-
-NCB_REGISTER_SUBCLASS_DELAY(SeparateLayerAdaptor) {
-    NCB_CONSTRUCTOR((iTJSDispatch2 *));
-    NCB_PROPERTY_RAW_CALLBACK_RO(width, SeparateLayerAdaptor_getWidth, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(height, SeparateLayerAdaptor_getHeight, 0);
-    NCB_PROPERTY_RAW_CALLBACK(face, SeparateLayerAdaptor_getFace, SeparateLayerAdaptor_setFace, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(imageWidth, SeparateLayerAdaptor_getImageWidth, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(imageHeight, SeparateLayerAdaptor_getImageHeight, 0);
-    NCB_METHOD_RAW_CALLBACK(loadImages, SeparateLayerAdaptor_loadImages, 0);
-    NCB_METHOD_RAW_CALLBACK(fillRect, SeparateLayerAdaptor_fillRect, 0);
-    NCB_METHOD_RAW_CALLBACK(operateRect, SeparateLayerAdaptor_operateRect, 0);
-}
-
-// 脚本意图: EmoteVariable.useD3D = (typeof Motion.Player.useD3D === "Object") ? Motion.Player.useD3D : Motion.enableD3D;
-// 但 then 分支实际赋的是比较结果 (int)1 而非对象，导致 (int)1 to Object。故让 useD3D 返回整数，
-// 使 typeof === "Integer" 走 else，赋 Motion.enableD3D（stub 对象），避免两处 int→Object 报错。
-static tjs_error Player_getUseD3D(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    *r = tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-static tjs_error Player_setUseD3D(tTJSVariant *, tjs_int count, tTJSVariant **p, iTJSDispatch2 *) {
-    if (count >= 1 && (*p)->Type() == tvtInteger)
-        motion::Player::setUseD3D(static_cast<bool>(**p));
-    return TJS_S_OK;
-}
-static tjs_error Player_getEnableD3D(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    iTJSDispatch2 *obj = TJSCreateDictionaryObject();
-    if (obj) {
-        *r = tTJSVariant(obj);
-        obj->Release();
-    } else {
-        *r = tTJSVariant();
-    }
-    return TJS_S_OK;
-}
-static tjs_error Player_setEnableD3D(tTJSVariant *, tjs_int count, tTJSVariant **p, iTJSDispatch2 *) {
-    if (count >= 1 && (*p)->Type() == tvtInteger)
-        motion::Player::setEnableD3D(static_cast<bool>(**p));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setVariable(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                    iTJSDispatch2 *objthis) {
-    auto *player = ncbInstanceAdaptor<motion::Player>::GetNativeInstance(objthis);
-    if(!player || count < 2) return TJS_E_INVALIDPARAM;
-    player->setVariable(ttstr(*p[0]), *p[1]);
-    if(r) *r = tTJSVariant();
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getVariable(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                    iTJSDispatch2 *objthis) {
-    auto *player = ncbInstanceAdaptor<motion::Player>::GetNativeInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    if(r) *r = player->getVariable(ttstr(*p[0]));
-    return TJS_S_OK;
-}
-
-static motion::Player *GetPlayerInstance(iTJSDispatch2 *objthis) {
-    return ncbInstanceAdaptor<motion::Player>::GetNativeInstance(objthis);
-}
-
-static tjs_error Player_getPlaying(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                   iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(player ? player->getPlaying() : false);
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getAllplaying(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                      iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(player ? player->getAllplaying() : false);
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getMotion(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                  iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(player ? player->getMotion() : ttstr());
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setMotion(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                  iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setMotion(ttstr(*p[0]));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getChara(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(player ? player->getChara() : ttstr());
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setChara(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setChara(ttstr(*p[0]));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getTickCount(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                     iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(static_cast<tjs_int>(player ? player->getTickCount() : 0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setTickCount(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                     iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setTickCount(static_cast<tjs_int>(**p));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getLastTime(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                    iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(static_cast<tjs_int>(player ? player->getLastTime() : 0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setLastTime(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                    iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setLastTime(static_cast<tjs_int>(**p));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getSpeed(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(static_cast<tjs_real>(player ? player->getSpeed() : 1.0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setSpeed(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setSpeed(static_cast<tjs_real>(p[0]->AsReal()));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getOutline(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                   iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!r)
-        return TJS_S_OK;
-    if(!player) {
-        *r = tTJSVariant(static_cast<tjs_int>(0));
-        return TJS_S_OK;
-    }
-    tTJSVariant value = player->getVariable(TJS_W("outline"));
-    if(value.Type() == tvtVoid)
-        *r = tTJSVariant(static_cast<tjs_int>(0));
-    else
-        *r = value;
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setOutline(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                   iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setVariable(TJS_W("outline"), *p[0]);
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getVariableKeys(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                        iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!r)
-        return TJS_S_OK;
-    if(!player) {
-        *r = tTJSVariant();
-        return TJS_S_OK;
-    }
-
-    iTJSDispatch2 *keys = player->getVariableKeys();
-    if(keys) {
-        *r = tTJSVariant(keys, keys);
-        keys->Release();
-    } else {
-        *r = tTJSVariant();
-    }
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getCompletionType(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                          iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(r) *r = tTJSVariant(static_cast<tjs_int>(player ? player->getCompletionType() : 0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setCompletionType(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                          iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->setCompletionType(static_cast<tjs_int>(**p));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_play(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                             iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    const ttstr motion = ttstr(*p[0]);
-    const tjs_int all = count >= 2 ? static_cast<tjs_int>(p[1]->AsInteger()) : 0;
-    player->play(motion, all);
-    return TJS_S_OK;
-}
-
-static tjs_error Player_stop(tTJSVariant *, tjs_int, tTJSVariant **,
-                             iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player) return TJS_E_INVALIDPARAM;
-    player->stop();
-    return TJS_S_OK;
-}
-
-static tjs_error Player_progress(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    player->progress(static_cast<tjs_int>(p[0]->AsInteger()));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_skipToSync(tTJSVariant *, tjs_int, tTJSVariant **,
-                                   iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player) return TJS_E_INVALIDPARAM;
-    player->skipToSync();
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setDrawAffineTranslateMatrix(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                                     iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 6) return TJS_E_INVALIDPARAM;
-    player->setDrawAffineTranslateMatrix(
-        p[0]->AsReal(), p[1]->AsReal(), p[2]->AsReal(),
-        p[3]->AsReal(), p[4]->AsReal(), p[5]->AsReal());
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setCoord(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 2) return TJS_E_INVALIDPARAM;
-    player->setCoord(static_cast<tjs_real>(p[0]->AsReal()),
-                     static_cast<tjs_real>(p[1]->AsReal()));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_contains(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                 iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 2) return TJS_E_INVALIDPARAM;
-    if(r) *r = tTJSVariant(player->contains(static_cast<tjs_int>(p[0]->AsInteger()),
-                                            static_cast<tjs_int>(p[1]->AsInteger())));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getCommandList(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                       iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player) return TJS_E_INVALIDPARAM;
-    iTJSDispatch2 *obj = player->getCommandList();
-    if(r) {
-        if(obj) {
-            *r = tTJSVariant(obj);
-            obj->Release();
-        } else {
-            *r = tTJSVariant();
-        }
-    } else if(obj) {
-        obj->Release();
-    }
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getLayerMotion(tTJSVariant *r, tjs_int count, tTJSVariant **,
-                                       iTJSDispatch2 *objthis) {
-    if(count < 1) return TJS_E_INVALIDPARAM;
-    if(r) *r = tTJSVariant(objthis);
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getLayerGetter(tTJSVariant *r, tjs_int count, tTJSVariant **p,
-                                       iTJSDispatch2 *objthis) {
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) return TJS_E_INVALIDPARAM;
-    ttstr name = ttstr(*p[0]);
-    iTJSDispatch2 *obj = player->createLayerGetter(objthis, name);
-    if(r) {
-        if(obj) {
-            *r = tTJSVariant(obj);
-            obj->Release();
-        } else {
-            *r = tTJSVariant();
-        }
-    } else if(obj) {
-        obj->Release();
-    }
-    return TJS_S_OK;
-}
-
-static tjs_error Player_clear(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                              iTJSDispatch2 *objthis) {
-    static int sClearCount = 0;
-    sClearCount++;
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 2) return TJS_E_INVALIDPARAM;
-    if(sClearCount <= 5 || sClearCount % 300 == 0) {
-        if(auto l = LOGGER) l->info("Player_clear: callCount={}", sClearCount);
-    }
-    player->clear(p[0]->AsObjectNoAddRef(), static_cast<tjs_int>(p[1]->AsInteger()));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_getLoopTime(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_setLoopTime(tTJSVariant *, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    return TJS_S_OK;
-}
-
-static tjs_error Player_dummyMethodInt(tTJSVariant *r, tjs_int, tTJSVariant **, iTJSDispatch2 *) {
-    if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
-    return TJS_S_OK;
-}
-
-static tjs_error Player_draw(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                             iTJSDispatch2 *objthis) {
-    static int sDrawWrapCount = 0;
-    sDrawWrapCount++;
-    auto *player = GetPlayerInstance(objthis);
-    if(!player || count < 1) {
-        if(auto l = LOGGER) l->warn("Player_draw: player={} count={} callCount={}", (void*)player, count, sDrawWrapCount);
-        return TJS_E_INVALIDPARAM;
-    }
-    if(sDrawWrapCount <= 5 || sDrawWrapCount % 300 == 0) {
-        if(auto l = LOGGER) l->info("Player_draw: calling draw, target={} callCount={}", (void*)p[0]->AsObjectNoAddRef(), sDrawWrapCount);
-    }
-    player->draw(p[0]->AsObjectNoAddRef());
-    return TJS_S_OK;
-}
-
-NCB_REGISTER_SUBCLASS_DELAY(Player) {
+// Aligned to libkrkr2.so Motion.Point/Circle/Rect/Quad/LayerGetter (0x690FBC~0x69B350)
+NCB_REGISTER_SUBCLASS_DELAY(Point) {
     NCB_CONSTRUCTOR(());
-    NCB_PROPERTY_RAW_CALLBACK(useD3D, Player_getUseD3D, Player_setUseD3D, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK(enableD3D, Player_getEnableD3D, Player_setEnableD3D, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(playing, Player_getPlaying, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(allplaying, Player_getAllplaying, 0);
-    NCB_PROPERTY_RAW_CALLBACK(motion, Player_getMotion, Player_setMotion, 0);
-    NCB_PROPERTY_RAW_CALLBACK(chara, Player_getChara, Player_setChara, 0);
-    NCB_PROPERTY_RAW_CALLBACK(tickCount, Player_getTickCount, Player_setTickCount, 0);
-    NCB_PROPERTY_RAW_CALLBACK(tickcount, Player_getTickCount, Player_setTickCount, 0);
-    NCB_PROPERTY_RAW_CALLBACK(lastTime, Player_getLastTime, Player_setLastTime, 0);
-    NCB_PROPERTY_RAW_CALLBACK(speed, Player_getSpeed, Player_setSpeed, 0);
-    NCB_PROPERTY_RAW_CALLBACK(outline, Player_getOutline, Player_setOutline, 0);
-    NCB_PROPERTY_RAW_CALLBACK_RO(variableKeys, Player_getVariableKeys, 0);
-    NCB_PROPERTY_RAW_CALLBACK(completionType, Player_getCompletionType, Player_setCompletionType, 0);
-    NCB_METHOD_RAW_CALLBACK(play, Player_play, 0);
-    NCB_METHOD_RAW_CALLBACK(stop, Player_stop, 0);
-    NCB_METHOD_RAW_CALLBACK(progress, Player_progress, 0);
-    NCB_METHOD_RAW_CALLBACK(skipToSync, Player_skipToSync, 0);
-    NCB_METHOD_RAW_CALLBACK(setDrawAffineTranslateMatrix, Player_setDrawAffineTranslateMatrix, 0);
-    NCB_METHOD_RAW_CALLBACK(setCoord, Player_setCoord, 0);
-    NCB_METHOD_RAW_CALLBACK(contains, Player_contains, 0);
-    NCB_METHOD_RAW_CALLBACK(getCommandList, Player_getCommandList, 0);
-    NCB_METHOD_RAW_CALLBACK(getLayerMotion, Player_getLayerMotion, 0);
-    NCB_METHOD_RAW_CALLBACK(getLayerGetter, Player_getLayerGetter, 0);
-    NCB_METHOD_RAW_CALLBACK(clear, Player_clear, 0);
-    NCB_METHOD_RAW_CALLBACK(draw, Player_draw, 0);
-    NCB_METHOD_RAW_CALLBACK(setVariable, Player_setVariable, 0);
-    NCB_METHOD_RAW_CALLBACK(getVariable, Player_getVariable, 0);
-    NCB_PROPERTY_RAW_CALLBACK(loopTime, Player_getLoopTime, Player_setLoopTime, 0);
-    NCB_METHOD_RAW_CALLBACK(canSync, Player_dummyMethodInt, 0);
-    NCB_METHOD_RAW_CALLBACK(sync, Player_dummyMethodInt, 0);
+    NCB_PROPERTY_RO(type, getType);
+    NCB_METHOD(contains);
+    NCB_PROPERTY_RO(x, getX);
+    NCB_PROPERTY_RO(y, getY);
+}
+NCB_REGISTER_SUBCLASS_DELAY(Circle) {
+    NCB_CONSTRUCTOR(());
+    NCB_PROPERTY_RO(type, getType);
+    NCB_METHOD(contains);
+    NCB_PROPERTY_RO(x, getX);
+    NCB_PROPERTY_RO(y, getY);
+    NCB_PROPERTY_RO(r, getR);
+}
+NCB_REGISTER_SUBCLASS_DELAY(Rect) {
+    NCB_CONSTRUCTOR(());
+    NCB_PROPERTY_RO(type, getType);
+    NCB_METHOD(contains);
+    NCB_PROPERTY_RO(l, getL);
+    NCB_PROPERTY_RO(t, getT);
+    NCB_PROPERTY_RO(w, getW);
+    NCB_PROPERTY_RO(h, getH);
+}
+NCB_REGISTER_SUBCLASS_DELAY(Quad) {
+    NCB_CONSTRUCTOR(());
+    NCB_PROPERTY_RO(type, getType);
+    NCB_METHOD(contains);
+    NCB_PROPERTY_RO(p, getP);
+}
+NCB_REGISTER_SUBCLASS_DELAY(LayerGetter) {
+    NCB_CONSTRUCTOR(());
+    NCB_PROPERTY_RO(type, getType);
+    NCB_PROPERTY_RO(label, getLabel);
+    NCB_PROPERTY_RO(visible, getVisible);
+    NCB_PROPERTY_RO(branchVisible, getBranchVisible);
+    NCB_PROPERTY_RO(layerVisible, getLayerVisible);
+    NCB_PROPERTY_RO(x, getX);
+    NCB_PROPERTY_RO(y, getY);
+    NCB_PROPERTY_RO(left, getLeft);
+    NCB_PROPERTY_RO(top, getTop);
+    NCB_PROPERTY_RO(flipX, getFlipX);
+    NCB_PROPERTY_RO(flipY, getFlipY);
+    NCB_PROPERTY_RO(zoomX, getZoomX);
+    NCB_PROPERTY_RO(zoomY, getZoomY);
+    NCB_PROPERTY_RO(angleDeg, getAngleDeg);
+    NCB_PROPERTY_RO(angleRad, getAngleRad);
+    NCB_PROPERTY_RO(slantX, getSlantX);
+    NCB_PROPERTY_RO(slantY, getSlantY);
+    NCB_PROPERTY_RO(originX, getOriginX);
+    NCB_PROPERTY_RO(originY, getOriginY);
+    NCB_PROPERTY_RO(opacity, getOpacity);
+    NCB_PROPERTY_RO(mtx, getMtx);
+    NCB_PROPERTY_RO(vtx, getVtx);
+    NCB_PROPERTY_RO(color, getColor);
+    NCB_PROPERTY_RO(bezierPatch, getBezierPatch);
+    NCB_PROPERTY_RO(shape, getShape);
+    NCB_PROPERTY_RO(motion, getMotion);
+    NCB_PROPERTY_RO(particle, getParticle);
+}
+// Aligned to libkrkr2.so SeparateLayerAdaptor_ncb_registerMembers (0x6ABFAC)
+NCB_REGISTER_SUBCLASS_DELAY(SeparateLayerAdaptor) {
+    Factory(&SeparateLayerAdaptor::factory);
+    NCB_PROPERTY(absolute, getAbsolute, setAbsolute);
+    NCB_PROPERTY(targetLayer, getTargetLayer, setTargetLayer);
+    NCB_METHOD(c);
+    RawCallback(TJS_W("assign"), &SeparateLayerAdaptor::assignCompat, 0);
+}
+NCB_REGISTER_SUBCLASS_DELAY(D3DAdaptor) {
+    Factory(&D3DAdaptor::factory);
+    NCB_METHOD(setPos);
+    NCB_METHOD(setSize);
+    NCB_METHOD(setClearColor);
+    NCB_METHOD(setResizable);
+    NCB_METHOD(removeAllTextures);
+    NCB_METHOD(removeAllBg);
+    NCB_METHOD(removeAllCaption);
+    NCB_METHOD(registerBg);
+    NCB_METHOD(registerCaption);
+    NCB_METHOD(unloadUnusedTextures);
+    RawCallback(TJS_W("captureCanvas"), &D3DAdaptor::captureCanvasStatic, 0);
+    NCB_PROPERTY(visible, getVisible, setVisible);
+    NCB_PROPERTY(alphaOpAdd, getAlphaOpAdd, setAlphaOpAdd);
+    NCB_PROPERTY(canvasCaptureEnabled, getCanvasCaptureEnabled, setCanvasCaptureEnabled);
+    NCB_PROPERTY(clearEnabled, getClearEnabled, setClearEnabled);
+}
+
+NCB_REGISTER_CLASS(Player) {
+    NCB_CONSTRUCTOR((ResourceManager));
+
+    NCB_PROPERTY_RAW_CALLBACK(useD3D, Player::getUseD3DStatic,
+                              Player::setUseD3DStatic, TJS_STATICMEMBER);
+
+    // Properties
+    // Root node position — aligned to libkrkr2.so NCB registration (0x6D69C8)
+    NCB_PROPERTY(x, getX, setX);
+    NCB_PROPERTY(y, getY, setY);
+    NCB_PROPERTY(left, getLeft, setLeft);
+    NCB_PROPERTY(top, getTop, setTop);
+
+    NCB_PROPERTY(completionType, getCompletionType, setCompletionType);
+    NCB_PROPERTY(metadata, getMetadata, setMetadata);
+    NCB_PROPERTY(chara, getChara, setChara);
+    // Aligned to libkrkr2.so 0x681CAC: raw callback to access objthis
+    // for onFindMotion TJS callback during motion loading
+    NCB_PROPERTY_RAW_CALLBACK(motion, Player::getMotionCompat,
+                              Player::setMotionCompat, 0);
+    NCB_PROPERTY(motionKey, getMotionKey, setMotionKey);
+    NCB_PROPERTY(outline, getOutline, setOutline);
+    NCB_PROPERTY(priorDraw, getPriorDraw, setPriorDraw);
+    NCB_PROPERTY(frameLastTime, getFrameLastTime, setFrameLastTime);
+    NCB_PROPERTY(frameLoopTime, getFrameLoopTime, setFrameLoopTime);
+    NCB_PROPERTY(loopTime, getLoopTime, setLoopTime);
+    NCB_PROPERTY(processedMeshVerticesNum, getProcessedMeshVerticesNum,
+                 setProcessedMeshVerticesNum);
+    NCB_PROPERTY(playing, getAllplaying, setAllplaying);
+    NCB_PROPERTY(queuing, getQueuing, setQueuing);
+    NCB_PROPERTY(directEdit, getDirectEdit, setDirectEdit);
+    NCB_PROPERTY(selectorEnabled, getSelectorEnabled, setSelectorEnabled);
+    NCB_PROPERTY(variableKeys, getVariableKeys, setVariableKeys);
+    NCB_PROPERTY(allplaying, getAllplaying, setAllplaying);
+    NCB_PROPERTY(syncWaiting, getSyncWaiting, setSyncWaiting);
+    NCB_PROPERTY(syncActive, getSyncActive, setSyncActive);
+    NCB_PROPERTY(hasCamera, getHasCamera, setHasCamera);
+    NCB_PROPERTY(cameraActive, getCameraActive, setCameraActive);
+    NCB_PROPERTY(stereovisionActive, getStereovisionActive,
+                 setStereovisionActive);
+    NCB_PROPERTY(tickCount, getTickCount, setTickCount);
+    NCB_PROPERTY(speed, getSpeed, setSpeed);
+    NCB_PROPERTY(frameTickCount, getFrameTickCount, setFrameTickCount);
+    NCB_PROPERTY(maskMode, getMaskMode, setMaskMode);
+    NCB_PROPERTY(colorWeight, getColorWeight, setColorWeight);
+    NCB_PROPERTY(independentLayerInherit, getIndependentLayerInherit,
+                 setIndependentLayerInherit);
+    NCB_PROPERTY(zFactor, getZFactor, setZFactor);
+    NCB_PROPERTY(cameraTarget, getCameraTarget, setCameraTarget);
+    NCB_PROPERTY(cameraPosition, getCameraPosition, setCameraPosition);
+    NCB_PROPERTY(cameraFOV, getCameraFOV, setCameraFOV);
+    NCB_PROPERTY(cameraAlive, getCameraAlive, setCameraAlive);
+    NCB_PROPERTY(canvasCaptureEnabled, getCanvasCaptureEnabled,
+                 setCanvasCaptureEnabled);
+    NCB_PROPERTY(clearEnabled, getClearEnabled, setClearEnabled);
+    NCB_PROPERTY(hitThreshold, getHitThreshold, setHitThreshold);
+    NCB_PROPERTY(preview, getPreview, setPreview);
+    NCB_PROPERTY(outsideFactor, getOutsideFactor, setOutsideFactor);
+    NCB_PROPERTY(resourceManager, getResourceManager, setResourceManager);
+    NCB_PROPERTY(stealthChara, getStealthChara, setStealthChara);
+    NCB_PROPERTY(stealthMotion, getStealthMotion, setStealthMotion);
+    NCB_PROPERTY(tags, getTags, setTags);
+    NCB_PROPERTY(project, getProject, setProject);
+    NCB_PROPERTY(useD3D, getUseD3D, setUseD3D);
+    NCB_PROPERTY(meshline, getMeshline, setMeshline);
+    NCB_PROPERTY_RO(busy, getBusy);
+
+    // Core methods
+    NCB_METHOD(random);
+    NCB_METHOD(initPhysics);
+    NCB_METHOD(serialize);
+    NCB_METHOD(unserialize);
+    NCB_METHOD(setRotate);
+    NCB_METHOD(setMirror);
+    NCB_METHOD(setHairScale);
+    NCB_METHOD(setPartsScale);
+    NCB_METHOD(setBustScale);
+    NCB_METHOD_RAW_CALLBACK(setDrawAffineTranslateMatrix,
+                            &Player::setDrawAffineTranslateMatrixCompat, 0);
+    NCB_METHOD(getCameraOffset);
+    NCB_METHOD(setCameraOffset);
+    NCB_METHOD(modifyRoot);
+    NCB_METHOD(debugPrint);
+
+    // Resource management
+    NCB_METHOD(unload);
+    NCB_METHOD(unloadAll);
+    NCB_METHOD(isExistMotion);
+    NCB_METHOD(findMotion);
+    NCB_METHOD(requireLayerId);
+    NCB_METHOD(releaseLayerId);
+
+    // Drawing/rendering
+    NCB_METHOD(setClearColor);
+    NCB_METHOD(setResizable);
+    NCB_METHOD(removeAllTextures);
+    NCB_METHOD(removeAllBg);
+    NCB_METHOD(removeAllCaption);
+    NCB_METHOD(registerBg);
+    NCB_METHOD(registerCaption);
+    NCB_METHOD(unloadUnusedTextures);
+    NCB_METHOD(alphaOpAdd);
+    NCB_METHOD_RAW_CALLBACK(captureCanvas, &Player::captureCanvasCompat, 0);
+    NCB_METHOD(findSource);
+    NCB_METHOD(loadSource);
+    NCB_METHOD(clearCache);
+    NCB_METHOD(setSize);
+    NCB_METHOD(copyRect);
+    NCB_METHOD(adjustGamma);
+    NCB_METHOD_RAW_CALLBACK(draw, &Player::drawCompat, 0);
+    NCB_METHOD(frameProgress);
+
+    // Viewport/display
+    NCB_METHOD(setFlip);
+    NCB_METHOD(setOpacity);
+    NCB_METHOD(setVisible);
+    NCB_METHOD(setSlant);
+    NCB_METHOD(setZoom);
+    NCB_METHOD(getLayerNames);
+    NCB_METHOD(releaseSyncWait);
+    NCB_METHOD(calcViewParam);
+    NCB_METHOD(getLayerMotion);
+    NCB_METHOD(getLayerGetter);
+    NCB_METHOD(getLayerGetterList);
+    NCB_METHOD(skipToSync);
+    NCB_METHOD(setStereovisionCameraPosition);
+
+    // Timeline/variable queries
+    NCB_METHOD_RAW_CALLBACK(setVariable, &Player::setVariableCompatMethod, 0);
+    NCB_METHOD(getVariable);
+    NCB_METHOD(countVariables);
+    NCB_METHOD(getVariableLabelAt);
+    NCB_METHOD(countVariableFrameAt);
+    NCB_METHOD(getVariableFrameLabelAt);
+    NCB_METHOD(getVariableFrameValueAt);
+    NCB_METHOD(getTimelinePlaying);
+    NCB_METHOD(getVariableRange);
+    NCB_METHOD(getVariableFrameList);
+    NCB_METHOD(countMainTimelines);
+    NCB_METHOD(getMainTimelineLabelAt);
+    NCB_METHOD(getMainTimelineLabelList);
+    NCB_METHOD(countDiffTimelines);
+    NCB_METHOD(getDiffTimelineLabelAt);
+    NCB_METHOD(getDiffTimelineLabelList);
+    NCB_METHOD(getLoopTimeline);
+    NCB_METHOD(countPlayingTimelines);
+    NCB_METHOD(getPlayingTimelineLabelAt);
+    NCB_METHOD(getPlayingTimelineFlagsAt);
+    NCB_METHOD(getTimelineTotalFrameCount);
+    NCB_METHOD(playTimeline);
+    NCB_METHOD(stopTimeline);
+    NCB_METHOD(setTimelineBlendRatio);
+    NCB_METHOD(getTimelineBlendRatio);
+    NCB_METHOD(fadeInTimeline);
+    NCB_METHOD(fadeOutTimeline);
+    NCB_METHOD(getPlayingTimelineInfoList);
+
+    // Selector
+    NCB_METHOD(isSelectorTarget);
+    NCB_METHOD(deactivateSelectorTarget);
+
+    // Misc
+    NCB_METHOD(getCommandList);
+    NCB_METHOD(getD3DAvailable);
+    NCB_METHOD(doAlphaMaskOperation);
+    NCB_METHOD(onFindMotion);
+    NCB_METHOD_RAW_CALLBACK(play, &Player::playCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(progress, &Player::progressCompatMethod, 0);
+    NCB_METHOD_RAW_CALLBACK(isPlaying, &Player::isPlayingCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(stop, &Player::stopCompat, 0);
+    NCB_METHOD(motionList);
+    NCB_METHOD(emoteEdit);
     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
 NCB_REGISTER_SUBCLASS_DELAY(EmotePlayer) {
     NCB_CONSTRUCTOR((ResourceManager));
+
+    // Properties
+    NCB_PROPERTY_RO(module, getModule);
+    NCB_PROPERTY(visible, getVisible, setVisible);
+    NCB_PROPERTY(smoothing, getSmoothing, setSmoothing);
+    NCB_PROPERTY(meshDivisionRatio, getMeshDivisionRatio, setMeshDivisionRatio);
+    NCB_PROPERTY(queing, getQueuing, setQueuing); // original typo preserved
+    NCB_PROPERTY(hairScale, getHairScale, setHairScale);
+    NCB_PROPERTY(partsScale, getPartsScale, setPartsScale);
+    NCB_PROPERTY(bustScale, getBustScale, setBustScale);
+    NCB_PROPERTY(bodyScale, getBodyScale, setBodyScale);
     NCB_PROPERTY(useD3D, getUseD3D, setUseD3D);
+    NCB_PROPERTY(progress, getProgress, setProgress);
+    NCB_PROPERTY(modified, getModified, setModified);
+    NCB_PROPERTY(drawvisible, getDrawVisible, setDrawVisible);
+    NCB_PROPERTY(drawOpacity, getDrawOpacity, setDrawOpacity);
+    NCB_PROPERTY(opengl, getOpengl, setOpengl);
+    NCB_PROPERTY_RO(animating, getAnimating);
+    NCB_PROPERTY_RO(playCallback, getPlayCallback);
+
+    // Methods
+    NCB_METHOD(create);
+    NCB_METHOD(load);
+    NCB_METHOD(clone);
+    NCB_METHOD(show);
+    NCB_METHOD(hide);
+    NCB_METHOD(assignState);
+    NCB_METHOD(initPhysics);
+    NCB_METHOD_RAW_CALLBACK(setRot, &EmotePlayer::setRotCompat, 0);
+    NCB_METHOD(getRot);
+    NCB_METHOD_RAW_CALLBACK(setCoord, &EmotePlayer::setCoordCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(setScale, &EmotePlayer::setScaleCompat, 0);
+    NCB_METHOD(getScale);
+    NCB_METHOD(setMirror);
+    NCB_METHOD_RAW_CALLBACK(setColor, &EmotePlayer::setColorCompat, 0);
+    NCB_METHOD(getColor);
+    NCB_METHOD(countVariables);
+    NCB_METHOD(getVariableLabelAt);
+    NCB_METHOD(countVariableFrameAt);
+    NCB_METHOD(getVariableFrameLabelAt);
+    NCB_METHOD(getVariableFrameValueAt);
+    NCB_METHOD_RAW_CALLBACK(setVariable, &EmotePlayer::setVariableCompat, 0);
+    NCB_METHOD(getVariable);
+    NCB_METHOD_RAW_CALLBACK(startWind, &EmotePlayer::startWindCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(stopWind, &EmotePlayer::stopWindCompat, 0);
+    NCB_METHOD(countMainTimelines);
+    NCB_METHOD(getMainTimelineLabelAt);
+    NCB_METHOD(countDiffTimelines);
+    NCB_METHOD(getDiffTimelineLabelAt);
+    NCB_METHOD(countPlayingTimelines);
+    NCB_METHOD(getPlayingTimelineLabelAt);
+    NCB_METHOD(getPlayingTimelineFlagsAt);
+    NCB_METHOD(isLoopTimeline);
+    NCB_METHOD(getTimelineTotalFrameCount);
+    NCB_METHOD(playTimeline);
+    NCB_METHOD(isTimelinePlaying);
+    NCB_METHOD(stopTimeline);
+    NCB_METHOD(setTimeline);
+    NCB_METHOD(setTimelineBlendRatio);
+    NCB_METHOD(getTimelineBlendRatio);
+    NCB_METHOD(fadeInTimeline);
+    NCB_METHOD(fadeOutTimeline);
+    NCB_METHOD(skip);
+    NCB_METHOD(addPlayCallback);
+    NCB_METHOD(pass);
+    NCB_METHOD(progress);
+    NCB_METHOD_RAW_CALLBACK(setOuterForce, &EmotePlayer::setOuterForceCompat, 0);
+    NCB_METHOD(getOuterForce);
+    NCB_METHOD_RAW_CALLBACK(contains, &EmotePlayer::containsCompat, 0);
     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
-static tjs_error ResourceManager_unload(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                        iTJSDispatch2 *objthis) {
-    auto *manager = ncbInstanceAdaptor<motion::ResourceManager>::GetNativeInstance(objthis);
-    if(!manager || count < 1) return TJS_E_INVALIDPARAM;
-    manager->unload(ttstr(*p[0]));
-    return TJS_S_OK;
-}
-
-static tjs_error ResourceManager_clearCache(tTJSVariant *, tjs_int, tTJSVariant **,
-                                            iTJSDispatch2 *objthis) {
-    auto *manager = ncbInstanceAdaptor<motion::ResourceManager>::GetNativeInstance(objthis);
-    if(!manager) return TJS_E_INVALIDPARAM;
-    manager->clearCache();
-    return TJS_S_OK;
-}
+// ============================================================
+// ResourceManager (existing, unchanged)
+// ============================================================
 
 NCB_REGISTER_SUBCLASS(ResourceManager) {
     NCB_CONSTRUCTOR((iTJSDispatch2 *, tjs_int));
     NCB_METHOD(load);
-    NCB_METHOD_RAW_CALLBACK(unload, ResourceManager_unload, 0);
-    NCB_METHOD_RAW_CALLBACK(clearCache, ResourceManager_clearCache, 0);
+    NCB_METHOD(unload);
+    NCB_METHOD(clearCache);
     NCB_METHOD_RAW_CALLBACK(setEmotePSBDecryptSeed,
                             &ResourceManager::setEmotePSBDecryptSeed,
                             TJS_STATICMEMBER);
@@ -636,61 +386,11 @@ NCB_REGISTER_SUBCLASS(ResourceManager) {
     NCB_METHOD_RAW_CALLBACK(missing, Universal_missing_method, 0);
 }
 
+// ============================================================
+// Motion top-level class with constants and subclasses
+// ============================================================
+
 class Motion {
-public:
-    static tjs_error getPlayFlagForce(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                      iTJSDispatch2 *) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(1));
-        return TJS_S_OK;
-    }
-
-    static tjs_error getShapeTypePoint(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                       iTJSDispatch2 *) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(0));
-        return TJS_S_OK;
-    }
-
-    static tjs_error getShapeTypeCircle(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                        iTJSDispatch2 *) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(1));
-        return TJS_S_OK;
-    }
-
-    static tjs_error getShapeTypeRect(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                      iTJSDispatch2 *) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(2));
-        return TJS_S_OK;
-    }
-
-    static tjs_error getShapeTypeQuad(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                      iTJSDispatch2 *) {
-        if(r) *r = tTJSVariant(static_cast<tjs_int>(3));
-        return TJS_S_OK;
-    }
-
-    static tjs_error setEnableD3D(tTJSVariant *, tjs_int count, tTJSVariant **p,
-                                  iTJSDispatch2 *) {
-        if(count == 1 && (*p)->Type() == tvtInteger) {
-            _enableD3D = static_cast<bool>(**p);
-            return TJS_S_OK;
-        }
-        return TJS_E_INVALIDPARAM;
-    }
-
-    static tjs_error getEnableD3D(tTJSVariant *r, tjs_int, tTJSVariant **,
-                                  iTJSDispatch2 *) {
-        iTJSDispatch2 *obj = TJSCreateDictionaryObject();
-        if (obj) {
-            *r = tTJSVariant(obj);
-            obj->Release();
-        } else {
-            *r = tTJSVariant();
-        }
-        return TJS_S_OK;
-    }
-
-private:
-    inline static bool _enableD3D;
 };
 
 class GenericMockObject : public tTJSDispatch {
@@ -820,61 +520,245 @@ static tjs_error Motion_getD3DAdaptor(tTJSVariant *r, tjs_int, tTJSVariant **, i
     }
     return TJS_S_OK;
 }
-
 NCB_REGISTER_CLASS(Motion) {
-    NCB_PROPERTY_RAW_CALLBACK(enableD3D, Motion::getEnableD3D,
-                              Motion::setEnableD3D, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(PlayFlagForce, Motion::getPlayFlagForce, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(ShapeTypePoint, Motion::getShapeTypePoint, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(ShapeTypeCircle, Motion::getShapeTypeCircle, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(ShapeTypeRect, Motion::getShapeTypeRect, TJS_STATICMEMBER);
-    NCB_PROPERTY_RAW_CALLBACK_RO(ShapeTypeQuad, Motion::getShapeTypeQuad, TJS_STATICMEMBER);
+    // Subclasses (Player registered as top-level class, aliased in PostRegistCallback)
     NCB_SUBCLASS(ResourceManager, ResourceManager);
-    NCB_SUBCLASS(Player, Player);
     NCB_SUBCLASS(EmotePlayer, EmotePlayer);
     NCB_SUBCLASS(SeparateLayerAdaptor, SeparateLayerAdaptor);
-    NCB_PROPERTY_RAW_CALLBACK_RO(D3DAdaptor, Motion_getD3DAdaptor, TJS_STATICMEMBER);
+    NCB_SUBCLASS(D3DAdaptor, D3DAdaptor);
+    NCB_SUBCLASS(SourceCache, SourceCache);
+    NCB_SUBCLASS(ObjSource, ObjSource);
+    // Aligned to libkrkr2.so Motion_namespace_ncb_register (0x6D9B08)
+    NCB_SUBCLASS(Point, Point);
+    NCB_SUBCLASS(Circle, Circle);
+    NCB_SUBCLASS(Rect, Rect);
+    NCB_SUBCLASS(Quad, Quad);
+    NCB_SUBCLASS(LayerGetter, LayerGetter);
+
+    // Layer types
+    Variant(TJS_W("LayerTypeObj"), (tjs_int)LayerTypeObj);
+    Variant(TJS_W("LayerTypeShape"), (tjs_int)LayerTypeShape);
+    Variant(TJS_W("LayerTypeLayout"), (tjs_int)LayerTypeLayout);
+    Variant(TJS_W("LayerTypeMotion"), (tjs_int)LayerTypeMotion);
+    Variant(TJS_W("LayerTypeParticle"), (tjs_int)LayerTypeParticle);
+    Variant(TJS_W("LayerTypeCamera"), (tjs_int)LayerTypeCamera);
+
+    // Shape types
+    Variant(TJS_W("ShapeTypePoint"), (tjs_int)ShapeTypePoint);
+    Variant(TJS_W("ShapeTypeCircle"), (tjs_int)ShapeTypeCircle);
+    Variant(TJS_W("ShapeTypeRect"), (tjs_int)ShapeTypeRect);
+    Variant(TJS_W("ShapeTypeQuad"), (tjs_int)ShapeTypeQuad);
+
+    // Play flags
+    Variant(TJS_W("PlayFlagForce"), (tjs_int)PlayFlagForce);
+    Variant(TJS_W("PlayFlagChain"), (tjs_int)PlayFlagChain);
+    Variant(TJS_W("PlayFlagAsCan"), (tjs_int)PlayFlagAsCan);
+    Variant(TJS_W("PlayFlagJoin"), (tjs_int)PlayFlagJoin);
+    Variant(TJS_W("PlayFlagStealth"), (tjs_int)PlayFlagStealth);
+
+    // Transform orders
+    Variant(TJS_W("TransformOrderFlip"), (tjs_int)TransformOrderFlip);
+    Variant(TJS_W("TransformOrderSlant"), (tjs_int)TransformOrderSlant);
+    Variant(TJS_W("TransformOrderZoom"), (tjs_int)TransformOrderZoom);
+    Variant(TJS_W("TransformOrderAngle"), (tjs_int)TransformOrderAngle);
+
+    // Coordinate types
+    Variant(TJS_W("CoordinateRecutangularXY"),
+            (tjs_int)CoordinateRecutangularXY);
+    Variant(TJS_W("CoordinateRecutangularXZ"),
+            (tjs_int)CoordinateRecutangularXZ);
 }
 
-class StaticGlobalMockFunc : public tTJSDispatch {
-    ttstr Name;
-public:
-    StaticGlobalMockFunc(const tjs_char* name) : Name(name) {}
-    ~StaticGlobalMockFunc() override {}
-
-    tjs_error FuncCall(tjs_uint32 flag, const tjs_char *membername,
-                       tjs_uint32 *hint, tTJSVariant *result,
-                       tjs_int numparams, tTJSVariant **param,
-                       iTJSDispatch2 *objthis) override {
-        if (result) {
-            iTJSDispatch2 *dummy = new GenericMockObject();
-            *result = tTJSVariant(dummy, dummy);
-            dummy->Release();
-        }
-        return TJS_S_OK;
-    }
-};
+// ============================================================
+// Callbacks (must be under motionplayer.dll module)
+// ============================================================
 
 static void PreRegistCallback() {
     iTJSDispatch2 *global = TVPGetScriptDispatch();
-    if (global) {
-        iTJSDispatch2 *func = new StaticGlobalMockFunc(TJS_W("SetSystemConfigDefaults"));
-        tTJSVariant val(func, func);
-        global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, global);
-        
-        tTJSVariant sysVar;
-        if(TJS_SUCCEEDED(global->PropGet(0, TJS_W("System"), nullptr, &sysVar, global)) && sysVar.Type() == tvtObject) {
-            iTJSDispatch2 *sysObj = sysVar.AsObjectNoAddRef();
-            if (sysObj) {
-                sysObj->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"), nullptr, &val, sysObj);
-            }
+    if (!global) return;
+
+    iTJSDispatch2 *func = new GenericMockObject();
+    tTJSVariant val(func, func);
+    global->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"),
+                    nullptr, &val, global);
+
+    tTJSVariant sysVar;
+    if (TJS_SUCCEEDED(
+            global->PropGet(0, TJS_W("System"), nullptr, &sysVar, global)) &&
+        sysVar.Type() == tvtObject) {
+        iTJSDispatch2 *sysObj = sysVar.AsObjectNoAddRef();
+        if (sysObj) {
+            sysObj->PropSet(TJS_MEMBERENSURE, TJS_W("SetSystemConfigDefaults"),
+                            nullptr, &val, sysObj);
         }
-        func->Release();
-        global->Release();
     }
+
+    func->Release();
+    global->Release();
+}
+
+static void PostRegistCallback() {
+    iTJSDispatch2 *global = TVPGetScriptDispatch();
+    if (!global) return;
+
+    // Alias Player class into Motion namespace
+    tTJSVariant motionVar;
+    if (TJS_SUCCEEDED(global->PropGet(0, TJS_W("Motion"), nullptr, &motionVar, global))) {
+        iTJSDispatch2 *motion = motionVar.AsObjectNoAddRef();
+        if (motion) {
+            tTJSVariant playerVar;
+            if (TJS_SUCCEEDED(global->PropGet(0, TJS_W("Player"), nullptr, &playerVar, global))) {
+                if (playerVar.Type() == tvtObject &&
+                    playerVar.AsObjectNoAddRef() != nullptr) {
+                    motion->PropSet(TJS_MEMBERENSURE, TJS_W("Player"),
+                                    nullptr, &playerVar, motion);
+                }
+            }
+
+            tTJSVariant enableD3D{(tjs_int)1};
+            motion->PropSet(TJS_MEMBERENSURE | TJS_IGNOREPROP | TJS_STATICMEMBER,
+                            TJS_W("enableD3D"), nullptr, &enableD3D, motion);
+        }
+    }
+
+    // Define ShortCutInitialPadKeyMap and related members as empty dictionaries.
+    // These are referenced by encrypted keybinder.tjs but may not be defined
+    // if the gamepad initialization script hasn't run yet.
+    {
+        tTJSVariant r;
+        try {
+            TVPExecuteExpression(
+                TJS_W("global.ShortCutInitialPadKeyMap === void "
+                      "? (global.ShortCutInitialPadKeyMap = %[]) : void"),
+                &r);
+            TVPExecuteExpression(
+                TJS_W("global.ShortCutInitialGamePadKeyMap === void "
+                      "? (global.ShortCutInitialGamePadKeyMap = %[]) : void"),
+                &r);
+        } catch(...) {}
+    }
+
+    global->Release();
 }
 
 static void PostUnregistCallback() {}
 
 NCB_PRE_REGIST_CALLBACK(PreRegistCallback);
+NCB_POST_REGIST_CALLBACK(PostRegistCallback);
 NCB_POST_UNREGIST_CALLBACK(PostUnregistCallback);
+
+// ============================================================
+// emoteplayer.dll module — separate from motionplayer.dll
+// In libkrkr2.so, emoteplayer.dll is an independent module whose
+// entry callback (sub_682528) loads motionplayer.dll as a dependency,
+// then registers EmotePlayer into the Motion namespace.
+// ============================================================
+#undef NCB_MODULE_NAME
+#define NCB_MODULE_NAME TJS_W("emoteplayer.dll")
+
+static void EmotePlayerPreRegist() {
+    // Load motionplayer.dll as dependency (matches libkrkr2.so sub_682528)
+    ncbAutoRegister::LoadModule(TJS_W("motionplayer.dll"));
+}
+NCB_PRE_REGIST_CALLBACK(EmotePlayerPreRegist);
+
+NCB_REGISTER_CLASS(D3DEmoteModule) {
+    NCB_CONSTRUCTOR(());
+
+    // Constants
+    Variant(TJS_W("MaskModeStencil"), (tjs_int)MaskModeStencil);
+    Variant(TJS_W("MaskModeAlpha"), (tjs_int)MaskModeAlpha);
+    Variant(TJS_W("TimelinePlayFlagParallel"),
+            (tjs_int)TimelinePlayFlagParallel);
+    Variant(TJS_W("TimelinePlayFlagSequential"),
+            (tjs_int)TimelinePlayFlagSequential);
+
+    // Properties
+    NCB_PROPERTY(maskMode, getMaskMode, setMaskMode);
+    NCB_PROPERTY(maskRegionClipping, getMaskRegionClipping,
+                 setMaskRegionClipping);
+    NCB_PROPERTY(mipMapEnabled, getMipMapEnabled, setMipMapEnabled);
+    NCB_PROPERTY(alphaOp, getAlphaOp, setAlphaOp);
+    NCB_PROPERTY(protectTranslucentTextureColor,
+                 getProtectTranslucentTextureColor,
+                 setProtectTranslucentTextureColor);
+    NCB_PROPERTY(pixelateDivision, getPixelateDivision, setPixelateDivision);
+
+    // Methods
+    NCB_METHOD(setMaxTextureSize);
+}
+
+NCB_REGISTER_CLASS(D3DEmotePlayer) {
+    NCB_CONSTRUCTOR((ResourceManager));
+
+    // Properties (same as EmotePlayer subclass, matching IDA registration order)
+    NCB_PROPERTY_RO(module, getModule);
+    NCB_PROPERTY(visible, getVisible, setVisible);
+    NCB_PROPERTY(smoothing, getSmoothing, setSmoothing);
+    NCB_PROPERTY(meshDivisionRatio, getMeshDivisionRatio, setMeshDivisionRatio);
+    NCB_PROPERTY(queing, getQueuing, setQueuing);
+    NCB_PROPERTY(hairScale, getHairScale, setHairScale);
+    NCB_PROPERTY(partsScale, getPartsScale, setPartsScale);
+    NCB_PROPERTY(bustScale, getBustScale, setBustScale);
+    NCB_PROPERTY(bodyScale, getBodyScale, setBodyScale);
+    NCB_PROPERTY(useD3D, getUseD3D, setUseD3D);
+    NCB_PROPERTY(progress, getProgress, setProgress);
+    NCB_PROPERTY(modified, getModified, setModified);
+    NCB_PROPERTY(drawvisible, getDrawVisible, setDrawVisible);
+    NCB_PROPERTY(drawOpacity, getDrawOpacity, setDrawOpacity);
+    NCB_PROPERTY(opengl, getOpengl, setOpengl);
+    NCB_PROPERTY_RO(animating, getAnimating);
+    NCB_PROPERTY_RO(playCallback, getPlayCallback);
+
+    // Methods
+    NCB_METHOD(create);
+    NCB_METHOD(load);
+    NCB_METHOD(clone);
+    NCB_METHOD(show);
+    NCB_METHOD(hide);
+    NCB_METHOD(assignState);
+    NCB_METHOD(initPhysics);
+    NCB_METHOD_RAW_CALLBACK(setRot, &EmotePlayer::setRotCompat, 0);
+    NCB_METHOD(getRot);
+    NCB_METHOD_RAW_CALLBACK(setCoord, &EmotePlayer::setCoordCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(setScale, &EmotePlayer::setScaleCompat, 0);
+    NCB_METHOD(getScale);
+    NCB_METHOD(setMirror);
+    NCB_METHOD_RAW_CALLBACK(setColor, &EmotePlayer::setColorCompat, 0);
+    NCB_METHOD(getColor);
+    NCB_METHOD(countVariables);
+    NCB_METHOD(getVariableLabelAt);
+    NCB_METHOD(countVariableFrameAt);
+    NCB_METHOD(getVariableFrameLabelAt);
+    NCB_METHOD(getVariableFrameValueAt);
+    NCB_METHOD_RAW_CALLBACK(setVariable, &EmotePlayer::setVariableCompat, 0);
+    NCB_METHOD(getVariable);
+    NCB_METHOD_RAW_CALLBACK(startWind, &EmotePlayer::startWindCompat, 0);
+    NCB_METHOD_RAW_CALLBACK(stopWind, &EmotePlayer::stopWindCompat, 0);
+    NCB_METHOD(countMainTimelines);
+    NCB_METHOD(getMainTimelineLabelAt);
+    NCB_METHOD(countDiffTimelines);
+    NCB_METHOD(getDiffTimelineLabelAt);
+    NCB_METHOD(countPlayingTimelines);
+    NCB_METHOD(getPlayingTimelineLabelAt);
+    NCB_METHOD(getPlayingTimelineFlagsAt);
+    NCB_METHOD(isLoopTimeline);
+    NCB_METHOD(getTimelineTotalFrameCount);
+    NCB_METHOD(playTimeline);
+    NCB_METHOD(isTimelinePlaying);
+    NCB_METHOD(stopTimeline);
+    NCB_METHOD(setTimeline);
+    NCB_METHOD(setTimelineBlendRatio);
+    NCB_METHOD(getTimelineBlendRatio);
+    NCB_METHOD(fadeInTimeline);
+    NCB_METHOD(fadeOutTimeline);
+    NCB_METHOD(skip);
+    NCB_METHOD(addPlayCallback);
+    NCB_METHOD(pass);
+    NCB_METHOD(progress);
+    NCB_METHOD_RAW_CALLBACK(setOuterForce, &EmotePlayer::setOuterForceCompat, 0);
+    NCB_METHOD(getOuterForce);
+    NCB_METHOD_RAW_CALLBACK(contains, &EmotePlayer::containsCompat, 0);
+}
+
+extern "C" void TVPRegisterMotionPlayerPluginAnchor() {}

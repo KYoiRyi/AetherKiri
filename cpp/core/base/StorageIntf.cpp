@@ -1118,6 +1118,18 @@ ttstr TVPGetPlacedPath(const ttstr &name) {
     }
 #endif
 
+    // Check for internal plugins registered via NCB even when no physical
+    // file exists on disk. Motion/emote scripts use getPlacedPath() through
+    // CanLoadPlugin(), so internal modules must resolve here as well.
+    {
+        ttstr storage = TVPExtractStorageName(name).AsLowerCase();
+        if(!storage.IsEmpty() &&
+           (TVPRegisteredPlugins.find(storage) != TVPRegisteredPlugins.end() ||
+            ncbAutoRegister::HasModule(storage))) {
+            return TVPNormalizeStorageName(name);
+        }
+    }
+
     ttstr *incache = TVPAutoPathCache.FindAndTouch(name);
     if(incache) {
         if(*incache == TVP_AUTOPATH_CACHE_MISS_MARKER)
@@ -1178,6 +1190,34 @@ bool TVPIsExistentStorage(const ttstr &name) {
         ttstr ext = ttstr(pure.c_str() + pure.GetLen() - 4).AsLowerCase();
         if(ext == TJS_W(".dll") || ext == TJS_W(".tpm"))
             return ncbAutoRegister::HasModule(pure);
+    }
+
+    // Bridge motion parameter checks used by some scripts:
+    // motion_<name>.tjs should be treated as existent when the actual
+    // <name>.mtn/.psb resource exists in storage.
+    const auto storageName = TVPExtractStorageName(name).AsStdString();
+    if(storageName.size() > 11) {
+        std::string lower = storageName;
+        std::transform(lower.begin(), lower.end(), lower.begin(),
+                       [](unsigned char ch) {
+                           return static_cast<char>(std::tolower(ch));
+                       });
+        if(lower.rfind("motion_", 0) == 0 &&
+           lower.substr(lower.size() - 4) == ".tjs") {
+            const auto inner = storageName.substr(7, storageName.size() - 11);
+            const auto dot = inner.rfind('.');
+            if(dot != std::string::npos) {
+                std::string ext = inner.substr(dot);
+                std::transform(ext.begin(), ext.end(), ext.begin(),
+                               [](unsigned char ch) {
+                                   return static_cast<char>(std::tolower(ch));
+                               });
+                if((ext == ".mtn" || ext == ".psb") &&
+                   !TVPGetPlacedPath(ttstr(inner.c_str())).IsEmpty()) {
+                    return true;
+                }
+            }
+        }
     }
     return false;
 }
@@ -1284,7 +1324,7 @@ tTJSBinaryStream *TVPCreateStream(const ttstr &_name, tjs_uint32 flags) {
 //---------------------------------------------------------------------------
 void TVPClearStorageCaches() {
     TVPClearXP3SegmentCache();
-    TVPClearAutoPathSearchCache();
+    TVPClearAutoPathCache();
 }
 //---------------------------------------------------------------------------
 

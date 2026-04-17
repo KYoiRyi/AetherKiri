@@ -231,6 +231,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get consoleLogFileDesc => '将引擎控制台日志写入 krkr.console.log 文件';
 
   @override
+  String get traceLog => '追踪日志';
+
+  @override
+  String get traceLogDesc => '启用 spdlog trace 级别详细日志，输出最大调试信息';
+
+  @override
+  String get exportScripts => '导出 TJS 脚本';
+
+  @override
+  String get exportScriptsDesc => '游戏加载时自动从 XP3 中导出反汇编的 TJS 字节码脚本';
+
+  @override
   String get targetFrameRate => '目标帧率';
 
   @override

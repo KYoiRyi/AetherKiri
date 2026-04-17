@@ -11,6 +11,7 @@
 #include "ncbind.hpp"
 #include "PSBFile.h"
 #include "PSBHeader.h"
+#include "PSBMediaRegistry.h"
 #include "PSBMedia.h"
 #include "PSBValue.h"
 #include "SystemControl.h"
@@ -50,7 +51,10 @@ static bool psbCacheInfoCallback(size_t &usedBytes, size_t &limitBytes) {
     return true;
 }
 
-void initPsbFile() {
+namespace PSB {
+void initPSBMedia() {
+    if(psbMedia != nullptr)
+        return;
     psbMedia = new PSBMedia();
     TVPRegisterStorageMedia(psbMedia);
     psbMedia->Release();
@@ -58,7 +62,7 @@ void initPsbFile() {
     LOGGER->info("initPsbFile");
 }
 
-void deInitPsbFile() {
+void deInitPSBMedia() {
     TVPRegisterPSBCacheInfoCallback(nullptr);
     if(psbMedia != nullptr) {
         psbMedia->clear();
@@ -67,6 +71,11 @@ void deInitPsbFile() {
     }
     LOGGER->info("deInitPsbFile");
 }
+} // namespace PSB
+
+void initPsbFile() { initPSBMedia(); }
+
+void deInitPsbFile() { deInitPSBMedia(); }
 
 // ---------------------------------------------------------------------------
 // PSB Lazy Proxy: converts PSB tree nodes to TJS on demand, avoiding the

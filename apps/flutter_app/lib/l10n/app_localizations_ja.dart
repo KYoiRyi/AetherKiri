@@ -234,6 +234,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get consoleLogFileDesc => 'エンジンコンソールログを krkr.console.log に出力します';
 
   @override
+  String get traceLog => 'トレースログ';
+
+  @override
+  String get traceLogDesc => 'spdlog トレースレベルの詳細ログを有効にして最大限のデバッグ情報を出力します';
+
+  @override
+  String get exportScripts => 'TJS スクリプトエクスポート';
+
+  @override
+  String get exportScriptsDesc =>
+      'ゲーム読み込み時に XP3 から逆アセンブル済み TJS バイトコードスクリプトを自動エクスポートします';
+
+  @override
   String get targetFrameRate => '目標フレームレート';
 
   @override

@@ -113,8 +113,11 @@ endif()
 
 # Link the standalone executable target (not needed on macOS where Flutter is the app shell)
 if(TARGET ${PROJECT_NAME})
+    # Keep static NCB registration objects from krkr2plugin alive.
+    set(_KRKR2PLUGIN_LINK_ITEM "$<LINK_LIBRARY:WHOLE_ARCHIVE,krkr2plugin>")
     target_link_libraries(${PROJECT_NAME} PUBLIC
-        krkr2plugin krkr2core
+        krkr2core
+        ${_KRKR2PLUGIN_LINK_ITEM}
     )
 
     ## app config

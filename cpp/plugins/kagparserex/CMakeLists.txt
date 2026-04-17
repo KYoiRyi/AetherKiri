@@ -3,7 +3,7 @@ project(kagparserex)
 
 add_library(${PROJECT_NAME} STATIC)
 
-target_sources(${PROJECT_NAME} PUBLIC
+target_sources(${PROJECT_NAME} PRIVATE
     kagparserex_plugin.cpp
 )
 

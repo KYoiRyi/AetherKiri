@@ -1,0 +1,206 @@
+name: Android Vcpkg Bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      abi:
+        description: Android ABI to prebuild
+        required: false
+        default: arm64-v8a
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.repository }}-android-vcpkg-bundle
+  cancel-in-progress: false
+
+env:
+  VCPKG_BUNDLE_TAG: android-vcpkg-bundle
+  VCPKG_BUNDLE_ASSET: android-vcpkg-bundle.tar.zst
+  VCPKG_LEGACY_CACHE_RESTORE_KEY: Linux-android-vcpkg-
+
+jobs:
+  build-vcpkg:
+    name: Build Android vcpkg bundle
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ABI: ${{ inputs.abi || 'arm64-v8a' }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Build Systems
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build pkg-config autoconf automake libtool gettext bison flex curl unzip zip zstd jq
+
+      - name: Restore existing Android vcpkg bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.cache/vcpkg"
+          if gh release download "${VCPKG_BUNDLE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --pattern "${VCPKG_BUNDLE_ASSET}" \
+            --dir "${RUNNER_TEMP}/android-vcpkg-bundle"; then
+            mkdir -p "${RUNNER_TEMP}/android-vcpkg-bundle/extracted"
+            tar --zstd -xf "${RUNNER_TEMP}/android-vcpkg-bundle/${VCPKG_BUNDLE_ASSET}" \
+              -C "${RUNNER_TEMP}/android-vcpkg-bundle/extracted"
+            cp -a "${RUNNER_TEMP}/android-vcpkg-bundle/extracted/workspace/." "${GITHUB_WORKSPACE}/" || true
+            cp -a "${RUNNER_TEMP}/android-vcpkg-bundle/extracted/home-cache/." "$HOME/.cache/" || true
+          fi
+
+      - name: Restore legacy vcpkg cache fallback
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .devtools/vcpkg
+            ~/.cache/vcpkg/archives
+          key: ${{ runner.os }}-android-vcpkg-legacy-bootstrap
+          restore-keys: |
+            ${{ env.VCPKG_LEGACY_CACHE_RESTORE_KEY }}
+
+      - name: Detect Android SDK and NDK
+        run: |
+          set -euo pipefail
+          if [[ -z "${ANDROID_HOME:-}" ]]; then
+            if [[ -d "$HOME/Android/Sdk" ]]; then
+              echo "ANDROID_HOME=$HOME/Android/Sdk" >> "$GITHUB_ENV"
+            elif [[ -d "/usr/local/lib/android/sdk" ]]; then
+              echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "ANDROID_HOME=${ANDROID_HOME}" >> "$GITHUB_ENV"
+          fi
+
+          sdk_root="${ANDROID_HOME:-${HOME}/Android/Sdk}"
+          if [[ -d "${sdk_root}/ndk" ]]; then
+            latest_ndk="$(find "${sdk_root}/ndk" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -1)"
+            echo "ANDROID_NDK_HOME=${latest_ndk}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Bootstrap vcpkg if needed
+        run: |
+          set -euo pipefail
+          if [[ -d ".devtools/vcpkg" && ! -x ".devtools/vcpkg/bootstrap-vcpkg.sh" && ! -x ".devtools/vcpkg/vcpkg" ]]; then
+            rm -rf .devtools/vcpkg
+          fi
+          if [[ ! -d ".devtools/vcpkg/.git" ]]; then
+            mkdir -p .devtools
+            git clone https://github.com/microsoft/vcpkg.git .devtools/vcpkg
+          fi
+          if [[ ! -x ".devtools/vcpkg/vcpkg" ]]; then
+            if [[ ! -x ".devtools/vcpkg/bootstrap-vcpkg.sh" ]]; then
+              rm -rf .devtools/vcpkg
+              git clone https://github.com/microsoft/vcpkg.git .devtools/vcpkg
+            fi
+            (cd .devtools/vcpkg && ./bootstrap-vcpkg.sh -disableMetrics)
+          fi
+
+      - name: Build Android vcpkg dependencies
+        run: |
+          set -euo pipefail
+
+          case "${TARGET_ABI}" in
+            arm64-v8a) TRIPLET="arm64-android" ;;
+            armeabi-v7a) TRIPLET="arm-android" ;;
+            x86_64) TRIPLET="x64-android" ;;
+            x86) TRIPLET="x86-android" ;;
+            *)
+              echo "Unsupported ABI: ${TARGET_ABI}" >&2
+              exit 1
+              ;;
+          esac
+
+          export VCPKG_ROOT="${GITHUB_WORKSPACE}/.devtools/vcpkg"
+          export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+          export ANDROID_NDK_HOME="${ANDROID_NDK_HOME}"
+
+          VCPKG_BIN="${VCPKG_ROOT}/vcpkg"
+          OVERLAY_PORTS="${GITHUB_WORKSPACE}/vcpkg/ports"
+          OVERLAY_TRIPLETS="${GITHUB_WORKSPACE}/vcpkg/triplets"
+
+          if [[ ! -d "${ANDROID_NDK_HOME:-}" ]]; then
+            echo "ANDROID_NDK_HOME is missing" >&2
+            exit 1
+          fi
+
+          (cd "${GITHUB_WORKSPACE}" && VCPKG_BUILD_TYPE=release "$VCPKG_BIN" install \
+            --triplet "$TRIPLET" \
+            --x-install-root="$VCPKG_ROOT/installed" \
+            --x-manifest-root="${GITHUB_WORKSPACE}" \
+            --overlay-ports="$OVERLAY_PORTS" \
+            --overlay-triplets="$OVERLAY_TRIPLETS")
+
+      - name: Pack Android vcpkg bundle
+        run: |
+          set -euo pipefail
+          case "${TARGET_ABI}" in
+            arm64-v8a) TRIPLET="arm64-android" ;;
+            armeabi-v7a) TRIPLET="arm-android" ;;
+            x86_64) TRIPLET="x64-android" ;;
+            x86) TRIPLET="x86-android" ;;
+            *)
+              echo "Unsupported ABI: ${TARGET_ABI}" >&2
+              exit 1
+              ;;
+          esac
+
+          rm -rf "${RUNNER_TEMP}/android-vcpkg-bundle-payload"
+          BUNDLE_VCPKG_ROOT="${RUNNER_TEMP}/android-vcpkg-bundle-payload/workspace/.devtools/vcpkg"
+          mkdir -p "${BUNDLE_VCPKG_ROOT}"
+
+          cp -a ".devtools/vcpkg/.vcpkg-root" "${BUNDLE_VCPKG_ROOT}/"
+          cp -a ".devtools/vcpkg/scripts" "${BUNDLE_VCPKG_ROOT}/"
+          if [[ -d ".devtools/vcpkg/triplets" ]]; then
+            cp -a ".devtools/vcpkg/triplets" "${BUNDLE_VCPKG_ROOT}/"
+          fi
+          if [[ -f ".devtools/vcpkg/vcpkg" ]]; then
+            cp -a ".devtools/vcpkg/vcpkg" "${BUNDLE_VCPKG_ROOT}/"
+          fi
+          if [[ -f ".devtools/vcpkg/bootstrap-vcpkg.sh" ]]; then
+            cp -a ".devtools/vcpkg/bootstrap-vcpkg.sh" "${BUNDLE_VCPKG_ROOT}/"
+          fi
+
+          mkdir -p "${BUNDLE_VCPKG_ROOT}/installed"
+          cp -a ".devtools/vcpkg/installed/${TRIPLET}" "${BUNDLE_VCPKG_ROOT}/installed/"
+          if [[ -d ".devtools/vcpkg/installed/vcpkg" ]]; then
+            cp -a ".devtools/vcpkg/installed/vcpkg" "${BUNDLE_VCPKG_ROOT}/installed/"
+          fi
+
+          tar --zstd -cf "${RUNNER_TEMP}/${VCPKG_BUNDLE_ASSET}" \
+            -C "${RUNNER_TEMP}/android-vcpkg-bundle-payload" \
+            workspace
+
+          bundle_size_bytes="$(stat -c%s "${RUNNER_TEMP}/${VCPKG_BUNDLE_ASSET}")"
+          bundle_size_mb="$((bundle_size_bytes / 1024 / 1024))"
+          echo "Bundle size: ${bundle_size_mb} MB"
+          if (( bundle_size_bytes >= 2147483648 )); then
+            echo "Bundled asset still exceeds GitHub's 2 GB release upload limit." >&2
+            exit 1
+          fi
+
+      - name: Ensure bundle release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release view "${VCPKG_BUNDLE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1 || \
+          gh release create "${VCPKG_BUNDLE_TAG}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${VCPKG_BUNDLE_TAG}" \
+            --notes "Shared Android vcpkg bundle" \
+            --prerelease
+
+      - name: Publish single shared Android vcpkg bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload "${VCPKG_BUNDLE_TAG}" \
+            "${RUNNER_TEMP}/${VCPKG_BUNDLE_ASSET}#${VCPKG_BUNDLE_ASSET}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --clobber

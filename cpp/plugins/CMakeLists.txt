@@ -3,7 +3,7 @@ project(krkr2plugin)
 
 add_library(${PROJECT_NAME} STATIC)
 
-target_sources(${PROJECT_NAME} PUBLIC
+target_sources(${PROJECT_NAME} PRIVATE
     scriptsEx.cpp
     win32dialog.cpp
     dirlist.cpp
@@ -127,10 +127,10 @@ if(CUBISM_FW_SOURCES)
     target_compile_definitions(${PROJECT_NAME} PUBLIC CSM_TARGET_ANGLE_ES2)
     target_link_libraries(${PROJECT_NAME} PUBLIC CubismFramework)
     # Add the live2d source code to krkr2plugin since the framework is available
-    target_sources(${PROJECT_NAME} PUBLIC krkrlive2d.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE krkrlive2d.cpp)
 else()
     message(WARNING "Live2D Cubism SDK Framework is missing or empty! krkrlive2d plugin will NOT be compiled. To fix, extract Live2D Cubism Native SDK into cpp/plugins/cubism/")
-    target_sources(${PROJECT_NAME} PUBLIC krkrlive2d_stub.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE krkrlive2d_stub.cpp)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${KRKR2PLUGIN_PATH} ${KRKR2PLUGIN_PATH}/simplebinder})

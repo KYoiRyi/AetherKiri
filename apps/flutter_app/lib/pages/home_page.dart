@@ -51,6 +51,8 @@ class _HomePageState extends State<HomePage> {
   bool _pluginTrace = false;
   bool _mockEnabled = true;
   bool _consoleLogFile = true;
+  bool _traceLog = false;
+  bool _exportScripts = false;
 
   String? _resolveBuiltInDylibPath() {
     if (Platform.isIOS) {
@@ -110,6 +112,8 @@ class _HomePageState extends State<HomePage> {
     _pluginTrace = prefs.getBool(PrefsKeys.pluginTrace) ?? false;
     _mockEnabled = prefs.getBool(PrefsKeys.mockEnabled) ?? true;
     _consoleLogFile = prefs.getBool(PrefsKeys.consoleLogFile) ?? true;
+    _traceLog = prefs.getBool(PrefsKeys.traceLog) ?? false;
+    _exportScripts = prefs.getBool(PrefsKeys.exportScripts) ?? false;
     await _gameManager.load();
     await _gameManager.applyPendingPlaySession();
 
@@ -566,6 +570,8 @@ class _HomePageState extends State<HomePage> {
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
           consoleLogFile: _consoleLogFile,
+          traceLog: _traceLog,
+          exportScripts: _exportScripts,
           gameManager: _gameManager,
         ),
       ),
@@ -750,6 +756,8 @@ class _HomePageState extends State<HomePage> {
           pluginTrace: _pluginTrace,
           mockEnabled: _mockEnabled,
           consoleLogFile: _consoleLogFile,
+          traceLog: _traceLog,
+          exportScripts: _exportScripts,
         ),
       ),
     );
@@ -769,6 +777,8 @@ class _HomePageState extends State<HomePage> {
         _pluginTrace = result.pluginTrace;
         _mockEnabled = result.mockEnabled;
         _consoleLogFile = result.consoleLogFile;
+        _traceLog = result.traceLog;
+        _exportScripts = result.exportScripts;
       });
     }
   }

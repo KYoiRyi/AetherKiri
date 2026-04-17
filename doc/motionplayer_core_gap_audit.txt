@@ -1,0 +1,163 @@
+AetherKiri motionplayer core gap audit
+Date: 2026-04-13
+
+Scope
+- Static audit only.
+- No full-project build attempted.
+- Focused on imported motionplayer's direct host/core dependencies.
+
+Confirmed present
+- cpp/core/visual/WindowIntf.h
+- cpp/core/visual/LayerIntf.h
+- cpp/core/visual/LayerBitmapIntf.h
+- cpp/core/visual/GraphicsLoaderIntf.h
+- cpp/core/visual/tvpgl.h
+- cpp/core/base/StorageIntf.h
+- cpp/core/base/EventIntf.h
+- cpp/core/base/ScriptMgnIntf.h
+- cpp/core/environ/ConfigManager/IndividualConfigManager.h
+
+Fixed during audit
+1. Layer bezier/mesh operations were missing from AetherKiri LayerIntf.
+   Added:
+   - BezierPatchCopy
+   - MeshCopy
+   - OperateBezierPatch
+   - OperateMesh
+
+2. PSBMediaRegistry layer was missing from AetherKiri psbfile.
+   Added:
+   - cpp/plugins/psbfile/PSBMediaRegistry.h
+   - cpp/plugins/psbfile/PSBMediaRegistry.cpp
+   - CMake wiring in cpp/plugins/psbfile/CMakeLists.txt
+
+3. Storage lookup was not motionplayer-aware enough.
+   Added:
+   - internal plugin resolution in TVPGetPlacedPath
+   - motion_*.tjs -> *.mtn/.psb fallback in TVPIsExistentStorage
+
+Confirmed compatible or non-blocking
+1. GraphicsLoaderIntf difference is non-blocking for motionplayer.
+   The observed diff is a cache-stat declaration only:
+   - TVPGetGraphicCacheTotalBytes
+   motionplayer only directly uses TVPLoadGraphic, which is declared in both trees.
+
+2. PlayerUpdateLayers.cpp includes wasm_simd128.h only under __EMSCRIPTEN__.
+   This is not a native AetherKiri blocker by itself.
+
+3. Render-path Layer/Window methods used by motionplayer are declared in AetherKiri.
+   Checked:
+   - GetOwnerNoAddRef
+   - GetParent / SetParent
+   - SetType
+   - GetAbsoluteOrderMode / SetAbsoluteOrderMode
+   - SetVisible
+   - GetWidth / GetHeight
+   - GetImageWidth / GetImageHeight
+   - GetHasImage / SetHasImage
+   - SetImageSize / SetSize / SetClip
+   - GetMainImage / GetClip
+   - CopyRect
+   - BezierPatchCopy / OperateBezierPatch
+   - GetMainImagePixelBuffer
+   - GetMainImagePixelBufferPitch
+   - GetMainImagePixelBufferForWrite
+
+4. All TVP-prefixed host symbols referenced directly by motionplayer are present
+   somewhere in AetherKiri outside the motionplayer tree.
+   Verified set:
+   - TVPBLExpand8BitTo32BitPal
+   - TVPBaseBitmap
+   - TVPBlendOperationMode
+   - TVPExecuteExpression
+   - TVPExtractStorageName
+   - TVPExtractStoragePath
+   - TVPGetCommandLine
+   - TVPGetPlacedPath
+   - TVPGetScriptDispatch
+   - TVPIsExistentStorage
+   - TVPLayerType
+   - TVPLoadGraphic
+   - TVPMainWindow
+   - TVPPointD
+   - TVPRect
+   - TVPReverseRGB
+   - TVP_clNone
+
+5. The following motionplayer-relevant Layer TJS entry points were inspected
+   directly and currently match the web implementation closely enough that no
+   additional host-side port was required in this audit pass:
+   - loadImages
+   - copyRect
+   - operateRect
+   - doBoxBlur
+   - adjustGamma
+
+6. SetHasImage / SetImageSize / GetImageWidth / GetImageHeight differ from the
+   web tree mainly because AetherKiri has extra bitmap-eviction recovery logic.
+   Current assessment: non-blocking for motionplayer.
+
+7. Script and event bridge headers are already aligned with the web project.
+   Verified:
+   - cpp/core/base/ScriptMgnIntf.h
+   - cpp/core/base/EventIntf.h
+
+8. The PSB value-layer types referenced by motionplayer are present in
+   AetherKiri's psbfile implementation.
+   Confirmed at least:
+   - PSBNumberType
+   - PSBResource
+   - PSBDictionary
+   - PSBList
+
+9. PSBMedia helper methods used by motionplayer already exist in AetherKiri.
+   Confirmed:
+   - getImagesByPrefix
+   - getImageInfo
+   - addLayerPositions / getLayerPositions
+   - addButtonBounds / getButtonBounds
+   - removeByPrefix
+   Current assessment: this area is not a source-level blocker. If a bug
+   remains here, it is more likely to be behavioral than missing-API related.
+
+10. Remaining explicit stubs inside the imported motionplayer tree have been
+    reduced to binary-aligned TODOs.
+    Current explicit runtime stubs:
+    - EmotePlayer::assignState()
+    - EmotePlayer::getOuterForce()
+    These are documented as unimplemented even in the reverse-engineering notes
+    for libkrkr2.so, so they are not being guessed at in AetherKiri.
+
+Pending audit targets
+1. LayerIntf.cpp still differs from kirikiriroid2-web beyond the bezier/mesh methods now ported.
+   Need to continue checking whether remaining diffs matter to motionplayer runtime behavior.
+
+2. StorageIntf.cpp still differs from kirikiriroid2-web beyond the plugin-aware placed-path logic and motion fallback now ported.
+   Need to continue checking whether any remaining differences affect motion script loading paths.
+
+3. psbfile main/registry lifecycle split differs from kirikiriroid2-web.
+   Current state is intentional:
+   - AetherKiri keeps PSB media lifecycle ownership in psbfile/main.cpp
+   - PSBMediaRegistry only provides resource registration helpers
+   This should be revisited if later code starts calling initPSBMedia/deInitPSBMedia directly.
+
+4. No compile validation yet against third-party headers such as spdlog.
+   A single-file syntax check stopped at missing external include paths, so unresolved compile-time API mismatches may still remain.
+
+5. High-risk build-system issue identified and patched.
+   AetherKiri originally did not mirror kirikiriroid2-web's static-registration
+   retention path. This was addressed by forcing whole-archive linkage of
+   `krkr2plugin` at the final link points currently known to matter:
+   - top-level runtime target in `CMakeLists.txt`
+   - `engine_api` in `bridge/engine_api/CMakeLists.txt`
+   - `motionplayer-dll` test target in `tests/unit-tests/plugins/CMakeLists.txt`
+   This reduces the risk of `motionplayer/main.cpp` static NCB registration
+   objects being dead-stripped by the linker.
+
+Recommended next checks
+1. Continue diffing LayerIntf.cpp against kirikiriroid2-web, but only for methods reachable from motionplayer.
+2. Diff RuntimeSupport.cpp-sensitive host APIs next:
+   - PSBMedia
+   - StorageIntf
+   - ScriptMgn/Event hooks
+3. If needed, add a small non-linking compile harness for a few high-risk translation units once dependency include paths are available.

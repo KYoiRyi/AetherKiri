@@ -28,6 +28,8 @@ class GamePage extends StatefulWidget {
     this.pluginTrace = false,
     this.mockEnabled = true,
     this.consoleLogFile = true,
+    this.traceLog = false,
+    this.exportScripts = false,
     this.gameManager,
   });
 
@@ -38,6 +40,8 @@ class GamePage extends StatefulWidget {
   final bool pluginTrace;
   final bool mockEnabled;
   final bool consoleLogFile;
+  final bool traceLog;
+  final bool exportScripts;
 
   /// If set, play duration is recorded when leaving this page.
   final GameManager? gameManager;
@@ -539,6 +543,18 @@ class _GamePageState extends State<GamePage> with WidgetsBindingObserver {
         value: '1',
       );
     }
+
+    _log('Setting trace_log=${widget.traceLog}');
+    await _bridge.engineSetOption(
+      key: PrefsKeys.optionTraceLog,
+      value: widget.traceLog ? '1' : '0',
+    );
+
+    _log('Setting export_scripts=${widget.exportScripts}');
+    await _bridge.engineSetOption(
+      key: PrefsKeys.optionExportScripts,
+      value: widget.exportScripts ? '1' : '0',
+    );
 
     if (!mounted) return;
     setState(() => _phase = _EnginePhase.opening);

@@ -72,6 +72,8 @@
       "hidden": true,
       "cacheVariables": {
         "LINUX": true,
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
         "VCPKG_BUILD_TYPE": "release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": true
       },
